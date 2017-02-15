@@ -1,13 +1,11 @@
-﻿using AmphetamineSerializer.Common;
-using AmphetamineSerializer.FunctionProviders;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Sigil.NonGeneric;
 using Sigil;
 
-namespace AmphetamineSerializer
+namespace AmphetamineSerializer.Common
 {
     public enum FoundryMode
     {

@@ -35,6 +35,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Sigil, Version=4.7.0.0, Culture=neutral, PublicKeyToken=2d06c3494341c8ab" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -45,11 +46,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ByteArrayDeserializationCtx.cs" />
     <Compile Include="ByteArrayDeserialization.cs" />
     <Compile Include="ByteArraySerialization.cs" />
+    <Compile Include="StreamCtx.cs" />
     <Compile Include="StreamDeserialization.cs" />
     <Compile Include="StreamSerialization.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AmphetamineSerializer.Common\AmphetamineSerializer.Common.csproj">
+      <Project>{E2E1D44C-D506-4D37-AAC9-A96F65D3D348}</Project>
+      <Name>AmphetamineSerializer.Common</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -36,6 +36,14 @@ namespace AmphetamineSerializer.Common
 
             foreach (var item in currentList)
             {
+                var attributes = item.GetCustomAttributes<SerializationHandlerAttribute>();
+                if (attributes != null)
+                {
+                    var attribute = attributes.Where(x => x.ContainedType == handlerType).FirstOrDefault();
+                    if (attribute != null)
+                        return item;
+                }
+
                 bool[] matching = new bool[inputType.Length + 1];
                 matching[inputType.Length] = (returnType == item.ReturnType);
 
@@ -59,8 +67,9 @@ namespace AmphetamineSerializer.Common
                     candidateMethod = item;
                 }
             }
-
-            return candidateMethod;
+            if (matchingParameters == inputType.Length + 1)
+                return candidateMethod;
+            return null;
         }
 
         public object ResolveFromSignature(object rootType, object inputTypes, object outputType)
@@ -74,7 +83,7 @@ namespace AmphetamineSerializer.Common
         /// <returns>Dictionary that map a type with a method that handle that type.</returns>
         public void Register(Type t)
         {
-            foreach (var method in t.GetMethods(BindingFlags.Static | BindingFlags.Instance|  BindingFlags.Public | BindingFlags.InvokeMethod))
+            foreach (var method in t.GetMethods(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.InvokeMethod))
             {
                 if (method.IsSpecialName)
                     continue;
@@ -82,15 +91,35 @@ namespace AmphetamineSerializer.Common
                     continue;
 
                 var currentParameter = method.GetParameters().First().ParameterType;
-                List<MethodInfo> currentList;
-                if (!handlers.TryGetValue(currentParameter, out currentList))
+                if (currentParameter == typeof(FoundryContext))
                 {
-                    currentList = new List<MethodInfo>();
-                    handlers.Add(currentParameter, currentList);
+                    var attributes = method.GetCustomAttributes<SerializationHandlerAttribute>();
+                    if (attributes != null)
+                    {
+                        foreach (var v in attributes)
+                        {
+                            List<MethodInfo> currentList;
+                            if (!handlers.TryGetValue(v.ContainedType, out currentList))
+                            {
+                                currentList = new List<MethodInfo>();
+                                handlers.Add(v.ContainedType, currentList);
+                            }
+                            if (!currentList.Contains(method))
+                                currentList.Add(method);
+                        }
+                    }
                 }
-
-                if (!currentList.Contains(method))
-                    currentList.Add(method);
+                else
+                {
+                    List<MethodInfo> currentList;
+                    if (!handlers.TryGetValue(currentParameter, out currentList))
+                    {
+                        currentList = new List<MethodInfo>();
+                        handlers.Add(currentParameter, currentList);
+                    }
+                    if (!currentList.Contains(method))
+                        currentList.Add(method);
+                }
             }
         }
     }

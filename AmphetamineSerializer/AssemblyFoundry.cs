@@ -165,7 +165,7 @@ namespace AmphetamineSerializer
 
                 var request = new SerializationBuildRequest()
                 {
-                    AdditionalContext = ctx.AdditionalContext,
+                    AdditionalContext = ctx,
                     DelegateType = ctx.Manipulator.MakeDelegateType(requestType, ctx.InputParameters)
                 };
                 var response = ctx.Chain.Process(request) as SerializationBuildResponse;

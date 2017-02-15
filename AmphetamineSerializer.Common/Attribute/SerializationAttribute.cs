@@ -5,7 +5,7 @@ namespace AmphetamineSerializer.Common
     /// <summary>
     /// Used for specify a method that handle the (de)serialization of a given type.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class SerializationHandlerAttribute : Attribute
     {
         /// <summary>

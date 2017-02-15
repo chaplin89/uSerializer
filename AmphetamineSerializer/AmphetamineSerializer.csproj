@@ -55,9 +55,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Chain\CacheManager.cs" />
-    <Compile Include="Chain\CustomSerializerFinder.cs" />
     <Compile Include="Chain\ChainManager.cs" />
     <Compile Include="Chain\CustomBuilderFinder.cs" />
+    <Compile Include="Chain\CustomSerializerFinder.cs" />
     <Compile Include="Chain\DefaultBuilder.cs" />
     <Compile Include="Chain\DefaultHandlerFinder.cs" />
     <Compile Include="FunctionProviders\DynamicFunctionProvider.cs" />
@@ -66,11 +66,8 @@
     <Compile Include="LenghtBoundSerializator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AssemblyFoundry.cs" />
-    <Compile Include="FoundryContext.cs" />
-    <Compile Include="ILAbstraction.cs" />
     <Compile Include="Serializator.cs" />
     <Compile Include="PacketsStream.cs" />
-    <Compile Include="FunctionProviders\SigilFunctionProvider.cs" />
     <Compile Include="VersionHelper.cs" />
   </ItemGroup>
   <ItemGroup>

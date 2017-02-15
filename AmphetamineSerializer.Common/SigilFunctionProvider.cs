@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Sigil.NonGeneric;
 using System.Reflection;
 
-namespace AmphetamineSerializer
+namespace AmphetamineSerializer.Common
 {
     public class SigilFunctionProvider
     {
@@ -12,46 +12,67 @@ namespace AmphetamineSerializer
         System.Reflection.Emit.ModuleBuilder moduleBuilder;
         System.Reflection.Emit.TypeBuilder typeBuilder;
 
-        public Dictionary<Type, MethodInfo> AlreadyBuildedMethods { get; set; }
+        public Dictionary<Type, Emit> AlreadyBuildedMethods { get; set; }
 
         Stack<Emit> methods = new Stack<Emit>();
         const MethodAttributes attributes = MethodAttributes.Public | MethodAttributes.Static;
 
         public SigilFunctionProvider(string assemblyName)
         {
-            AlreadyBuildedMethods = new Dictionary<Type, MethodInfo>();
+            AlreadyBuildedMethods = new Dictionary<Type, Emit>();
             this.assemblyName = new AssemblyName(assemblyName);
             var attributes = System.Reflection.Emit.AssemblyBuilderAccess.RunAndSave;
             assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(this.assemblyName, attributes,"D:\\");
             moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName + ".dll");
             typeBuilder = moduleBuilder.DefineType(string.Format("{0}.Handler", this.assemblyName.Name), TypeAttributes.Public);
         }
-
-        internal Emit AddMethod(string v, Type[] inputTypes, Type returnValue)
+        Type lastType;
+        public Emit AddMethod(string v, Type[] inputTypes, Type returnValue)
         {
             if (returnValue == null)
                 returnValue = typeof(void);
             var localMethod = Emit.BuildStaticMethod(returnValue, inputTypes, typeBuilder, v, MethodAttributes.Public, true);
             methods.Push(localMethod);
+            lastType = inputTypes[0];
             return localMethod;
         }
 
-        internal MethodInfo GetMethod(bool isToPersist)
+        public MethodInfo GetMethod(bool isToPersist)
         {
             MethodInfo mi;
+            Emit emit;
             if (!isToPersist)
-            { 
-                mi = methods.Pop().CreateMethod();
+            {
+                emit = methods.Pop();
+                mi = emit.CreateMethod();
             }
             else
             {
-                methods.Pop().CreateMethod();
+                emit = methods.Pop();
+                mi = emit.CreateMethod();
                 Type t = typeBuilder.CreateType();
                 assemblyBuilder.Save(assemblyName.Name + ".dll");
-                mi = t.GetMethods()[0];
             }
 
-            AlreadyBuildedMethods.Add(mi.GetParameters()[0].ParameterType, mi);
+            AlreadyBuildedMethods.Add(lastType, emit);
+            return mi;
+        }
+
+        public Emit GetEmit(bool isToPersist)
+        {
+            Emit mi;
+            if (!isToPersist)
+            {
+                mi = methods.Pop();
+            }
+            else
+            {
+                mi = methods.Pop();
+                Type t = typeBuilder.CreateType();
+                assemblyBuilder.Save(assemblyName.Name + ".dll");
+            }
+
+            AlreadyBuildedMethods.Add(lastType, mi);
             return mi;
         }
     }

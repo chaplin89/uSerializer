@@ -7,7 +7,7 @@ using System.Reflection;
 using Sigil.NonGeneric;
 using Sigil;
 
-namespace AmphetamineSerializer
+namespace AmphetamineSerializer.Common
 {
     /// <summary>
     /// Type of content to be loaded
@@ -130,7 +130,7 @@ namespace AmphetamineSerializer
         public ILAbstraction(Emit g)
         {
             this.g = g;
-        }        
+        }
 
         /// <summary>
         /// Emit the instructions for accessing a position inside an array.
@@ -464,12 +464,10 @@ namespace AmphetamineSerializer
         /// <param name="ctx"></param>
         public void ForwardParameters(Type[] inputParameter, MethodInfo currentMethod, SIndexAttribute attribute = null)
         {
-            ulong currentOptions = 0;
             if (currentMethod != null)
             {
                 var parameters = currentMethod.GetParameters();
                 bool[] foundParameter = new bool[parameters.Length - 1];
-                bool additionalParameterFound = false;
 
                 for (int i = 1; i < parameters.Length; ++i)
                 {
@@ -487,20 +485,13 @@ namespace AmphetamineSerializer
                     }
                     if (!foundParameter[i - 1])
                     {
-                        if (parameters[i].ParameterType == typeof(ulong) || parameters[i].ParameterType == typeof(long))
-                        {
-                            if (additionalParameterFound)
-                                throw new AmbiguousMatchException("More than one parameter accepting additional options were found in the handler signature.");
-                            if (attribute != null)
-                                currentOptions = attribute.AdditionalOptions;
-                            g.LoadConstant((long)currentOptions);
-                            additionalParameterFound = true;
-                        }
-                        else
-                            throw new InvalidOperationException("Unable to load all the parameters for the handler.");
+                        throw new InvalidOperationException("Unable to load all the parameters for the handler.");
                     }
                 }
-                g.Call(currentMethod);                 // void func(ref obj,byte[], ref int)
+                if (currentMethod.IsStatic)
+                    g.Call(currentMethod);                 // void func(ref obj,byte[], ref int)
+                else
+                    g.CallVirtual(currentMethod);
             }
             else
             {

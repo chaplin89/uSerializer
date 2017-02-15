@@ -3,6 +3,7 @@ using AmphetamineSerializer.Helpers;
 using AmphetamineSerializer.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace AmphetamineSerializer.Chain
 {
@@ -15,8 +16,7 @@ namespace AmphetamineSerializer.Chain
         {
             typeof(ByteArrayDeserialization),
             typeof(ByteArraySerialization),
-            typeof(StreamDeserialization),
-            typeof(StreamSerialization)
+            typeof(StreamDeserializationCtx),
         };
 
         public DefaultHandlerFinder()
@@ -39,6 +39,16 @@ namespace AmphetamineSerializer.Chain
             var foundMethod = resolver.ResolveFromSignature(req.RootType, req.InputTypes, req.OutputType);
             if (foundMethod == null)
                 return null;
+
+            if (foundMethod.GetParameters()[0].ParameterType == req.AdditionalContext.GetType())
+            {
+                foundMethod = (MethodInfo)foundMethod.Invoke(null, new object[] { req.AdditionalContext });
+
+                return new SerializationBuildResponse()
+                {
+                    DynMethod = foundMethod
+                };
+            }
 
             return new SerializationBuildResponse()
             {
