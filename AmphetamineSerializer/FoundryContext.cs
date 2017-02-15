@@ -4,7 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
+using Sigil.NonGeneric;
+using Sigil;
 
 namespace AmphetamineSerializer
 {
@@ -46,12 +47,12 @@ namespace AmphetamineSerializer
         /// <summary>
         /// If it's inside a loop, this is the index.
         /// </summary>
-        public LocalBuilder Index { get; set; }
+        public Local Index { get; set; }
 
         /// <summary>
         /// The instance of the object in course of deserialization.
         /// </summary>
-        public LocalBuilder ObjectInstance { get; set; }
+        public Local ObjectInstance { get; set; }
 
         /// <summary>
         /// Type upon wich build the deserialization logic.
@@ -79,12 +80,12 @@ namespace AmphetamineSerializer
         /// <summary>
         /// Provide an easy way to build a function from scratch.
         /// </summary>
-        public IFunctionProvider Provider { get; set; }
+        public SigilFunctionProvider Provider { get; set; }
 
         /// <summary>
         /// Generator.
         /// </summary>
-        public ILGenerator G { get; set; }
+        public Emit G { get; set; }
 
         /// <summary>
         /// Types in input to the method that will be forwarded to the
@@ -124,5 +125,7 @@ namespace AmphetamineSerializer
                 return null;
             }
         }
+
+        public bool ManageLifeCycle { get{ return InputParameters[0].IsByRef; } }
     }
 }

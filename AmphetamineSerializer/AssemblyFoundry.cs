@@ -1,12 +1,11 @@
 ﻿using AmphetamineSerializer.Chain;
-using AmphetamineSerializer.FunctionProviders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
 using AmphetamineSerializer.Interfaces;
 using AmphetamineSerializer.Common;
+using Sigil;
 
 namespace AmphetamineSerializer
 {
@@ -44,7 +43,7 @@ namespace AmphetamineSerializer
             }
             else
             {
-                ctx.Provider = new PersistentFunctionProvider(ctx.ObjectType.Name + Guid.NewGuid());
+                ctx.Provider = new SigilFunctionProvider(ctx.ObjectType.Name + Guid.NewGuid());
                 ctx.G = ctx.Provider.AddMethod("Handle", ctx.InputParameters, null);
                 ctx.Manipulator = new ILAbstraction(ctx.G);
                 isToPersist = true;
@@ -129,23 +128,23 @@ namespace AmphetamineSerializer
         {
             Type normalizedType;
             int[] versions;
-            if (ctx.InputParameters[0].IsByRef)
+            if (ctx.ManageLifeCycle)
             {
-                ctx.G.Emit(OpCodes.Ldarg_0);
-                var ctor = ctx.ObjectType.GetElementType().GetConstructor(new Type[] { });
-                ctx.ObjectInstance = ctx.G.DeclareLocal(ctx.ObjectType.GetElementType());
-                ctx.G.Emit(OpCodes.Newobj, ctor);
-                ctx.G.Emit(OpCodes.Stloc, ctx.ObjectInstance);
-                ctx.G.Emit(OpCodes.Ldloc, ctx.ObjectInstance);
-                ctx.G.Emit(OpCodes.Stind_Ref);
                 normalizedType = ctx.ObjectType.GetElementType();
+                ctx.G.LoadArgument(0);
+                var ctor = normalizedType.GetConstructor(new Type[] { });
+                ctx.ObjectInstance = ctx.G.DeclareLocal(normalizedType);
+                ctx.G.NewObject(ctx.ObjectType.GetElementType());
+                ctx.G.StoreLocal(ctx.ObjectInstance);
+                ctx.G.LoadLocal(ctx.ObjectInstance);
+                ctx.G.StoreIndirect(normalizedType);
             }
             else
             {
-                ctx.ObjectInstance = ctx.G.DeclareLocal(ctx.ObjectType);
-                ctx.G.Emit(OpCodes.Ldarg_0);
-                ctx.G.Emit(OpCodes.Stloc, ctx.ObjectInstance);
                 normalizedType = ctx.ObjectType;
+                ctx.ObjectInstance = ctx.G.DeclareLocal(ctx.ObjectType);
+                ctx.G.LoadArgument(0);
+                ctx.G.StoreLocal(ctx.ObjectInstance);
             }
             versions = VersionHelper.GetExplicitlyManagedVersions(normalizedType).ToArray();
             Label[] labels = null;
@@ -158,10 +157,10 @@ namespace AmphetamineSerializer
                 labels = new Label[versions.Length];
 
                 for (int i = 0; i < labels.Length; i++)
-                    labels[i] = ctx.G.DefineLabel();
+                    labels[i] = ctx.G.DefineLabel($"Version{i}");
 
                 Type requestType = field.FieldType;
-                if (ctx.ObjectType.IsByRef)
+                if (ctx.ManageLifeCycle)
                     requestType = requestType.MakeByRefType();
 
                 var request = new SerializationBuildRequest()
@@ -174,10 +173,10 @@ namespace AmphetamineSerializer
 
                 if (ctx.ObjectType.IsByRef)
                 {
-                    LocalBuilder local = ctx.G.DeclareLocal(field.FieldType);
-                    ctx.G.Emit(OpCodes.Ldloca, local);
+                    Local local = ctx.G.DeclareLocal(field.FieldType);
+                    ctx.G.LoadLocalAddress(local);
                     ctx.Manipulator.ForwardParameters(ctx.InputParameters, targetMethod, ctx.CurrentAttribute);
-                    ctx.G.Emit(OpCodes.Ldloc, local);
+                    ctx.G.LoadLocal(local);
                     ctx.Manipulator.EmitStoreObject(ctx.ObjectInstance, field, local);
                 }
                 else
@@ -188,16 +187,16 @@ namespace AmphetamineSerializer
                 }
 
                 // Deserialize versions
-                ctx.G.Emit(OpCodes.Ldc_I4, versions[0]);
-                ctx.G.Emit(OpCodes.Sub);
-                ctx.G.Emit(OpCodes.Switch, labels);
+                ctx.G.LoadConstant(versions[0]);
+                ctx.G.Subtract();
+                ctx.G.Switch(labels);
 
                 for (int i = 0; i < versions.Length; i++)
                 {
                     var fields = VersionHelper.GetVersionSnapshot(normalizedType, versions[i]).Where(x => x.Name.ToLower() != "version");
                     ctx.G.MarkLabel(labels[i]);
                     BuildFromFields(ctx, fields);
-                    ctx.G.Emit(OpCodes.Ret);
+                    ctx.G.Return();
                 }
             }
             else
@@ -205,7 +204,7 @@ namespace AmphetamineSerializer
                 BuildFromFields(ctx, VersionHelper.GetAllFields(normalizedType));
             }
 
-            ctx.G.Emit(OpCodes.Ret);
+            ctx.G.Return();
             return ctx.Provider.GetMethod(isToPersist);
         }
 
@@ -267,13 +266,13 @@ namespace AmphetamineSerializer
             LoopContext loopCtx;
             ctx.CurrentItemUnderlyingType = ctx.CurrentItemFieldInfo.FieldType.GetElementType();
 
-            LocalBuilder currentSize = null;
+            Local currentSize = null;
 
             if (ctx.ObjectType.IsByRef && ctx.CurrentAttribute.ArrayFixedSize != -1)
             {
                 currentSize = ctx.G.DeclareLocal(typeof(int));
-                ctx.G.Emit(OpCodes.Ldc_I4, ctx.CurrentAttribute.ArrayFixedSize);
-                ctx.G.Emit(OpCodes.Stloc, currentSize);
+                ctx.G.LoadConstant(ctx.CurrentAttribute.ArrayFixedSize);
+                ctx.G.StoreLocal(currentSize);
             }
 
             loopCtx = LoopContext.FromFoundryContext(ctx);
@@ -301,24 +300,24 @@ namespace AmphetamineSerializer
             // Save the state here and restore when we are done.
             if (!ctx.CurrentItemType.IsArray)
             {
-                ctx.G.Emit(OpCodes.Ldloc, ctx.ObjectInstance);                              // this --> stack
+                ctx.G.LoadLocal(ctx.ObjectInstance);                              // this --> stack
                 if (ctx.ObjectType.IsByRef)
-                    ctx.G.Emit(OpCodes.Ldflda, ctx.CurrentItemFieldInfo);
+                    ctx.G.LoadFieldAddress(ctx.CurrentItemFieldInfo);
                 else
-                    ctx.G.Emit(OpCodes.Ldfld, ctx.CurrentItemFieldInfo);
+                    ctx.G.LoadField(ctx.CurrentItemFieldInfo);
             }
             else
             {
-                ctx.G.Emit(OpCodes.Ldloc, ctx.ObjectInstance);                                          // this       --> stack
-                ctx.G.Emit(OpCodes.Ldfld, ctx.CurrentItemFieldInfo);                                    // field      --> stack
-                ctx.G.Emit(OpCodes.Ldloc, ctx.Index);                                                   // indexLocal --> stack
+                ctx.G.LoadLocal(ctx.ObjectInstance);                                          // this       --> stack
+                ctx.G.LoadField(ctx.CurrentItemFieldInfo);                                    // field      --> stack
+                ctx.G.LoadLocal(ctx.Index);                                                   // indexLocal --> stack
                 if (ctx.ObjectType.IsByRef)
-                    ctx.G.Emit(OpCodes.Ldelema, ctx.CurrentItemUnderlyingType);                         // stack      --> arraylocal[indexLocal]
+                    ctx.G.LoadElementAddress(ctx.CurrentItemUnderlyingType);                         // stack      --> arraylocal[indexLocal]
                 else
-                    ctx.G.Emit(OpCodes.Ldelem, ctx.CurrentItemUnderlyingType);
+                    ctx.G.LoadElement(ctx.CurrentItemUnderlyingType);
             }
             ctx.Manipulator.ForwardParameters(ctx.InputParameters, null, ctx.CurrentAttribute);
-            ctx.G.EmitCall(OpCodes.Call, method, null);
+            ctx.G.Call(method, null);
         }
         #endregion
     }

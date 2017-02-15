@@ -1,11 +1,11 @@
 ﻿using AmphetamineSerializer.Common;
-using AmphetamineSerializer.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Reflection.Emit;
+using Sigil.NonGeneric;
+using Sigil;
 
 namespace AmphetamineSerializer
 {
@@ -43,7 +43,7 @@ namespace AmphetamineSerializer
         /// <summary>
         /// Size of the array.
         /// </summary>
-        public LocalBuilder Size { get; set; }
+        public Local Size { get; set; }
 
         /// <summary>
         /// If it's not null, CurrentItemFieldInfo is assumed to be
@@ -54,7 +54,7 @@ namespace AmphetamineSerializer
         /// <summary>
         /// Generator.
         /// </summary>
-        public ILGenerator G { get; set; }
+        public Emit G { get; set; }
 
         /// <summary>
         /// 
@@ -64,7 +64,7 @@ namespace AmphetamineSerializer
         /// <summary>
         /// Index used in the loop.
         /// </summary>
-        public LocalBuilder Index { get; set; }
+        public Local Index { get; set; }
 
         /// <summary>
         /// Type of the array that will be created.
@@ -86,7 +86,7 @@ namespace AmphetamineSerializer
         /// <summary>
         /// Instance of the object being deserialized.
         /// </summary>
-        public LocalBuilder ObjectInstance { get; set; }
+        public Local ObjectInstance { get; set; }
 
         /// <summary>
         /// Types of the arguments that will be forwarded to the handlers.
@@ -121,16 +121,16 @@ namespace AmphetamineSerializer
     /// </summary>
     public class ILAbstraction
     {
-        private ILGenerator g;
+        private Emit g;
 
         /// <summary>
         /// Construct an ILAbstraction object.
         /// </summary>
         /// <param name="g">Generator</param>
-        public ILAbstraction(ILGenerator g)
+        public ILAbstraction(Emit g)
         {
             this.g = g;
-        }
+        }        
 
         /// <summary>
         /// Emit the instructions for accessing a position inside an array.
@@ -146,26 +146,26 @@ namespace AmphetamineSerializer
         /// <param name="elementType"></param>
         /// <param name="whatToLoad">Can be value or address.</param>
         /// <remarks>You can specify an <paramref name="elementType"/> if for example you </remarks>
-        public void EmitLoadArray(LocalBuilder objectInstance, object index, object array, Type elementType = null, TypeOfContent whatToLoad = TypeOfContent.Value)
+        public void EmitLoadArray(Local objectInstance, object index, object array, Type elementType = null, TypeOfContent whatToLoad = TypeOfContent.Value)
         {
-            Contract.Ensures((array is LocalBuilder && ((LocalBuilder)array).LocalType.IsArray) ||
+            Contract.Ensures((array is Local && ((Local)array).LocalType.IsArray) ||
                              (array is FieldInfo && ((FieldInfo)array).FieldType.IsArray));
-            Contract.Ensures(index is LocalBuilder || index is int);
+            Contract.Ensures(index is Local || index is int);
 
             Type typeToLoad = DeduceTypeAndLoad(array, objectInstance);
 
             if (elementType != null)
                 typeToLoad = elementType;
 
-            if (index is LocalBuilder)
-                g.Emit(OpCodes.Ldloc, (LocalBuilder)index); // index --> stack
+            if (index is Local)
+                g.LoadLocal((Local)index); // index --> stack
             else
-                g.Emit(OpCodes.Ldc_I4, (int)index); // index --> stack
+                g.LoadConstant((int)index); // index --> stack
 
             if (whatToLoad == TypeOfContent.Value)
-                g.Emit(OpCodes.Ldelem, typeToLoad); // arraylocal[indexLocal] --> stack
+                g.LoadElement(typeToLoad); // arraylocal[indexLocal] --> stack
             else
-                g.Emit(OpCodes.Ldelema, typeToLoad); // arraylocal[indexLocal] --> stack
+                g.LoadElementAddress(typeToLoad); // arraylocal[indexLocal] --> stack
         }
 
         /// <summary>
@@ -175,25 +175,25 @@ namespace AmphetamineSerializer
         /// <param name="obj">Can be a LocalBuilder or a FieldInfo depending on the needs.</param>
         /// <param name="objectInstance">Instance of the object that is being deserialized.</param>
         /// <returns></returns>
-        private Type DeduceTypeAndLoad(object obj, LocalBuilder objectInstance)
+        private Type DeduceTypeAndLoad(object obj, Local objectInstance)
         {
             Type typeToLoad = null;
-            if (obj is LocalBuilder)
-                typeToLoad = ((LocalBuilder)obj).LocalType.GetElementType();
+            if (obj is Local)
+                typeToLoad = ((Local)obj).LocalType.GetElementType();
             else if (obj is FieldInfo)
                 typeToLoad = ((FieldInfo)obj).FieldType.GetElementType();
             else
                 throw new ArgumentException("obj type not recognized.");
 
-            if (obj is LocalBuilder)
+            if (obj is Local)
             {
-                g.Emit(OpCodes.Ldloc, (LocalBuilder)obj); // field --> stack
+                g.LoadLocal((Local)obj); // field --> stack
             }
             else
             {
                 if (objectInstance != null)
-                    g.Emit(OpCodes.Ldloc, objectInstance); // this --> stack
-                g.Emit(OpCodes.Ldfld, (FieldInfo)obj); // field --> stack
+                    g.LoadLocal(objectInstance); // this --> stack
+                g.LoadField((FieldInfo)obj); // field --> stack
             }
             return typeToLoad;
         }
@@ -203,17 +203,17 @@ namespace AmphetamineSerializer
         /// </summary>
         /// <param name="index">Variable to increment</param>
         /// <param name="step">Step</param>
-        public void IncrementLocalVariable(LocalBuilder index, int step = 1)
+        public void IncrementLocalVariable(Local index, int step = 1)
         {
             // C# Translation:
             //     index+=step;
-            g.Emit(OpCodes.Ldloc, index); // index --> stack
+            g.LoadLocal(index); // index --> stack
             if (step == 1)
-                g.Emit(OpCodes.Ldc_I4_1); // 1 --> stack
+                g.LoadConstant(1); // 1 --> stack
             else
-                g.Emit(OpCodes.Ldc_I4, step); // step --> stack
-            g.Emit(OpCodes.Add); // index + step --> stack
-            g.Emit(OpCodes.Stloc, index); // stack --> index
+                g.LoadConstant(step); // step --> stack
+            g.Add(); // index + step --> stack
+            g.StoreLocal(index); // stack --> index
         }
 
         /// <summary>
@@ -225,18 +225,18 @@ namespace AmphetamineSerializer
         /// <param name="value"></param>
         /// <param name="undelyingType"></param>
         /// <param name="whatToStore"></param>
-        public void EmitStoreArray(LocalBuilder objectInstance, LocalBuilder index, FieldInfo array, LocalBuilder value, Type undelyingType, TypeOfContent whatToStore = TypeOfContent.Value)
+        public void EmitStoreArray(Local objectInstance, Local index, FieldInfo array, Local value, Type undelyingType, TypeOfContent whatToStore = TypeOfContent.Value)
         {
-            g.Emit(OpCodes.Ldloc, objectInstance);
-            g.Emit(OpCodes.Ldfld, array);
-            g.Emit(OpCodes.Ldloc, index);
+            g.LoadLocal(objectInstance);
+            g.LoadField(array);
+            g.LoadLocal(index);
 
             if (whatToStore == TypeOfContent.Value)
-                g.Emit(OpCodes.Ldloc, value);
+                g.LoadLocal(value);
             else
-                g.Emit(OpCodes.Ldind_Ref, value);
+                g.LoadLocalAddress(value);
 
-            g.Emit(OpCodes.Stelem, undelyingType);
+            g.StoreElement(undelyingType);
         }
 
         /// <summary>
@@ -248,18 +248,18 @@ namespace AmphetamineSerializer
         /// <param name="value"></param>
         /// <param name="undelyingType"></param>
         /// <param name="whatToStore"></param>
-        public void EmitStoreArray(LocalBuilder objectInstance, int index, FieldInfo array, LocalBuilder value, Type undelyingType, TypeOfContent whatToStore = TypeOfContent.Value)
+        public void EmitStoreArray(Local objectInstance, int index, FieldInfo array, Local value, Type undelyingType, TypeOfContent whatToStore = TypeOfContent.Value)
         {
-            g.Emit(OpCodes.Ldloc, objectInstance);
-            g.Emit(OpCodes.Ldfld, array);
-            g.Emit(OpCodes.Ldc_I4, index);
+            g.LoadLocal(objectInstance);
+            g.LoadField(array);
+            g.LoadConstant(index);
 
             if (whatToStore == TypeOfContent.Value)
-                g.Emit(OpCodes.Ldloc, value);
+                g.LoadLocal(value);
             else
-                g.Emit(OpCodes.Ldind_Ref, value);
+                g.LoadLocalAddress(value);
 
-            g.Emit(OpCodes.Stelem, undelyingType);
+            g.StoreElement(undelyingType);
         }
 
         /// <summary>
@@ -268,13 +268,13 @@ namespace AmphetamineSerializer
         /// <param name="objectInstance">Instance</param>
         /// <param name="field">Field</param>
         /// <param name="whatToLoad">Tell if the caller is interested in the address or in the content</param>
-        public void EmitAccessObject(LocalBuilder objectInstance, FieldInfo field, TypeOfContent whatToLoad = TypeOfContent.Value)
+        public void EmitAccessObject(Local objectInstance, FieldInfo field, TypeOfContent whatToLoad = TypeOfContent.Value)
         {
-            g.Emit(OpCodes.Ldloc, objectInstance);      // this                                            --> stack
+            g.LoadLocal(objectInstance);      // this                                            --> stack
             if (whatToLoad == TypeOfContent.Address)
-                g.Emit(OpCodes.Ldflda, field);          // &this.CurrentItem                               --> stack
+                g.LoadFieldAddress(field);          // &this.CurrentItem                               --> stack
             else
-                g.Emit(OpCodes.Ldfld, field);           // this.CurrentItem                                --> stack
+                g.LoadField(field);           // this.CurrentItem                                --> stack
         }
 
         /// <summary>
@@ -283,15 +283,15 @@ namespace AmphetamineSerializer
         /// <param name="objectInstance">Instance</param>
         /// <param name="field">Field</param>
         /// <param name="whatToLoad">Tell if the caller is interested in the address or in the content</param>
-        public void EmitStoreObject(LocalBuilder objectInstance, FieldInfo field, LocalBuilder content, TypeOfContent whatToLoad = TypeOfContent.Value)
+        public void EmitStoreObject(Local objectInstance, FieldInfo field, Local content, TypeOfContent whatToLoad = TypeOfContent.Value)
         {
-            g.Emit(OpCodes.Ldloc, objectInstance); // this --> stack
+            g.LoadLocal(objectInstance); // this --> stack
 
             if (whatToLoad == TypeOfContent.Address)
-                g.Emit(OpCodes.Ldloca, content);// this --> stack
+                g.LoadLocalAddress(content);// this --> stack
             else
-                g.Emit(OpCodes.Ldloc, content); // this --> stack
-            g.Emit(OpCodes.Stfld, field);          // &this.CurrentItem --> stack
+                g.LoadLocal(content); // this --> stack
+            g.StoreField(field);          // &this.CurrentItem --> stack
         }
 
         /// <summary>
@@ -329,13 +329,11 @@ namespace AmphetamineSerializer
                 };
                 var response = loopCtx.Chain.Process(request) as SerializationBuildResponse;
                 loopCtx.Size = loopCtx.G.DeclareLocal(typeof(uint));
-                loopCtx.G.Emit(OpCodes.Ldloc, loopCtx.ObjectInstance); // this (stfld) --> stack
-                loopCtx.G.Emit(OpCodes.Ldfld, loopCtx.CurrentItemFieldInfo); // this.CurrentItemFieldInfo --> stack
-                loopCtx.G.Emit(OpCodes.Ldlen);
-                loopCtx.G.Emit(OpCodes.Stloc, loopCtx.Size);
-
-                // this.DecodeUInt(ref size, buffer, ref position);
-                loopCtx.G.Emit(OpCodes.Ldloc, loopCtx.Size);
+                loopCtx.G.LoadLocal(loopCtx.ObjectInstance); // this (stfld) --> stack
+                loopCtx.G.LoadField(loopCtx.CurrentItemFieldInfo); // this.CurrentItemFieldInfo --> stack
+                loopCtx.G.LoadLength(loopCtx.CurrentItemFieldInfo.FieldType.GetElementType());
+                loopCtx.G.StoreLocal(loopCtx.Size);
+                loopCtx.G.LoadLocal(loopCtx.Size);
 
                 ForwardParameters(loopCtx.InputParameter, response.Method);
             }
@@ -354,7 +352,7 @@ namespace AmphetamineSerializer
                 loopCtx.Size = loopCtx.G.DeclareLocal(indexType);
 
                 // this.DecodeUInt(ref size, buffer, ref position);
-                loopCtx.G.Emit(OpCodes.Ldloca, loopCtx.Size);
+                loopCtx.G.LoadLocalAddress(loopCtx.Size);
                 ForwardParameters(loopCtx.InputParameter, response.Method);
             }
 
@@ -363,27 +361,27 @@ namespace AmphetamineSerializer
                 if (!loopCtx.StoreAtPosition.HasValue)
                 {
                     // ObjectInstance.CurrentItemFieldInfo = new CurrentItemUnderlyingType[Size];
-                    loopCtx.G.Emit(OpCodes.Ldloc, loopCtx.ObjectInstance); // this (stfld) --> stack
-                    loopCtx.G.Emit(OpCodes.Ldloc, loopCtx.Size); // size --> stack
-                    loopCtx.G.Emit(OpCodes.Newarr, loopCtx.CurrentItemUnderlyingType); // new Array[size] --> stack
-                    loopCtx.G.Emit(OpCodes.Stfld, loopCtx.CurrentItemFieldInfo); // stack --> item
+                    loopCtx.G.LoadLocal(loopCtx.ObjectInstance); // this (stfld) --> stack
+                    loopCtx.G.LoadLocal(loopCtx.Size); // size --> stack
+                    loopCtx.G.NewArray(loopCtx.CurrentItemUnderlyingType); // new Array[size] --> stack
+                    loopCtx.G.StoreField(loopCtx.CurrentItemFieldInfo); // stack --> item
                 }
                 else
                 {
                     // ObjectInstance.CurrentItemFieldInfo[StoreAtPosition] = new CurrentItemUnderlyingType[Size]
-                    loopCtx.G.Emit(OpCodes.Ldloc, loopCtx.ObjectInstance); // this (stfld) --> stack
-                    loopCtx.G.Emit(OpCodes.Ldfld, loopCtx.CurrentItemFieldInfo); // this.CurrentItemFieldInfo --> stack
-                    loopCtx.G.Emit(OpCodes.Ldc_I4, loopCtx.StoreAtPosition.Value); // StoreAtPosition --> stack
-                    loopCtx.G.Emit(OpCodes.Ldloc, loopCtx.Size); // size --> stack
-                    loopCtx.G.Emit(OpCodes.Newarr, loopCtx.CurrentItemUnderlyingType); // new Array[size] --> stack
-                    loopCtx.G.Emit(OpCodes.Stelem, loopCtx.CurrentItemType);
+                    loopCtx.G.LoadLocal(loopCtx.ObjectInstance); // this (stfld) --> stack
+                    loopCtx.G.LoadField(loopCtx.CurrentItemFieldInfo); // this.CurrentItemFieldInfo --> stack
+                    loopCtx.G.LoadConstant(loopCtx.StoreAtPosition.Value); // StoreAtPosition --> stack
+                    loopCtx.G.LoadLocal(loopCtx.Size); // size --> stack
+                    loopCtx.G.NewArray(loopCtx.CurrentItemUnderlyingType); // new Array[size] --> stack
+                    loopCtx.G.StoreElement(loopCtx.CurrentItemType);
                 }
             }
             // int indexLocal = 0;
             // goto CheckOutOfBound;
-            loopCtx.G.Emit(OpCodes.Ldc_I4_0); // 0 --> stack
-            loopCtx.G.Emit(OpCodes.Stloc, loopCtx.Index); // stack --> indexLocal
-            loopCtx.G.Emit(OpCodes.Br, loopCtx.CheckOutOfBound); // Local variables initialized, jump
+            loopCtx.G.LoadConstant(0); // 0 --> stack
+            loopCtx.G.StoreLocal(loopCtx.Index); // stack --> indexLocal
+            loopCtx.G.Branch(loopCtx.CheckOutOfBound); // Local variables initialized, jump
 
             // Loop start
             loopCtx.G.MarkLabel(loopCtx.Body);
@@ -397,17 +395,17 @@ namespace AmphetamineSerializer
         /// <param name="objectTemp"></param>
         /// <param name="type"></param>
         /// <param name="whatToStore"></param>
-        public void EmitStoreArray(int h, LocalBuilder currentArray, LocalBuilder objectTemp, Type type, TypeOfContent whatToStore = TypeOfContent.Value)
+        public void EmitStoreArray(int h, Local currentArray, Local objectTemp, Type type, TypeOfContent whatToStore = TypeOfContent.Value)
         {
-            g.Emit(OpCodes.Ldloc, currentArray);
-            g.Emit(OpCodes.Ldc_I4, h);
+            g.LoadLocal(currentArray);
+            g.LoadConstant(h);
 
             if (whatToStore == TypeOfContent.Value)
-                g.Emit(OpCodes.Ldloc, objectTemp);
+                g.LoadLocal(objectTemp);
             else
-                g.Emit(OpCodes.Ldind_Ref, objectTemp);
+                g.LoadLocalAddress(objectTemp);
 
-            g.Emit(OpCodes.Stelem, type);
+            g.StoreElement(type);
         }
 
         /// <summary>
@@ -431,22 +429,21 @@ namespace AmphetamineSerializer
             IncrementLocalVariable(ctx.Index);
 
             ctx.G.MarkLabel(ctx.CheckOutOfBound);
-            ctx.G.Emit(OpCodes.Ldloc, ctx.Index); // Index --> stack
+            ctx.G.LoadLocal(ctx.Index); // Index --> stack
 
             // If the Size is not provided, load the lenght of the array.
             if (ctx.Size == null)
             {
-                ctx.G.Emit(OpCodes.Ldloc, ctx.ObjectInstance); // this --> stack
-                ctx.G.Emit(OpCodes.Ldfld, ctx.CurrentItemFieldInfo); // Array --> stack
-                ctx.G.Emit(OpCodes.Ldlen); // Array.Lenght --> stack
-                ctx.G.Emit(OpCodes.Conv_I4); // stack --> to int 32
+                ctx.G.LoadLocal(ctx.ObjectInstance); // this --> stack
+                ctx.G.LoadField(ctx.CurrentItemFieldInfo); // Array --> stack
+                ctx.G.LoadLength<int>(); // Array.Lenght --> stack
             }
             else
             {
-                ctx.G.Emit(OpCodes.Ldloc, ctx.Size);
+                ctx.G.LoadLocal(ctx.Size);
             }
 
-            ctx.G.Emit(OpCodes.Blt, ctx.Body);
+            ctx.G.BranchIfLess(ctx.Body);
         }
 
         public Type MakeDelegateType(Type objectType, Type[] inputTypes)
@@ -476,7 +473,7 @@ namespace AmphetamineSerializer
 
                 for (int i = 1; i < parameters.Length; ++i)
                 {
-                    for (int j = 1; j < inputParameter.Length; j++)
+                    for (ushort j = 1; j < inputParameter.Length; j++)
                     {
                         if (inputParameter[j] == parameters[i].ParameterType)
                         {
@@ -484,7 +481,7 @@ namespace AmphetamineSerializer
                                 throw new AmbiguousMatchException("Input arguments match more than one argument in the handler signature.");
                             foundParameter[i - 1] = true;
 
-                            g.Emit(OpCodes.Ldarg, j); // argument i --> stack
+                            g.LoadArgument(j); // argument i --> stack
                             break;
                         }
                     }
@@ -496,21 +493,19 @@ namespace AmphetamineSerializer
                                 throw new AmbiguousMatchException("More than one parameter accepting additional options were found in the handler signature.");
                             if (attribute != null)
                                 currentOptions = attribute.AdditionalOptions;
-                            g.Emit(OpCodes.Ldc_I8, (long)currentOptions);
+                            g.LoadConstant((long)currentOptions);
                             additionalParameterFound = true;
                         }
                         else
                             throw new InvalidOperationException("Unable to load all the parameters for the handler.");
                     }
                 }
-                g.Emit(OpCodes.Nop);
-                g.Emit(OpCodes.Nop);
-                g.EmitCall(OpCodes.Call, currentMethod, null);                 // void func(ref obj,byte[], ref int)
+                g.Call(currentMethod);                 // void func(ref obj,byte[], ref int)
             }
             else
             {
-                for (int j = 1; j < inputParameter.Length; j++)
-                    g.Emit(OpCodes.Ldarg, j); // argument i --> stack
+                for (ushort j = 1; j < inputParameter.Length; j++)
+                    g.LoadArgument(j); // argument i --> stack
             }
         }
     }
