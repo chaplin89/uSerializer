@@ -1,9 +1,7 @@
-﻿using AmphetamineSerializer;
-using AmphetamineSerializer.Example;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 
-namespace Mermec.Trackware.NativeTestSuite
+namespace AmphetamineSerializer.Example
 {
     public class PeParser
     {

@@ -1,5 +1,4 @@
-﻿using AmphetamineSerializer;
-using AmphetamineSerializer.Tests;
+﻿using AmphetamineSerializer.Tests;
 using Ploeh.AutoFixture;
 using System;
 using System.Collections.Generic;
@@ -9,7 +8,7 @@ using System.Linq;
 using System.Reflection;
 using TechTalk.SpecFlow;
 
-namespace Mermec.TrackWare.SystemTests
+namespace AmphetamineSerializer.SystemTests
 {
     [Binding]
     public class SerializationSteps

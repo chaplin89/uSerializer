@@ -1,10 +1,4 @@
-﻿using AmphetamineSerializer;
-using AmphetamineSerializer.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AmphetamineSerializer.Common;
 
 namespace AmphetamineSerializer.Example
 {

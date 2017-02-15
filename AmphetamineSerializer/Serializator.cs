@@ -1,7 +1,6 @@
 ﻿using AmphetamineSerializer.Common;
 using AmphetamineSerializer.Interfaces;
 using System;
-using System.Diagnostics;
 using System.IO;
 
 namespace AmphetamineSerializer
