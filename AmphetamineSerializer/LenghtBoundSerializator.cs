@@ -10,7 +10,7 @@ namespace AmphetamineSerializer
     /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class LenghtBoundSerializator<T> : ISerializator
+    public class LenghtBoundSerializator<T> : Serializator<T>
     {
         delegate void DeserializeBytes(ref T obj, byte[] buffer, ref uint position);
         delegate void SerializeBinaryWriter(ref T obj, BinaryWriter stream);
@@ -29,40 +29,28 @@ namespace AmphetamineSerializer
         /// <param name="obj"></param>
         /// <param name="buffer"></param>
         /// <param name="position"></param>
-        public void Deserialize(ref T obj, byte[] buffer, ref uint position)
+        public override void Deserialize(ref T obj, byte[] buffer, ref uint position)
         {
-            if (deserializeFromBytes == null)
-                deserializeFromBytes = (DeserializeBytes)MakeRequest(typeof(DeserializeBytes));
-
+            position += 4;
             deserializeFromBytes(ref obj, buffer, ref position);
+            position += 4;
         }
 
-        public void Deserialize(ref T obj, BinaryReader stream)
+        public override void Deserialize(ref T obj, BinaryReader stream)
         {
-            if (deserializeFromStream == null)
-                deserializeFromStream = (DeserializeBinaryReader)MakeRequest(typeof(DeserializeBinaryReader));
-
-            if (stream.BaseStream.Position == stream.BaseStream.Length)
-            {
-                obj = default(T);
-                return;
-            }
-
             int initialLenght = stream.ReadInt32();
             int finalPosition = (int)stream.BaseStream.Position + initialLenght;
 
-            deserializeFromStream(ref obj, stream);
+            base.Deserialize(ref obj, stream);
+
             stream.BaseStream.Position = finalPosition;
 
             int lenght = stream.ReadInt32();
             Debug.Assert(lenght == initialLenght);
         }
 
-        public void Serialize(T obj, BinaryWriter stream)
+        public override void Serialize(T obj, BinaryWriter stream)
         {
-            if (serializeFromStream == null)
-                serializeFromStream = (SerializeBinaryWriter)MakeRequest(typeof(SerializeBinaryWriter));
-
             uint lenght = 0;
             long initialPosition;
             long finalPosition;
@@ -71,7 +59,7 @@ namespace AmphetamineSerializer
 
             initialPosition = stream.BaseStream.Position;
 
-            serializeFromStream(ref obj, stream);
+            base.Serialize(obj, stream);
 
             finalPosition = stream.BaseStream.Position;
 
@@ -81,36 +69,6 @@ namespace AmphetamineSerializer
             stream.BaseStream.Position = initialPosition - 4;
             stream.Write(lenght);
             stream.BaseStream.Position = finalPosition + 4;
-        }
-
-        public void Deserialize(ref object obj, byte[] buffer, ref uint position)
-        {
-            T tempObj = (T)obj;
-            Deserialize(ref obj, buffer, ref position);
-            obj = tempObj;
-        }
-
-        public void Serialize(object obj, BinaryWriter stream)
-        {
-            Serialize((T)obj, stream);
-        }
-
-        public void Deserialize(ref object obj, BinaryReader stream)
-        {
-            T tempObj = (T)obj;
-            Deserialize(ref tempObj, stream);
-            obj = tempObj;
-        }
-
-        private Delegate MakeRequest(Type delegateType)
-        {
-            var request = new SerializationBuildRequest()
-            {
-                AdditionalContext = this.additionalContext,
-                DelegateType = delegateType
-            };
-            var response = chain.Process(request) as SerializationBuildResponse;
-            return response.Method.CreateDelegate(delegateType, response.Instance);
         }
 
         public LenghtBoundSerializator(object additionalContext = null)

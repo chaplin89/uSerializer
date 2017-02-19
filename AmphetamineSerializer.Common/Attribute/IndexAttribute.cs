@@ -6,7 +6,7 @@ namespace AmphetamineSerializer.Common
     /// Instruct the deserializator about how to deserialize a give field.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
-    public class SIndexAttribute : Attribute
+    public class ASIndexAttribute : Attribute
     {
         /// <summary>
         /// Order used for deserializing the field.
@@ -61,7 +61,7 @@ namespace AmphetamineSerializer.Common
         /// Initialize an attribute with an index.
         /// </summary>
         /// <param name="index">Index</param>
-        public SIndexAttribute(int index)
+        public ASIndexAttribute(int index)
         {
             Index = index;
 

@@ -20,8 +20,7 @@ namespace AmphetamineSerializer
                        .SetNext(new CustomSerializerFinder())
                        .SetNext(new CustomBuilderFinder())
                        .SetNext(new DefaultHandlerFinder())
-                       .SetNext(new CacheManager())
-                       .SetNext(new DefaultBuilder());
+                       .SetNext(new CacheManager());
             return manager;
         }
 

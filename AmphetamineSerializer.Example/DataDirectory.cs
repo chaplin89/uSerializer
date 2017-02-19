@@ -5,9 +5,9 @@ namespace AmphetamineSerializer.Example
     public class DataDirectory
     {
 
-        [SIndex(0)]
+        [ASIndex(0)]
         public uint VirtualAddress;
-        [SIndex(1)]
+        [ASIndex(1)]
         public uint Size;
     }
 }

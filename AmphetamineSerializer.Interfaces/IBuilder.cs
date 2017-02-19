@@ -1,9 +1,9 @@
-﻿using System.Reflection;
+﻿using AmphetamineSerializer.Common;
 
 namespace AmphetamineSerializer.Interfaces
 {
     public interface IBuilder
     {
-        MethodInfo Method { get; }
+        BuildedFunction Method { get; }
     }
 }

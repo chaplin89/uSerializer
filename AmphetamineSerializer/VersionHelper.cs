@@ -24,7 +24,7 @@ namespace AmphetamineSerializer
 
             foreach (var item in GetFields(rootType))
             {
-                var attribute = item.GetCustomAttribute<SIndexAttribute>(false);
+                var attribute = item.GetCustomAttribute<ASIndexAttribute>(false);
                 if (attribute.VersionBegin != -1)
                 {
                     if (!minExplicitlyManagedVersion.HasValue)
@@ -85,17 +85,17 @@ namespace AmphetamineSerializer
         {
             var allFields = rootType
                             .GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                            .Where(x => x.GetCustomAttribute<SIndexAttribute>(false) != null)
-                            .OrderBy(x => x.GetCustomAttribute<SIndexAttribute>(false).Index);
+                            .Where(x => x.GetCustomAttribute<ASIndexAttribute>(false) != null)
+                            .OrderBy(x => x.GetCustomAttribute<ASIndexAttribute>(false).Index);
 
             if (version.HasValue)
             {
                 return allFields
-                          .Where(x => !(x.GetCustomAttribute<SIndexAttribute>().VersionBegin != -1) ||
-                                       x.GetCustomAttribute<SIndexAttribute>().VersionBegin <= version.Value)
-                          .Where(x => !(x.GetCustomAttribute<SIndexAttribute>().VersionEnd != -1) ||
-                                       x.GetCustomAttribute<SIndexAttribute>().VersionEnd >= version.Value)
-                          .OrderBy(x => x.GetCustomAttribute<SIndexAttribute>().Index);
+                          .Where(x => !(x.GetCustomAttribute<ASIndexAttribute>().VersionBegin != -1) ||
+                                       x.GetCustomAttribute<ASIndexAttribute>().VersionBegin <= version.Value)
+                          .Where(x => !(x.GetCustomAttribute<ASIndexAttribute>().VersionEnd != -1) ||
+                                       x.GetCustomAttribute<ASIndexAttribute>().VersionEnd >= version.Value)
+                          .OrderBy(x => x.GetCustomAttribute<ASIndexAttribute>().Index);
             }
 
             return allFields;

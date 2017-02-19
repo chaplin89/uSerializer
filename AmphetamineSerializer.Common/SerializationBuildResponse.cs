@@ -6,7 +6,7 @@ namespace AmphetamineSerializer.Common
 {
     public class SerializationBuildResponse : IResponse
     {
-        public MethodInfo Method;
+        public BuildedFunction Method;
 
         public object Instance { get; set; }
         public string ProcessedBy { get; set; }

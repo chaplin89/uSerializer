@@ -9,7 +9,7 @@ namespace AmphetamineSerializer
     /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class TWSerializator<T> : ISerializator
+    public class Serializator<T> : ISerializator
     {
         delegate void DeserializeBytes(ref T obj, byte[] buffer, ref uint position);
         delegate void SerializeBinaryWriter(T obj, BinaryWriter stream);
@@ -28,7 +28,7 @@ namespace AmphetamineSerializer
         /// <param name="obj"></param>
         /// <param name="buffer"></param>
         /// <param name="position"></param>
-        public void Deserialize(ref T obj, byte[] buffer, ref uint position)
+        public virtual void Deserialize(ref T obj, byte[] buffer, ref uint position)
         {
             if (deserializeFromBytes == null)
                 deserializeFromBytes = (DeserializeBytes)MakeRequest(typeof(DeserializeBytes));
@@ -36,24 +36,19 @@ namespace AmphetamineSerializer
             deserializeFromBytes(ref obj, buffer, ref position);
         }
 
-        public void Deserialize(ref T obj, BinaryReader stream)
+        public virtual void Deserialize(ref T obj, BinaryReader stream)
         {
             if (deserializeFromStream == null)
                 deserializeFromStream = (DeserializeBinaryReader)MakeRequest(typeof(DeserializeBinaryReader));
 
-            if (stream.BaseStream.Position == stream.BaseStream.Length)
-            {
-                obj = default(T);
-                return;
-            }
-
             deserializeFromStream(ref obj, stream);
         }
 
-        public void Serialize(T obj, BinaryWriter stream)
+        public virtual void Serialize(T obj, BinaryWriter stream)
         {
             if (serializeFromStream == null)
                 serializeFromStream = (SerializeBinaryWriter)MakeRequest(typeof(SerializeBinaryWriter));
+
             serializeFromStream(obj, stream);
         }
 
@@ -84,10 +79,10 @@ namespace AmphetamineSerializer
                 DelegateType = delegateType
             };
             var response = chain.Process(request) as SerializationBuildResponse;
-            return response.Method.CreateDelegate(delegateType, response.Instance);
+            return response.Method.Method.CreateDelegate(delegateType, response.Instance);
         }
 
-        public TWSerializator(object additionalContext = null)
+        public Serializator(object additionalContext = null)
         {
             this.additionalContext = additionalContext;
         }

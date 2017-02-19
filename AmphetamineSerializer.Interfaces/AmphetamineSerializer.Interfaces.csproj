@@ -35,6 +35,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Sigil">
+      <HintPath>..\AmphetamineSerializer.Helpers\bin\Debug\Sigil.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -45,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BuildedFunction.cs" />
     <Compile Include="IBuilder.cs" />
     <Compile Include="IChainElement.cs" />
     <Compile Include="IChainManager.cs" />

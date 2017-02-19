@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Sigil.NonGeneric;
 using Sigil;
+using System.Diagnostics;
 
 namespace AmphetamineSerializer.Common
 {
@@ -18,9 +19,25 @@ namespace AmphetamineSerializer.Common
     /// </summary>
     public class FoundryContext
     {
+        private ILAbstraction manipulator;
+
         private FoundryContext()
         {
-            AlreadyBuildedMethods = new Dictionary<Type, MethodInfo>();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="delegateType"></param>
+        /// <param name="additionalContext"></param>
+        /// <returns></returns>
+        public static FoundryContext MakeContext(Type delegateType, object additionalContext)
+        {
+            return new FoundryContext()
+            {
+                InputParameters = delegateType.GetMethod("Invoke").GetParameters().Select(x => x.ParameterType).ToArray(),
+                AdditionalContext = additionalContext
+            };
         }
 
         /// <summary>
@@ -57,22 +74,36 @@ namespace AmphetamineSerializer.Common
         /// </summary>
         public Type ObjectType
         {
-            get { return (InputParameters != null) ? InputParameters.FirstOrDefault() : null; }
+            get
+            {
+                if (InputParameters != null)
+                    return InputParameters.FirstOrDefault();
+                return null;
+            }
         }
-
-        /// <summary>
-        /// Methods builded in this context.
-        /// </summary>
-        public Dictionary<Type, MethodInfo> AlreadyBuildedMethods { get; set; }
 
         /// <summary>
         /// Provide basic abstraction from IL.
         /// </summary>
-        public ILAbstraction Manipulator { get; set; }
+        public ILAbstraction Manipulator
+        {
+            get
+            {
+                if (manipulator == null)
+                    manipulator = new ILAbstraction(G);
+                return manipulator;
+            }
+        }
 
         /// <summary>
-        /// If not null, the assembly will be build based on this sample structure.
+        /// Additional context used in custom builders (if not null).
         /// </summary>
+        /// <remarks>
+        /// The meaning is dependent on the builder.
+        /// Common case when you need to use this field is when you're building 
+        /// your serialization logic starting from generic meta-information retrieved 
+        /// from the header of a file (and not directly from an object graph).
+        /// </remarks>
         public object AdditionalContext { get; set; }
 
         /// <summary>
@@ -87,43 +118,63 @@ namespace AmphetamineSerializer.Common
 
         /// <summary>
         /// Types in input to the method that will be forwarded to the
-        /// deserialization handler.
+        /// serialization handlers.
         /// </summary>
         public Type[] InputParameters { get; set; }
 
         /// <summary>
-        /// Known handlers for managing types.
+        /// Chain-of-responsibility that manage building request.
         /// </summary>
         public IChainManager Chain { get; set; }
 
         /// <summary>
-        /// 
+        /// Return the index type for current field.
         /// </summary>
-        /// <param name="scheleton"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        public static FoundryContext MakeContext(Type scheleton, object context)
-        {
-            return new FoundryContext()
-            {
-                InputParameters = scheleton.GetMethod("Invoke").GetParameters().Select(x => x.ParameterType).ToArray(),
-                AdditionalContext = context
-            };
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public SIndexAttribute CurrentAttribute
+        public ASIndexAttribute CurrentAttribute
         {
             get
             {
                 if (CurrentItemFieldInfo != null)
-                    return CurrentItemFieldInfo.GetCustomAttribute<SIndexAttribute>();
+                    return CurrentItemFieldInfo.GetCustomAttribute<ASIndexAttribute>();
                 return null;
             }
         }
 
-        public bool ManageLifeCycle { get{ return InputParameters[0].IsByRef; } }
+        /// <summary>
+        /// Indicate wether the builder is managing the life-cycle of the elements.
+        /// For the moment, this means:
+        /// 1) true if the input is passed ByRef
+        /// 2) false vice-versa
+        /// </summary>
+        /// <remarks>
+        /// This is the only thing that differentiate a Serialization from a Deserialization.
+        /// The inner part of the builder, in fact, does not know anything about Serialization or 
+        /// Deserialization because it's only a way to iterate over an object graph and call some methods.
+        /// </remarks>
+        public bool ManageLifeCycle
+        {
+            get
+            {
+                Debug.Assert(InputParameters != null && InputParameters.Length > 0);
+                return InputParameters.First().IsByRef;
+            }
+        }
+
+        /// <summary>
+        /// CurrentUnderlyingType 
+        /// </summary>
+        public Type NormalizedType {
+            get
+            {
+                Type normalizedType = CurrentItemUnderlyingType;
+
+                if (CurrentItemUnderlyingType.IsEnum)
+                    normalizedType = normalizedType.GetEnumUnderlyingType();
+                if (ManageLifeCycle)
+                    normalizedType = normalizedType.MakeByRefType();
+
+                return normalizedType;
+            }
+        }
     }
 }

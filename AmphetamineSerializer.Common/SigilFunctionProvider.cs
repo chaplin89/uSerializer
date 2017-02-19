@@ -12,68 +12,69 @@ namespace AmphetamineSerializer.Common
         System.Reflection.Emit.ModuleBuilder moduleBuilder;
         System.Reflection.Emit.TypeBuilder typeBuilder;
 
-        public Dictionary<Type, Emit> AlreadyBuildedMethods { get; set; }
-
-        Stack<Emit> methods = new Stack<Emit>();
+        public Dictionary<Type, BuildedFunction> AlreadyBuildedMethods { get; set; }
+        Stack<BuildedFunction> methods = new Stack<BuildedFunction>();
         const MethodAttributes attributes = MethodAttributes.Public | MethodAttributes.Static;
 
         public SigilFunctionProvider(string assemblyName)
         {
-            AlreadyBuildedMethods = new Dictionary<Type, Emit>();
+            AlreadyBuildedMethods = new Dictionary<Type, BuildedFunction>();
             this.assemblyName = new AssemblyName(assemblyName);
             var attributes = System.Reflection.Emit.AssemblyBuilderAccess.RunAndSave;
-            assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(this.assemblyName, attributes,"D:\\");
+            assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(this.assemblyName, attributes, "D:\\");
             moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName + ".dll");
             typeBuilder = moduleBuilder.DefineType(string.Format("{0}.Handler", this.assemblyName.Name), TypeAttributes.Public);
         }
-        Type lastType;
+
         public Emit AddMethod(string v, Type[] inputTypes, Type returnValue)
         {
+            if (v == null)
+                throw new ArgumentNullException("v");
+            if (inputTypes == null)
+                throw new ArgumentNullException("inputTypes");
             if (returnValue == null)
                 returnValue = typeof(void);
-            var localMethod = Emit.BuildStaticMethod(returnValue, inputTypes, typeBuilder, v, MethodAttributes.Public, true);
-            methods.Push(localMethod);
-            lastType = inputTypes[0];
-            return localMethod;
+
+            BuildedFunction bf = new BuildedFunction()
+            {
+                Emiter = Emit.BuildStaticMethod(returnValue, inputTypes, typeBuilder, v, MethodAttributes.Public, true),
+                Status = BuildedFunctionStatus.FunctionNotFinalized,
+            };
+
+            methods.Push(bf);
+            return bf.Emiter;
         }
 
-        public MethodInfo GetMethod(bool isToPersist)
+        public BuildedFunction GetMethod(bool isToPersist)
         {
-            MethodInfo mi;
-            Emit emit;
-            if (!isToPersist)
+            BuildedFunction bf = methods.Pop();
+
+            bf.Method = bf.Emiter.CreateMethod();
+            bf.Status = BuildedFunctionStatus.FunctionFinalizedTypeNotFinalized;
+
+            if (isToPersist)
             {
-                emit = methods.Pop();
-                mi = emit.CreateMethod();
-            }
-            else
-            {
-                emit = methods.Pop();
-                mi = emit.CreateMethod();
-                Type t = typeBuilder.CreateType();
+                foreach (var item in methods)
+                {
+                    BuildedFunction tempBf = item;
+                    tempBf.Method = tempBf.Emiter.CreateMethod();
+                    tempBf.Status = BuildedFunctionStatus.FunctionFinalizedTypeNotFinalized;
+                }
+
+                Type currentType = typeBuilder.CreateType();
+                bf.Method = currentType.GetMethods()[0];
                 assemblyBuilder.Save(assemblyName.Name + ".dll");
+
+                foreach (var v in AlreadyBuildedMethods)
+                {
+                    v.Value.Emiter = null;
+                    v.Value.Status = BuildedFunctionStatus.TypeFinalized;
+                }
+
+                bf.Status = BuildedFunctionStatus.TypeFinalized;
             }
 
-            AlreadyBuildedMethods.Add(lastType, emit);
-            return mi;
-        }
-
-        public Emit GetEmit(bool isToPersist)
-        {
-            Emit mi;
-            if (!isToPersist)
-            {
-                mi = methods.Pop();
-            }
-            else
-            {
-                mi = methods.Pop();
-                Type t = typeBuilder.CreateType();
-                assemblyBuilder.Save(assemblyName.Name + ".dll");
-            }
-
-            AlreadyBuildedMethods.Add(lastType, mi);
-            return mi;
+            return bf;
         }
     }
 }

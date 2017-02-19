@@ -19,7 +19,7 @@ namespace AmphetamineSerializer
             };
         }
 
-        public Dictionary<Type, RequestHandler> ManagedRequestes { get{ return managedRequestes; } }
+        public Dictionary<Type, RequestHandler> ManagedRequestes { get { return managedRequestes; } }
 
         public string Name { get { return "CustomSerializerFinder"; } }
 
@@ -49,10 +49,16 @@ namespace AmphetamineSerializer
             var instance = Activator.CreateInstance(attribute.SerializatorType, localRequest.AdditionalContext);
             resolver.Register(attribute.SerializatorType);
             var inputType = dlgMi.GetParameters().Select(x => x.ParameterType).ToArray();
-            var method = resolver.ResolveFromSignature(localRequest.RootType, inputType, dlgMi.ReturnType);
+            var method = new BuildedFunction()
+            {
+                Method = resolver.ResolveFromSignature(localRequest.RootType, inputType, dlgMi.ReturnType),
+                Status = BuildedFunctionStatus.TypeFinalized
+            };
 
-            if (method == null)
+            if (method.Method == null)
                 throw new InvalidOperationException("Unable to retrieve the method from the custom deserializator.");
+
+
 
             return new SerializationBuildResponse()
             {

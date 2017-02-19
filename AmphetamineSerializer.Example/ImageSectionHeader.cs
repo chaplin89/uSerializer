@@ -5,25 +5,25 @@ namespace AmphetamineSerializer.Example
 {
     public class ImageSectionHeader
     {
-        [SIndex(0, ArrayFixedSize = 8)]
+        [ASIndex(0, ArrayFixedSize = 8)]
         public byte[] Name;
-        [SIndex(1)]
+        [ASIndex(1)]
         public uint Misc;
-        [SIndex(2)]
+        [ASIndex(2)]
         public uint VirtualAddress;
-        [SIndex(3)]
+        [ASIndex(3)]
         public uint SizeOfRawData;
-        [SIndex(4)]
+        [ASIndex(4)]
         public uint PointerToRawData;
-        [SIndex(5)]
+        [ASIndex(5)]
         public uint PointerToRelocations;
-        [SIndex(6)]
+        [ASIndex(6)]
         public uint PointerToLinenumbers;
-        [SIndex(7)]
+        [ASIndex(7)]
         public ushort NumberOfRelocations;
-        [SIndex(8)]
+        [ASIndex(8)]
         public ushort NumberOfLinenumbers;
-        [SIndex(9)]
+        [ASIndex(9)]
         public uint Characteristics;
 
         public string Name_

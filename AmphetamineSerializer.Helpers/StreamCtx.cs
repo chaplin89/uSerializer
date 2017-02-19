@@ -1,56 +1,166 @@
 ﻿using AmphetamineSerializer.Common;
+using AmphetamineSerializer.Interfaces;
 using Sigil.NonGeneric;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Text;
 
 namespace AmphetamineSerializer.Helpers
 {
-    static public class StreamDeserializationCtx
+    public class StreamDeserializationCtx : IBuilder
     {
-        static private readonly Dictionary<Type, MethodInfo> typeHandlerMap;
-
         static StreamDeserializationCtx()
         {
-            Type tr = typeof(BinaryReader);
-            Type tw = typeof(BinaryWriter);
-            typeHandlerMap = new Dictionary<Type, MethodInfo>()
-            {
-                {typeof(byte),   tw.GetMethod("Write", new Type[] {typeof(byte),   })},
-                {typeof(sbyte),  tw.GetMethod("Write", new Type[] {typeof(sbyte),  })},
-                {typeof(uint),   tw.GetMethod("Write", new Type[] {typeof(uint),   })},
-                {typeof(int),    tw.GetMethod("Write", new Type[] {typeof(int),    })},
-                {typeof(ushort), tw.GetMethod("Write", new Type[] {typeof(ushort), })},
-                {typeof(short),  tw.GetMethod("Write", new Type[] {typeof(short),  })},
-                {typeof(double), tw.GetMethod("Write", new Type[] {typeof(double), })},
-                {typeof(float),  tw.GetMethod("Write", new Type[] {typeof(float),  })},
+            // Not all methods were found
+            Debug.Assert(typeHandlerMap.Where(x => x.Value == null).Count() == 0);
+        }
 
-                {typeof(byte).MakeByRefType(),   tr.GetMethod("ReadByte")},
-                {typeof(sbyte).MakeByRefType(),  tr.GetMethod("ReadSByte")},
-                {typeof(uint).MakeByRefType(),   tr.GetMethod("ReadUInt32")},
-                {typeof(int).MakeByRefType(),    tr.GetMethod("ReadInt32")},
-                {typeof(ushort).MakeByRefType(), tr.GetMethod("ReadUInt16")},
-                {typeof(short).MakeByRefType(),  tr.GetMethod("ReadInt16")},
-                {typeof(double).MakeByRefType(), tr.GetMethod("ReadDouble")},
-                {typeof(float).MakeByRefType(),  tr.GetMethod("ReadFloat")},
-            };
+        private FoundryContext ctx;
+        static private readonly Dictionary<Type, MethodInfo> typeHandlerMap = new Dictionary<Type, MethodInfo>()
+        {
+            {typeof(byte),                   typeof(BinaryWriter).GetMethod("Write", new Type[] {typeof(byte),   })},
+            {typeof(sbyte),                  typeof(BinaryWriter).GetMethod("Write", new Type[] {typeof(sbyte),  })},
+            {typeof(uint),                   typeof(BinaryWriter).GetMethod("Write", new Type[] {typeof(uint),   })},
+            {typeof(int),                    typeof(BinaryWriter).GetMethod("Write", new Type[] {typeof(int),    })},
+            {typeof(ushort),                 typeof(BinaryWriter).GetMethod("Write", new Type[] {typeof(ushort), })},
+            {typeof(short),                  typeof(BinaryWriter).GetMethod("Write", new Type[] {typeof(short),  })},
+            {typeof(double),                 typeof(BinaryWriter).GetMethod("Write", new Type[] {typeof(double), })},
+            {typeof(float),                  typeof(BinaryWriter).GetMethod("Write", new Type[] {typeof(float),  })},
+            {typeof(byte[]),                 typeof(BinaryWriter).GetMethod("Write", new Type[] {typeof(byte[]), })},
+
+            {typeof(byte).MakeByRefType(),   typeof(BinaryReader).GetMethod("ReadByte")},
+            {typeof(sbyte).MakeByRefType(),  typeof(BinaryReader).GetMethod("ReadSByte")},
+            {typeof(uint).MakeByRefType(),   typeof(BinaryReader).GetMethod("ReadUInt32")},
+            {typeof(int).MakeByRefType(),    typeof(BinaryReader).GetMethod("ReadInt32")},
+            {typeof(ushort).MakeByRefType(), typeof(BinaryReader).GetMethod("ReadUInt16")},
+            {typeof(short).MakeByRefType(),  typeof(BinaryReader).GetMethod("ReadInt16")},
+            {typeof(double).MakeByRefType(), typeof(BinaryReader).GetMethod("ReadDouble")},
+            {typeof(float).MakeByRefType(),  typeof(BinaryReader).GetMethod("ReadSingle")},
+            {typeof(byte[]).MakeByRefType(),  typeof(BinaryReader).GetMethod("ReadBytes")}
+        };
+
+        public StreamDeserializationCtx(FoundryContext ctx)
+        {
+            this.ctx = ctx;
+        }
+
+        public BuildedFunction Method
+        {
+            get
+            {
+                if (ctx.CurrentItemUnderlyingType == null)
+                    return null;
+
+                if (ctx.CurrentItemUnderlyingType == typeof(string))
+                    HandleString(ctx);
+                else if (typeHandlerMap.ContainsKey(ctx.CurrentItemUnderlyingType))
+                    HandlePrimitive(ctx);
+                else
+                    return null;
+
+                return new BuildedFunction() { Status = BuildedFunctionStatus.NoMethodsAvailable };
+            }
+        }
+
+        private void Load()
+        {
+            if (ctx.CurrentItemType.IsArray)
+            {
+                ctx.G.LoadLocal(ctx.ObjectInstance);
+                ctx.G.LoadField(ctx.CurrentItemFieldInfo);
+                ctx.G.LoadLocal(ctx.Index);
+                ctx.G.LoadElement(ctx.CurrentItemUnderlyingType);
+            }
+            else
+            {
+                ctx.G.LoadLocal(ctx.ObjectInstance);
+                ctx.G.LoadField(ctx.CurrentItemFieldInfo);
+            }
+        }
+
+        void BeginStore()
+        {
+            if (ctx.CurrentItemType.IsArray)
+            {
+                ctx.G.LoadLocal(ctx.ObjectInstance);
+                ctx.G.LoadField(ctx.CurrentItemFieldInfo);
+                ctx.G.LoadLocal(ctx.Index);
+            }
+            else
+            {
+                ctx.G.LoadLocal(ctx.ObjectInstance);
+            }
+        }
+
+        void EndStore()
+        {
+            if (ctx.CurrentItemType.IsArray)
+                ctx.G.StoreElement(ctx.CurrentItemUnderlyingType);
+            else
+                ctx.G.StoreField(ctx.CurrentItemFieldInfo);
         }
 
         [SerializationHandler(typeof(string))]
-        static public Emit DecodeString(FoundryContext ctx)
+        public void HandleString(FoundryContext ctx)
         {
-            Type currentType = ctx.CurrentItemUnderlyingType.MakeByRefType();
-            if (ctx.Provider.AlreadyBuildedMethods.ContainsKey(currentType))
-                return ctx.Provider.AlreadyBuildedMethods[currentType];
+            if (ctx.ManageLifeCycle)
+                DecodeString(ctx);
+            else
+                EncodeString(ctx);
+        }
 
-            List<Type> input = new List<Type>() { currentType };
-            for (int i = 1; i < ctx.InputParameters.Length; i++)
-                input.Add(ctx.InputParameters[i]);
+        public void DecodeString(FoundryContext ctx)
+        {
+            // Rough C# translation:
+            // Encoding.ASCII.GetString(reader.ReadBytes(reader.ReadInt32()));
 
-            Emit e = ctx.Provider.AddMethod("Read", input.ToArray(), typeof(void));
-            e.Return();
-            return ctx.Provider.GetEmit(false);
+            // Encoding.ASCII instance (Encoder#1)
+            // BinaryReader (Reader#1)
+            // Duplicate (Reader#2)
+            // ReadInt(Reader#2) -> Size in stack
+            // ReadBytes(Reader#1, Size) -> bytes in stack
+            // Encoding.ASCII.GetString(Encoder#1, bytes)
+
+            // Put the decoded string in the stack.
+            BeginStore();
+            {
+                ctx.G.Call(typeof(Encoding).GetProperty("ASCII").GetMethod);
+                ctx.G.LoadArgument(1);
+                ctx.G.LoadArgument(1);
+                ctx.G.CallVirtual(typeHandlerMap[typeof(int).MakeByRefType()]);
+                ctx.G.CallVirtual(typeHandlerMap[typeof(byte[]).MakeByRefType()]);
+                ctx.G.CallVirtual(typeof(Encoding).GetMethod("GetString", new Type[] { typeof(byte[]) }));
+            }
+            EndStore();
+        }
+
+        public BuildedFunction EncodeString(FoundryContext ctx)
+        {
+            // writer.Write(Encoding.ASCII.GetByteCount(Load()));
+            // writer.Write(Encoding.ASCII.GetBytes(Load());
+
+            // Write lenght
+            {
+                ctx.G.LoadArgument(1);
+                ctx.G.Call(typeof(Encoding).GetProperty("ASCII").GetMethod);
+                Load();
+                ctx.G.CallVirtual(typeof(Encoding).GetMethod("GetByteCount", new Type[] { typeof(string) }));
+                ctx.G.CallVirtual(typeHandlerMap[typeof(int)]);
+            }
+            // Write string
+            {
+                ctx.G.LoadArgument(1);
+                ctx.G.Call(typeof(Encoding).GetProperty("ASCII").GetMethod);
+                Load();
+                ctx.G.CallVirtual(typeof(Encoding).GetMethod("GetBytes", new Type[] { typeof(string) }));
+                ctx.G.CallVirtual(typeHandlerMap[typeof(byte[])]);
+            }
+
+            return new BuildedFunction() { Status = BuildedFunctionStatus.NoMethodsAvailable };
         }
 
         [SerializationHandler(typeof(byte))]
@@ -61,55 +171,20 @@ namespace AmphetamineSerializer.Helpers
         [SerializationHandler(typeof(short))]
         [SerializationHandler(typeof(double))]
         [SerializationHandler(typeof(float))]
-        static public Emit HandlePrimitive(FoundryContext ctx)
+        public void HandlePrimitive(FoundryContext ctx)
         {
-            if (ctx.ObjectType.IsByRef)
-                return HandleRead(ctx);
-            else
-                return HandleWrite(ctx);
-        }
+            if (ctx.ManageLifeCycle)
+                BeginStore();
 
-        private static Emit HandleRead(FoundryContext ctx)
-        {
-            Type currentType = ctx.CurrentItemUnderlyingType.MakeByRefType();
-            if (ctx.Provider.AlreadyBuildedMethods.ContainsKey(currentType))
-                return ctx.Provider.AlreadyBuildedMethods[currentType];
+            ctx.G.LoadArgument(1); // argument i --> stack
 
-            if (!typeHandlerMap.ContainsKey(currentType))
-                return null;
+            if (!ctx.ManageLifeCycle)
+                Load();
 
-            List<Type> input = new List<Type>() { currentType };
-            for (int i = 1; i < ctx.InputParameters.Length; i++)
-                input.Add(ctx.InputParameters[i]);
+            ctx.G.CallVirtual(typeHandlerMap[ctx.NormalizedType]);
 
-            Emit e = ctx.Provider.AddMethod("Read", input.ToArray(), typeof(void));
-            e.LoadArgument(1); // argument i --> stack
-            e.CallVirtual(typeHandlerMap[currentType]);
-            e.StoreArgument(0);
-            e.Return();
-            return ctx.Provider.GetEmit(false);
-        }
-
-        private static Emit HandleWrite(FoundryContext ctx)
-        {
-            Type currentType = ctx.CurrentItemUnderlyingType;
-            if (ctx.Provider.AlreadyBuildedMethods.ContainsKey(currentType))
-                return ctx.Provider.AlreadyBuildedMethods[currentType];
-
-            if (!typeHandlerMap.ContainsKey(currentType))
-                return null;
-
-            List<Type> input = new List<Type>() { currentType };
-            for (int i = 1; i < ctx.InputParameters.Length; i++)
-                input.Add(ctx.InputParameters[i]);
-
-            Emit e = ctx.Provider.AddMethod("Write", input.ToArray(), typeof(void));
-            e.LoadArgument(1); // argument i --> stack
-            e.LoadArgument(0); // argument i --> stack
-            e.CallVirtual(typeHandlerMap[currentType]);
-            e.Return();
-            return ctx.Provider.GetEmit(false);
-
+            if (ctx.ManageLifeCycle)
+                EndStore();
         }
     }
 }

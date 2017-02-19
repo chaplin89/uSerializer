@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
 using TechTalk.SpecFlow;
 
 namespace AmphetamineSerializer.SystemTests
@@ -27,17 +28,17 @@ namespace AmphetamineSerializer.SystemTests
         [Given(@"I serialize the instance (.*) of type (.*) in (.*)")]
         public void GivenISerializeTheClassTestInto(string instanceName, string type, string path)
         {
-            TWSerializator<Test> serializator = new TWSerializator<Test>();
+            Serializator<Test> serializator = new Serializator<Test>();
             var currentInstance = (Test)ScenarioContext.Current[instanceName];
 
             using (FileStream file = File.OpenWrite(path))
-                serializator.Serialize(currentInstance, new BinaryWriter(file));            
+                serializator.Serialize(currentInstance, new BinaryWriter(file));
         }
 
         [When(@"I deserialize the instance (.*) of type (.*) from (.*)")]
         public void WhenIDeserializeTheClassTestIntoInstance(string instanceName, string type, string path)
         {
-            TWSerializator<Test> deserializator = new TWSerializator<Test>();
+            Serializator<Test> deserializator = new Serializator<Test>();
             Test currentInstance = null;
 
             using (FileStream file = File.OpenRead(path))
@@ -49,9 +50,30 @@ namespace AmphetamineSerializer.SystemTests
         [Then(@"(.*) and (.*) are identical")]
         public void ThenCompareInstanceAndInstanceReturnTrue(string inst1, string inst2)
         {
-            IEquatable<Test> obj1 = ScenarioContext.Current[inst1] as IEquatable<Test>;
-            IEquatable<Test> obj2 = ScenarioContext.Current[inst2] as IEquatable<Test>;
-            Debug.Assert(PublicFieldsAreEqual(obj1, obj2));
+            Test obj1 = ScenarioContext.Current[inst1] as Test;
+            Test obj2 = ScenarioContext.Current[inst2] as Test;
+            using (var stream1 = new MemoryStream())
+            using (var stream2 = new MemoryStream())
+            {
+                var formatter = new BinaryFormatter();
+                formatter.Serialize(stream1, obj1);
+                formatter.Serialize(stream2, obj2);
+
+                long position1 = stream1.Position;
+                long position2 = stream2.Position;
+
+                Debug.Assert(position1 == position2);
+
+                stream1.Position = 0;
+                stream2.Position = 0;
+
+                for(int i=0; i< position1; i++)
+                { 
+                    int byte1 = stream1.ReadByte();
+                    int byte2 = stream2.ReadByte();
+                    Debug.Assert(byte1 == byte2);
+                }
+            }
         }
 
         private bool PublicFieldsAreEqual<T>(T self, T to) where T : class
@@ -74,9 +96,9 @@ namespace AmphetamineSerializer.SystemTests
                     let selfValue = type.GetField(pi.Name).GetValue(self) as Array
                     let toValue = type.GetField(pi.Name).GetValue(to) as Array
                     where pi.FieldType.IsArray
-                    select new { selfValue, toValue};
+                    select new { selfValue, toValue };
 
-                foreach(var v in arrays)
+                foreach (var v in arrays)
                 {
                     if (v.selfValue.Length != v.toValue.Length)
                         return false;

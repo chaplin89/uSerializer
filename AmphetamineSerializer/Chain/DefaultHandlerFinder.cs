@@ -3,26 +3,24 @@ using AmphetamineSerializer.Helpers;
 using AmphetamineSerializer.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
+using System.Dynamic;
 
 namespace AmphetamineSerializer.Chain
 {
     public class DefaultHandlerFinder : IChainElement
     {
         readonly Dictionary<Type, RequestHandler> managedRequests;
-        FuzzyFunctionResolver resolver;
 
         Type[] defaultHelpers = new Type[]
         {
-            typeof(ByteArrayDeserialization),
-            typeof(ByteArraySerialization),
+            // typeof(ByteArrayDeserialization),
+            // typeof(ByteArraySerialization),
             typeof(StreamDeserializationCtx),
+            typeof(AssemblyFoundry)
         };
 
         public DefaultHandlerFinder()
         {
-            resolver = new FuzzyFunctionResolver(defaultHelpers);
-
             managedRequests = new Dictionary<Type, RequestHandler>()
             {
                 { typeof(SerializationBuildRequest), HandleBuildRequest}
@@ -33,27 +31,31 @@ namespace AmphetamineSerializer.Chain
 
         public Dictionary<Type, RequestHandler> ManagedRequestes { get { return managedRequests; } }
 
-        public IResponse HandleBuildRequest(IRequest request)
+        public IResponse HandleBuildRequest(IRequest genericRequest)
         {
-            var req = request as SerializationBuildRequest;
-            var foundMethod = resolver.ResolveFromSignature(req.RootType, req.InputTypes, req.OutputType);
-            if (foundMethod == null)
-                return null;
+            var request = genericRequest as SerializationBuildRequest;
 
-            if (foundMethod.GetParameters()[0].ParameterType == req.AdditionalContext.GetType())
+            FoundryContext ctx;
+            if (request.AdditionalContext == null || request.AdditionalContext.GetType() != typeof(FoundryContext))
+                ctx = FoundryContext.MakeContext(request.DelegateType, request.AdditionalContext);
+            else
+                ctx = request.AdditionalContext as FoundryContext;
+
+            foreach (var item in defaultHelpers)
             {
-                foundMethod = (MethodInfo)foundMethod.Invoke(null, new object[] { req.AdditionalContext });
-
-                return new SerializationBuildResponse()
+                using (new StatusSaver(ctx))
                 {
-                    DynMethod = foundMethod
-                };
-            }
+                    IBuilder instance = (IBuilder)Activator.CreateInstance(item, new object[] { ctx });
+                    if (instance.Method == null)
+                        continue;
 
-            return new SerializationBuildResponse()
-            {
-                Method = foundMethod
-            };
+                    return new SerializationBuildResponse()
+                    {
+                        Method = instance.Method
+                    };
+                }
+            }
+            return null;
         }
     }
 }

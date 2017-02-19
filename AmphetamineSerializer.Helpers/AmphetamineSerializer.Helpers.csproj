@@ -59,6 +59,10 @@
       <Project>{E2E1D44C-D506-4D37-AAC9-A96F65D3D348}</Project>
       <Name>AmphetamineSerializer.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\AmphetamineSerializer.Interfaces\AmphetamineSerializer.Interfaces.csproj">
+      <Project>{5EB81743-BF16-4C46-B74E-2C846281AF2B}</Project>
+      <Name>AmphetamineSerializer.Interfaces</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

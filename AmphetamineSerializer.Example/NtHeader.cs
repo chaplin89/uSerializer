@@ -4,11 +4,11 @@ namespace AmphetamineSerializer.Example
 {
     public class NtHeader
     {
-        [SIndex(0)]
+        [ASIndex(0)]
         public uint Signature;
-        [SIndex(1)]
+        [ASIndex(1)]
         public FileHeader FileHeader;
-        [SIndex(2)]
+        [ASIndex(2)]
         public OptionalHeader32 OptionalHeader;
     }
 }

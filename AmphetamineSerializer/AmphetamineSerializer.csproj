@@ -58,7 +58,6 @@
     <Compile Include="Chain\ChainManager.cs" />
     <Compile Include="Chain\CustomBuilderFinder.cs" />
     <Compile Include="Chain\CustomSerializerFinder.cs" />
-    <Compile Include="Chain\DefaultBuilder.cs" />
     <Compile Include="Chain\DefaultHandlerFinder.cs" />
     <Compile Include="FunctionProviders\DynamicFunctionProvider.cs" />
     <Compile Include="FunctionProviders\IFunctionProvider.cs" />

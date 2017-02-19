@@ -12,10 +12,10 @@ namespace AmphetamineSerializer.Example
             var sections                    = new List<ImageSectionHeader>(4);
             var importDirectory             = new ImportDirectory();
             
-            var dosHeaderSerializator       = new TWSerializator<DosHeader>();
-            var ntHeaderSerializator        = new TWSerializator<NtHeader>();
-            var sectionHeaderSerializator   = new TWSerializator<ImageSectionHeader>();
-            var importDirectorySerializator = new TWSerializator<ImportDirectory>();
+            var dosHeaderSerializator       = new Serializator<DosHeader>();
+            var ntHeaderSerializator        = new Serializator<NtHeader>();
+            var sectionHeaderSerializator   = new Serializator<ImageSectionHeader>();
+            var importDirectorySerializator = new Serializator<ImportDirectory>();
 
             using (var file = File.Open(path, FileMode.Open))
             {

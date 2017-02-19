@@ -38,14 +38,12 @@ namespace AmphetamineSerializer
                         input.Add(ctx.InputParameters[i]);
                     }
                     ctx.G = ctx.Provider.AddMethod("Handle", input.ToArray(), null);
-                    ctx.Manipulator = new ILAbstraction(ctx.G);
                 }
             }
             else
             {
-                ctx.Provider = new SigilFunctionProvider(ctx.ObjectType.Name + Guid.NewGuid());
+                ctx.Provider = new SigilFunctionProvider($"{ctx.ObjectType.Name}_{Guid.NewGuid()}");
                 ctx.G = ctx.Provider.AddMethod("Handle", ctx.InputParameters, null);
-                ctx.Manipulator = new ILAbstraction(ctx.G);
                 isToPersist = true;
             }
 
@@ -54,8 +52,7 @@ namespace AmphetamineSerializer
                 var manager = new ChainManager()
                                   .SetNext(new CustomSerializerFinder())
                                   .SetNext(new CustomBuilderFinder())
-                                  .SetNext(new DefaultHandlerFinder())
-                                  .SetNext(new DefaultBuilder());
+                                  .SetNext(new DefaultHandlerFinder());
 
                 ctx.Chain = manager;
             }
@@ -76,43 +73,21 @@ namespace AmphetamineSerializer
         /// <summary>
         /// Internally cached method.
         /// </summary>
-        MethodInfo method;
+        BuildedFunction method;
         #endregion
 
         #region Public properties
         /// <summary>
         /// Expose the builded method.
         /// </summary>
-        public MethodInfo Method
+        public BuildedFunction Method
         {
             get
             {
-                MethodInfo existentMethod = null;
-
-                ctx.AlreadyBuildedMethods.TryGetValue(ctx.ObjectType, out existentMethod);
-
-                if (existentMethod == null)
+                if (method == null)
                     method = Make();
 
-                if (existentMethod == null)
-                    ctx.AlreadyBuildedMethods.Add(ctx.ObjectType, method);
-                else
-                    ctx.AlreadyBuildedMethods[ctx.ObjectType] = method;
-
                 return method;
-            }
-        }
-
-        public FoundryContext Context
-        {
-            get
-            {
-                return ctx;
-            }
-
-            set
-            {
-                ctx = value;
             }
         }
 
@@ -124,7 +99,7 @@ namespace AmphetamineSerializer
         /// Generate the method for the current ObjectType.
         /// </summary>
         /// <returns>Builded method</returns>
-        private MethodInfo Make()
+        private BuildedFunction Make()
         {
             Type normalizedType;
             int[] versions;
@@ -146,6 +121,7 @@ namespace AmphetamineSerializer
                 ctx.G.LoadArgument(0);
                 ctx.G.StoreLocal(ctx.ObjectInstance);
             }
+
             versions = VersionHelper.GetExplicitlyManagedVersions(normalizedType).ToArray();
             Label[] labels = null;
             if (versions.Length > 1)
@@ -224,6 +200,7 @@ namespace AmphetamineSerializer
                 // 1. List (needs a special handling because of its similarities with Array)
                 // 2. Anything else implementing IList (excluing List ofc)
                 LoopContext loopCtx = null;
+                SerializationBuildResponse response = null;
 
                 ctx.CurrentItemFieldInfo = item;
                 ctx.CurrentItemType = item.FieldType;
@@ -235,26 +212,37 @@ namespace AmphetamineSerializer
                 if (ctx.CurrentItemType.IsArray)
                     loopCtx = ManageArray(ctx);
 
-                Type currentType = ctx.CurrentItemUnderlyingType;
-
-                if (ctx.CurrentItemUnderlyingType.IsEnum)
-                    currentType = currentType.GetEnumUnderlyingType();
-
-                Type requestType = currentType;
-                if (ctx.ObjectType.IsByRef)
-                    requestType = requestType.MakeByRefType();
-
                 var request = new SerializationBuildRequest()
                 {
                     AdditionalContext = ctx,
-                    DelegateType = ctx.Manipulator.MakeDelegateType(requestType, ctx.InputParameters)
+                    DelegateType = ctx.Manipulator.MakeDelegateType(ctx.NormalizedType, ctx.InputParameters)
                 };
-
-                SerializationBuildResponse response;
+                
                 using (var status = new StatusSaver(ctx))
                     response = ctx.Chain.Process(request) as SerializationBuildResponse;
 
-                HandleType(ctx, response.Method);
+                if (response == null)
+                    throw new InvalidOperationException($"Unable to find an handler for type {ctx.NormalizedType}");
+
+                // So we have correctly send a request we have its reply.
+                // Whoever handled the request had chance to:
+                // 1) Modify the context in order to produce some instruction capable of 
+                //    handling the request. We don't need to do anything else.
+                // 2) Giving back a method that we have to call.
+                //    If that is the case, we should rearrange the input and call the method.
+                if (response.Method.Status != BuildedFunctionStatus.NoMethodsAvailable)
+                {
+                    HandleType(ctx);
+
+                    bool callEmiter =
+                        response.Method.Status == BuildedFunctionStatus.FunctionFinalizedTypeNotFinalized ||
+                        response.Method.Status == BuildedFunctionStatus.FunctionNotFinalized;
+
+                    if (callEmiter)
+                        ctx.G.Call(response.Method.Emiter, null);
+                    else
+                        ctx.G.Call(response.Method.Method, null);
+                }
 
                 if (ctx.CurrentItemType.IsArray)
                     ctx.Manipulator.AddLoopEpilogue(loopCtx);
@@ -286,18 +274,11 @@ namespace AmphetamineSerializer
         #region Type management
 
         /// <summary>
-        /// Manage a non-trivial type.
-        /// A non-trivial type is a type for which a deserializing function is not know.
+        /// Manage 
         /// </summary>
         /// <param name="ctx">Context</param>
-        /// <remarks>
-        /// In order to produce istructions for deserialize a non-trivial type, 
-        /// the function will modify the context and recursively create other foundries.
-        /// </remarks>
-        private void HandleType(FoundryContext ctx, MethodInfo method)
+        private void HandleType(FoundryContext ctx)
         {
-            // We are moving in an inner level of the graph;
-            // Save the state here and restore when we are done.
             if (!ctx.CurrentItemType.IsArray)
             {
                 ctx.G.LoadLocal(ctx.ObjectInstance);                              // this --> stack
@@ -308,16 +289,15 @@ namespace AmphetamineSerializer
             }
             else
             {
-                ctx.G.LoadLocal(ctx.ObjectInstance);                                          // this       --> stack
-                ctx.G.LoadField(ctx.CurrentItemFieldInfo);                                    // field      --> stack
-                ctx.G.LoadLocal(ctx.Index);                                                   // indexLocal --> stack
-                if (ctx.ObjectType.IsByRef)
-                    ctx.G.LoadElementAddress(ctx.CurrentItemUnderlyingType);                         // stack      --> arraylocal[indexLocal]
+                ctx.G.LoadLocal(ctx.ObjectInstance);                         // this       --> stack
+                ctx.G.LoadField(ctx.CurrentItemFieldInfo);                   // field      --> stack
+                ctx.G.LoadLocal(ctx.Index);                                  // indexLocal --> stack
+                if (ctx.ObjectType.IsByRef)                                  
+                    ctx.G.LoadElementAddress(ctx.CurrentItemUnderlyingType); // stack      --> arraylocal[indexLocal]
                 else
                     ctx.G.LoadElement(ctx.CurrentItemUnderlyingType);
             }
             ctx.Manipulator.ForwardParameters(ctx.InputParameters, null, ctx.CurrentAttribute);
-            ctx.G.Call(method, null);
         }
         #endregion
     }

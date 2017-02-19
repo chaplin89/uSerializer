@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Sigil.NonGeneric;
 using Sigil;
+using System.Linq;
 
 namespace AmphetamineSerializer.Common
 {
@@ -27,7 +28,7 @@ namespace AmphetamineSerializer.Common
     /// <summary>
     /// Manage a context for a loop
     /// </summary>
-    public class LoopContext
+    public class LoopContext : IDisposable
     {
         /// <summary>
         /// Label that point to the end of the loop,
@@ -113,6 +114,11 @@ namespace AmphetamineSerializer.Common
                 Mode = ctx.ObjectType.IsByRef ? FoundryMode.ManageLifeCycle : FoundryMode.ReadOnly,
                 Chain = ctx.Chain
             };
+        }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -315,7 +321,7 @@ namespace AmphetamineSerializer.Common
             loopCtx.Body = loopCtx.G.DefineLabel();
             loopCtx.CheckOutOfBound = loopCtx.G.DefineLabel();
 
-            Type indexType = loopCtx.CurrentItemFieldInfo.GetCustomAttribute<SIndexAttribute>(false)?.SizeType;
+            Type indexType = loopCtx.CurrentItemFieldInfo.GetCustomAttribute<ASIndexAttribute>(false)?.SizeType;
             if (indexType == null)
                 indexType = typeof(uint);
 
@@ -328,14 +334,24 @@ namespace AmphetamineSerializer.Common
                     DelegateType = MakeDelegateType(requestType, loopCtx.InputParameter)
                 };
                 var response = loopCtx.Chain.Process(request) as SerializationBuildResponse;
-                loopCtx.Size = loopCtx.G.DeclareLocal(typeof(uint));
-                loopCtx.G.LoadLocal(loopCtx.ObjectInstance); // this (stfld) --> stack
-                loopCtx.G.LoadField(loopCtx.CurrentItemFieldInfo); // this.CurrentItemFieldInfo --> stack
-                loopCtx.G.LoadLength(loopCtx.CurrentItemFieldInfo.FieldType.GetElementType());
-                loopCtx.G.StoreLocal(loopCtx.Size);
-                loopCtx.G.LoadLocal(loopCtx.Size);
 
-                ForwardParameters(loopCtx.InputParameter, response.Method);
+                if (response.Method.Status != BuildedFunctionStatus.NoMethodsAvailable)
+                {
+                    loopCtx.Size = loopCtx.G.DeclareLocal(typeof(uint));
+                    loopCtx.G.LoadLocal(loopCtx.ObjectInstance); // this (stfld) --> stack
+                    loopCtx.G.LoadField(loopCtx.CurrentItemFieldInfo); // this.CurrentItemFieldInfo --> stack
+                    loopCtx.G.LoadLength(loopCtx.CurrentItemFieldInfo.FieldType.GetElementType());
+                    loopCtx.G.StoreLocal(loopCtx.Size);
+                    loopCtx.G.LoadLocal(loopCtx.Size);
+
+                    if (response.Method.Status == BuildedFunctionStatus.TypeFinalized)
+                        ForwardParameters(loopCtx.InputParameter, response.Method);
+                    else
+                    {
+                        ForwardParameters(loopCtx.InputParameter, null);
+                        loopCtx.G.Call(response.Method.Emiter);
+                    }
+                }
             }
 
             // Case #1: Noone created the Size variable; create a new one and expect to find its value
@@ -462,11 +478,11 @@ namespace AmphetamineSerializer.Common
         /// 
         /// </summary>
         /// <param name="ctx"></param>
-        public void ForwardParameters(Type[] inputParameter, MethodInfo currentMethod, SIndexAttribute attribute = null)
+        public void ForwardParameters(Type[] inputParameter, BuildedFunction currentMethod, ASIndexAttribute attribute = null)
         {
-            if (currentMethod != null)
+            if (currentMethod != null && currentMethod.Status == BuildedFunctionStatus.TypeFinalized)
             {
-                var parameters = currentMethod.GetParameters();
+                ParameterInfo[] parameters = currentMethod.Method.GetParameters();
                 bool[] foundParameter = new bool[parameters.Length - 1];
 
                 for (int i = 1; i < parameters.Length; ++i)
@@ -488,10 +504,11 @@ namespace AmphetamineSerializer.Common
                         throw new InvalidOperationException("Unable to load all the parameters for the handler.");
                     }
                 }
-                if (currentMethod.IsStatic)
-                    g.Call(currentMethod);                 // void func(ref obj,byte[], ref int)
+
+                if (currentMethod.Method.IsStatic)
+                    g.Call(currentMethod.Method);                 // void func(ref obj,byte[], ref int)
                 else
-                    g.CallVirtual(currentMethod);
+                    g.CallVirtual(currentMethod.Method);
             }
             else
             {
