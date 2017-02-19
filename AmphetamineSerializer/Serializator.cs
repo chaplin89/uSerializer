@@ -11,13 +11,13 @@ namespace AmphetamineSerializer
     /// <typeparam name="T"></typeparam>
     public class Serializator<T> : ISerializator
     {
-        delegate void DeserializeBytes(ref T obj, byte[] buffer, ref uint position);
-        delegate void SerializeBinaryWriter(T obj, BinaryWriter stream);
-        delegate void DeserializeBinaryReader(ref T obj, BinaryReader stream);
+        protected delegate void DeserializeBytes(ref T obj, byte[] buffer, ref uint position);
+        protected delegate void SerializeBinaryWriter(T obj, BinaryWriter stream);
+        protected delegate void DeserializeBinaryReader(ref T obj, BinaryReader stream);
 
-        DeserializeBytes deserializeFromBytes;
-        DeserializeBinaryReader deserializeFromStream;
-        SerializeBinaryWriter serializeFromStream;
+        protected DeserializeBytes deserializeFromBytes;
+        protected DeserializeBinaryReader deserializeFromStream;
+        protected SerializeBinaryWriter serializeFromStream;
 
         private object additionalContext;
         IChainManager chain = ChainManager.MakeDefaultChain();

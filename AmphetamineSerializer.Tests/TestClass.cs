@@ -3,6 +3,7 @@ using System;
 
 namespace AmphetamineSerializer.Tests
 {
+    [Serializable]
     public class Test
     {
         [ASIndex(0)]

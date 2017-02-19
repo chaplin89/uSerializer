@@ -31,6 +31,11 @@ namespace AmphetamineSerializer.Common
     public class LoopContext : IDisposable
     {
         /// <summary>
+        /// This is the index.
+        /// </summary>
+        public Local Index { get; set; }
+
+        /// <summary>
         /// Label that point to the end of the loop,
         /// where the out of bound condition is checked.
         /// </summary>
@@ -51,48 +56,7 @@ namespace AmphetamineSerializer.Common
         /// an array, and the loopManager won't try to set the
         /// </summary>
         public int? StoreAtPosition { get; set; }
-
-        /// <summary>
-        /// Generator.
-        /// </summary>
-        public Emit G { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public IChainManager Chain { get; set; }
-
-        /// <summary>
-        /// Index used in the loop.
-        /// </summary>
-        public Local Index { get; set; }
-
-        /// <summary>
-        /// Type of the array that will be created.
-        /// Can be CurrentItemType.GetElementType() == CurrentUnderlyingType
-        /// or not (i.e. you are using an object[] to contain float elements).
-        /// </summary>
-        public Type CurrentItemType { get; set; }
-
-        /// <summary>
-        /// Type contained in the array that will be created.
-        /// </summary>
-        public Type CurrentItemUnderlyingType { get; set; }
-
-        /// <summary>
-        /// FieldInfo for 
-        /// </summary>
-        public FieldInfo CurrentItemFieldInfo { get; set; }
-
-        /// <summary>
-        /// Instance of the object being deserialized.
-        /// </summary>
-        public Local ObjectInstance { get; set; }
-
-        /// <summary>
-        /// Types of the arguments that will be forwarded to the handlers.
-        /// </summary>
-        public Type[] InputParameter { get; set; }
+        
         public FoundryMode Mode { get; private set; }
 
         /// <summary>
@@ -104,15 +68,7 @@ namespace AmphetamineSerializer.Common
         {
             return new LoopContext()
             {
-                G = ctx.G,
-                Index = ctx.Index,
-                CurrentItemType = ctx.CurrentItemType,
-                CurrentItemUnderlyingType = ctx.CurrentItemUnderlyingType,
-                CurrentItemFieldInfo = ctx.CurrentItemFieldInfo,
-                ObjectInstance = ctx.ObjectInstance,
-                InputParameter = ctx.InputParameters,
                 Mode = ctx.ObjectType.IsByRef ? FoundryMode.ManageLifeCycle : FoundryMode.ReadOnly,
-                Chain = ctx.Chain
             };
         }
 
@@ -306,7 +262,7 @@ namespace AmphetamineSerializer.Common
         /// 2. Jump for checking if current index is out of bound
         /// 3. Mark the begin of the loop's body
         /// </summary>
-        /// <param name="loopCtx">Context of the loop</param>
+        /// <param name="ctx">Context of the loop</param>
         /// <remarks>The loop context can be provided by the caller or it can be null.
         /// If it's null, the function will generate a new loop context that you need to pass to the 
         /// <see cref="AddLoopEpilogue(LoopContext)"/> function.
@@ -314,42 +270,44 @@ namespace AmphetamineSerializer.Common
         ///     Index = 0;
         ///     (Initialize the array);
         /// </remarks>
-        public void AddLoopPreamble(ref LoopContext loopCtx)
+        public void AddLoopPreamble(ref FoundryContext ctx)
         {
-            Contract.Ensures(loopCtx != null);
+            Contract.Ensures(ctx != null);
 
-            loopCtx.Body = loopCtx.G.DefineLabel();
-            loopCtx.CheckOutOfBound = loopCtx.G.DefineLabel();
+            ctx.LoopCtx.Body = ctx.G.DefineLabel();
+            ctx.LoopCtx.CheckOutOfBound = ctx.G.DefineLabel();
 
-            Type indexType = loopCtx.CurrentItemFieldInfo.GetCustomAttribute<ASIndexAttribute>(false)?.SizeType;
+            Type indexType = ctx.CurrentItemFieldInfo.GetCustomAttribute<ASIndexAttribute>(false)?.SizeType;
             if (indexType == null)
                 indexType = typeof(uint);
 
-            if (loopCtx.Mode == FoundryMode.ReadOnly)
+            if (ctx.LoopCtx.Mode == FoundryMode.ReadOnly)
             {
                 Type requestType = indexType;
 
                 var request = new SerializationBuildRequest()
                 {
-                    DelegateType = MakeDelegateType(requestType, loopCtx.InputParameter)
+                    DelegateType = MakeDelegateType(requestType, ctx.InputParameters),
+                    AdditionalContext = ctx
                 };
-                var response = loopCtx.Chain.Process(request) as SerializationBuildResponse;
+
+                var response = ctx.Chain.Process(request) as SerializationBuildResponse;
 
                 if (response.Method.Status != BuildedFunctionStatus.NoMethodsAvailable)
                 {
-                    loopCtx.Size = loopCtx.G.DeclareLocal(typeof(uint));
-                    loopCtx.G.LoadLocal(loopCtx.ObjectInstance); // this (stfld) --> stack
-                    loopCtx.G.LoadField(loopCtx.CurrentItemFieldInfo); // this.CurrentItemFieldInfo --> stack
-                    loopCtx.G.LoadLength(loopCtx.CurrentItemFieldInfo.FieldType.GetElementType());
-                    loopCtx.G.StoreLocal(loopCtx.Size);
-                    loopCtx.G.LoadLocal(loopCtx.Size);
+                    ctx.LoopCtx.Size = ctx.G.DeclareLocal(typeof(uint));
+                    ctx.G.LoadLocal(ctx.ObjectInstance); // this (stfld) --> stack
+                    ctx.G.LoadField(ctx.CurrentItemFieldInfo); // this.CurrentItemFieldInfo --> stack
+                    ctx.G.LoadLength(ctx.CurrentItemFieldInfo.FieldType.GetElementType());
+                    ctx.G.StoreLocal(ctx.LoopCtx.Size);
+                    ctx.G.LoadLocal(ctx.LoopCtx.Size);
 
                     if (response.Method.Status == BuildedFunctionStatus.TypeFinalized)
-                        ForwardParameters(loopCtx.InputParameter, response.Method);
+                        ForwardParameters(ctx.InputParameters, response.Method);
                     else
                     {
-                        ForwardParameters(loopCtx.InputParameter, null);
-                        loopCtx.G.Call(response.Method.Emiter);
+                        ForwardParameters(ctx.InputParameters, null);
+                        ctx.G.Call(response.Method.Emiter);
                     }
                 }
             }
@@ -357,50 +315,52 @@ namespace AmphetamineSerializer.Common
             // Case #1: Noone created the Size variable; create a new one and expect to find its value
             //          in the stream.
             // Case #2: The Size variable was already initialized by someone else; Use it.
-            else if (loopCtx.Size == null)
+            else if (ctx.LoopCtx.Size == null)
             {
                 var request = new SerializationBuildRequest()
                 {
-                    DelegateType = MakeDelegateType(indexType.MakeByRefType(), loopCtx.InputParameter)
+                    DelegateType = MakeDelegateType(indexType.MakeByRefType(), ctx.InputParameters),
+                    AdditionalContext = ctx
                 };
-                var response = loopCtx.Chain.Process(request) as SerializationBuildResponse;
 
-                loopCtx.Size = loopCtx.G.DeclareLocal(indexType);
+                var response = ctx.Chain.Process(request) as SerializationBuildResponse;
+
+                ctx.LoopCtx.Size = ctx.G.DeclareLocal(indexType);
 
                 // this.DecodeUInt(ref size, buffer, ref position);
-                loopCtx.G.LoadLocalAddress(loopCtx.Size);
-                ForwardParameters(loopCtx.InputParameter, response.Method);
+                ctx.G.LoadLocalAddress(ctx.LoopCtx.Size);
+                ForwardParameters(ctx.InputParameters, response.Method);
             }
 
-            if (loopCtx.Mode == FoundryMode.ManageLifeCycle)
+            if (ctx.LoopCtx.Mode == FoundryMode.ManageLifeCycle)
             {
-                if (!loopCtx.StoreAtPosition.HasValue)
+                if (!ctx.LoopCtx.StoreAtPosition.HasValue)
                 {
                     // ObjectInstance.CurrentItemFieldInfo = new CurrentItemUnderlyingType[Size];
-                    loopCtx.G.LoadLocal(loopCtx.ObjectInstance); // this (stfld) --> stack
-                    loopCtx.G.LoadLocal(loopCtx.Size); // size --> stack
-                    loopCtx.G.NewArray(loopCtx.CurrentItemUnderlyingType); // new Array[size] --> stack
-                    loopCtx.G.StoreField(loopCtx.CurrentItemFieldInfo); // stack --> item
+                    ctx.G.LoadLocal(ctx.ObjectInstance); // this (stfld) --> stack
+                    ctx.G.LoadLocal(ctx.LoopCtx.Size); // size --> stack
+                    ctx.G.NewArray(ctx.CurrentItemUnderlyingType); // new Array[size] --> stack
+                    ctx.G.StoreField(ctx.CurrentItemFieldInfo); // stack --> item
                 }
                 else
                 {
                     // ObjectInstance.CurrentItemFieldInfo[StoreAtPosition] = new CurrentItemUnderlyingType[Size]
-                    loopCtx.G.LoadLocal(loopCtx.ObjectInstance); // this (stfld) --> stack
-                    loopCtx.G.LoadField(loopCtx.CurrentItemFieldInfo); // this.CurrentItemFieldInfo --> stack
-                    loopCtx.G.LoadConstant(loopCtx.StoreAtPosition.Value); // StoreAtPosition --> stack
-                    loopCtx.G.LoadLocal(loopCtx.Size); // size --> stack
-                    loopCtx.G.NewArray(loopCtx.CurrentItemUnderlyingType); // new Array[size] --> stack
-                    loopCtx.G.StoreElement(loopCtx.CurrentItemType);
+                    ctx.G.LoadLocal(ctx.ObjectInstance); // this (stfld) --> stack
+                    ctx.G.LoadField(ctx.CurrentItemFieldInfo); // this.CurrentItemFieldInfo --> stack
+                    ctx.G.LoadConstant(ctx.LoopCtx.StoreAtPosition.Value); // StoreAtPosition --> stack
+                    ctx.G.LoadLocal(ctx.LoopCtx.Size); // size --> stack
+                    ctx.G.NewArray(ctx.CurrentItemUnderlyingType); // new Array[size] --> stack
+                    ctx.G.StoreElement(ctx.CurrentItemType);
                 }
             }
             // int indexLocal = 0;
             // goto CheckOutOfBound;
-            loopCtx.G.LoadConstant(0); // 0 --> stack
-            loopCtx.G.StoreLocal(loopCtx.Index); // stack --> indexLocal
-            loopCtx.G.Branch(loopCtx.CheckOutOfBound); // Local variables initialized, jump
+            ctx.G.LoadConstant(0); // 0 --> stack
+            ctx.G.StoreLocal(ctx.LoopCtx.Index); // stack --> indexLocal
+            ctx.G.Branch(ctx.LoopCtx.CheckOutOfBound); // Local variables initialized, jump
 
             // Loop start
-            loopCtx.G.MarkLabel(loopCtx.Body);
+            ctx.G.MarkLabel(ctx.LoopCtx.Body);
         }
 
         /// <summary>
@@ -437,18 +397,18 @@ namespace AmphetamineSerializer.Common
         ///         (here follow the Body label)
         ///     }
         /// </remarks>
-        public void AddLoopEpilogue(LoopContext ctx)
+        public void AddLoopEpilogue(FoundryContext ctx)
         {
             Contract.Ensures(ctx != null);
-            Contract.Ensures(ctx.Index != null);
+            Contract.Ensures(ctx.LoopCtx.Index != null);
 
-            IncrementLocalVariable(ctx.Index);
+            IncrementLocalVariable(ctx.LoopCtx.Index);
 
-            ctx.G.MarkLabel(ctx.CheckOutOfBound);
-            ctx.G.LoadLocal(ctx.Index); // Index --> stack
+            ctx.G.MarkLabel(ctx.LoopCtx.CheckOutOfBound);
+            ctx.G.LoadLocal(ctx.LoopCtx.Index); // Index --> stack
 
             // If the Size is not provided, load the lenght of the array.
-            if (ctx.Size == null)
+            if (ctx.LoopCtx.Size == null)
             {
                 ctx.G.LoadLocal(ctx.ObjectInstance); // this --> stack
                 ctx.G.LoadField(ctx.CurrentItemFieldInfo); // Array --> stack
@@ -456,10 +416,10 @@ namespace AmphetamineSerializer.Common
             }
             else
             {
-                ctx.G.LoadLocal(ctx.Size);
+                ctx.G.LoadLocal(ctx.LoopCtx.Size);
             }
 
-            ctx.G.BranchIfLess(ctx.Body);
+            ctx.G.BranchIfLess(ctx.LoopCtx.Body);
         }
 
         public Type MakeDelegateType(Type objectType, Type[] inputTypes)

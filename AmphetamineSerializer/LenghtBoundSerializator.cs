@@ -12,14 +12,6 @@ namespace AmphetamineSerializer
     /// <typeparam name="T"></typeparam>
     public class LenghtBoundSerializator<T> : Serializator<T>
     {
-        delegate void DeserializeBytes(ref T obj, byte[] buffer, ref uint position);
-        delegate void SerializeBinaryWriter(ref T obj, BinaryWriter stream);
-        delegate void DeserializeBinaryReader(ref T obj, BinaryReader stream);
-
-        DeserializeBytes deserializeFromBytes;
-        DeserializeBinaryReader deserializeFromStream;
-        SerializeBinaryWriter serializeFromStream;
-
         private object additionalContext;
         IChainManager chain = ChainManager.MakeDefaultChain();
 

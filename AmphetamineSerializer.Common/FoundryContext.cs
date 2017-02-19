@@ -60,14 +60,11 @@ namespace AmphetamineSerializer.Common
         public Type CurrentItemUnderlyingType { get; set; }
 
         /// <summary>
-        /// If it's inside a loop, this is the index.
-        /// </summary>
-        public Local Index { get; set; }
-
-        /// <summary>
         /// The instance of the object in course of deserialization.
         /// </summary>
         public Local ObjectInstance { get; set; }
+
+        public LoopContext LoopCtx { get; set; }
 
         /// <summary>
         /// Type upon wich build the deserialization logic.

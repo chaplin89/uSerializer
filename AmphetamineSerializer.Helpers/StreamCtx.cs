@@ -72,7 +72,7 @@ namespace AmphetamineSerializer.Helpers
             {
                 ctx.G.LoadLocal(ctx.ObjectInstance);
                 ctx.G.LoadField(ctx.CurrentItemFieldInfo);
-                ctx.G.LoadLocal(ctx.Index);
+                ctx.G.LoadLocal(ctx.LoopCtx.Index);
                 ctx.G.LoadElement(ctx.CurrentItemUnderlyingType);
             }
             else
@@ -88,7 +88,7 @@ namespace AmphetamineSerializer.Helpers
             {
                 ctx.G.LoadLocal(ctx.ObjectInstance);
                 ctx.G.LoadField(ctx.CurrentItemFieldInfo);
-                ctx.G.LoadLocal(ctx.Index);
+                ctx.G.LoadLocal(ctx.LoopCtx.Index);
             }
             else
             {

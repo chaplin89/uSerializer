@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Sigil.NonGeneric;
 using System.Reflection;
+using System.Linq;
 
 namespace AmphetamineSerializer.Common
 {
@@ -45,14 +46,14 @@ namespace AmphetamineSerializer.Common
             return bf.Emiter;
         }
 
-        public BuildedFunction GetMethod(bool isToPersist)
+        public BuildedFunction GetMethod()
         {
             BuildedFunction bf = methods.Pop();
 
             bf.Method = bf.Emiter.CreateMethod();
             bf.Status = BuildedFunctionStatus.FunctionFinalizedTypeNotFinalized;
 
-            if (isToPersist)
+            if (methods.Count == 0)
             {
                 foreach (var item in methods)
                 {
@@ -62,7 +63,7 @@ namespace AmphetamineSerializer.Common
                 }
 
                 Type currentType = typeBuilder.CreateType();
-                bf.Method = currentType.GetMethods()[0];
+                bf.Method = currentType.GetMethod(bf.Method.Name, bf.Method.GetParameters().Select(x=>x.ParameterType).ToArray());
                 assemblyBuilder.Save(assemblyName.Name + ".dll");
 
                 foreach (var v in AlreadyBuildedMethods)
