@@ -41,7 +41,6 @@ namespace AmphetamineSerializer.Common
                 Emiter = Emit.BuildStaticMethod(returnValue, inputTypes, typeBuilder, v, MethodAttributes.Public, true, false),
                 Status = BuildedFunctionStatus.FunctionNotFinalized,
             };
-
             methods.Push(bf);
             return bf.Emiter;
         }

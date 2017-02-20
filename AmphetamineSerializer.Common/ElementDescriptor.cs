@@ -1,4 +1,5 @@
 ﻿using Sigil;
+using Sigil.NonGeneric;
 using System;
 using System.Reflection;
 
@@ -138,5 +139,11 @@ namespace AmphetamineSerializer.Common
                 return null;
             }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public Emit G { get; set; }
+        public LoopContext LoopCtx { get; set; }
     }
 }

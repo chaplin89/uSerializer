@@ -25,16 +25,24 @@ namespace AmphetamineSerializer.Common
         /// <param name="delegateType"></param>
         /// <param name="additionalContext"></param>
         /// <returns></returns>
-        public static FoundryContext MakeContext(Type delegateType, object additionalContext)
+        public static FoundryContext MakeContext(Type delegateType, 
+                                                 object additionalContext, 
+                                                 ElementDescriptor element, 
+                                                 SigilFunctionProvider provider,
+                                                 Emit g)
         {
             return new FoundryContext()
             {
                 InputParameters = delegateType.GetMethod("Invoke").GetParameters().Select(x => x.ParameterType).ToArray(),
-                AdditionalContext = additionalContext
+                AdditionalContext = additionalContext,
+                Element = element,
+                Provider = provider,
+                G = g
             };
         }
 
         public ElementDescriptor Element;
+        private Emit g;
 
         /// <summary>
         /// 
@@ -86,7 +94,7 @@ namespace AmphetamineSerializer.Common
         /// <summary>
         /// Generator.
         /// </summary>
-        public Emit G { get; set; }
+        public Emit G { get;set;}
 
         /// <summary>
         /// Types in input to the method that will be forwarded to the

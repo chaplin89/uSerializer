@@ -1,6 +1,7 @@
 ﻿using System;
 using AmphetamineSerializer.Interfaces;
 using System.Linq;
+using Sigil.NonGeneric;
 
 namespace AmphetamineSerializer.Common
 {
@@ -25,5 +26,9 @@ namespace AmphetamineSerializer.Common
         public Type[] InputTypes { get { return inputTypes; } }
         public Type OutputType { get { return outputType; } }
         public Type RootType { get { return inputTypes != null ? inputTypes.FirstOrDefault() : null; } }
+
+        public ElementDescriptor Element { get; set; }
+        public SigilFunctionProvider Provider { get; set; }
+        public Emit G { get; set; }
     }
 }

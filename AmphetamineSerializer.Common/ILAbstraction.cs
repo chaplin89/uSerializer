@@ -75,7 +75,7 @@ namespace AmphetamineSerializer.Common
             {
                 ctx.G.LoadLocal(ctx.Element.FieldElement.Instance);
                 ctx.G.LoadField(ctx.Element.FieldElement.Field);
-                ctx.G.LoadLocal(ctx.LoopCtx.Peek().Index);
+                ctx.G.LoadLocal(ctx.Element.LoopCtx.Index);
                 ctx.G.LoadElement(ctx.Element.UnderlyingType);
             }
             else
@@ -141,7 +141,7 @@ namespace AmphetamineSerializer.Common
             {
                 ctx.G.LoadLocal(ctx.Element.FieldElement.Instance);
                 ctx.G.LoadField(ctx.Element.FieldElement.Field);
-                ctx.G.LoadLocal(ctx.LoopCtx.Peek().Index);
+                ctx.G.LoadLocal(ctx.Element.LoopCtx.Index);
             }
             else
             {
@@ -255,8 +255,11 @@ namespace AmphetamineSerializer.Common
                 // Write the size of the array
                 var request = new SerializationBuildRequest()
                 {
+                    Element = ctx.Element,
                     DelegateType = MakeDelegateType(requestType, ctx.InputParameters),
-                    AdditionalContext = ctx
+                    AdditionalContext = ctx.AdditionalContext,
+                    Provider = ctx.Provider,
+                    G = ctx.G
                 };
 
                 var response = ctx.Chain.Process(request) as SerializationBuildResponse;
@@ -299,8 +302,11 @@ namespace AmphetamineSerializer.Common
 
                 var request = new SerializationBuildRequest()
                 {
+                    Element = ctx.Element,
                     DelegateType = MakeDelegateType(indexType.MakeByRefType(), ctx.InputParameters),
-                    AdditionalContext = ctx
+                    AdditionalContext = ctx.AdditionalContext,
+                    Provider = ctx.Provider,
+                    G = ctx.G
                 };
 
                 var response = ctx.Chain.Process(request) as SerializationBuildResponse;

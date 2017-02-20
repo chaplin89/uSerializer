@@ -24,27 +24,18 @@ namespace AmphetamineSerializer
         {
             this.ctx = ctx;
 
-            if (ctx.Provider != null)
+            if (ctx.Provider != null && ctx.Provider.AlreadyBuildedMethods.ContainsKey(ctx.ObjectType))
             {
-                if (ctx.Provider.AlreadyBuildedMethods.ContainsKey(ctx.ObjectType))
-                {
-                    method = ctx.Provider.AlreadyBuildedMethods[ctx.ObjectType];
-                }
-                else
-                {
-                    List<Type> input = new List<Type>() { ctx.ObjectType };
-                    for (int i = 1; i < ctx.InputParameters.Length; i++)
-                    {
-                        input.Add(ctx.InputParameters[i]);
-                    }
-                    ctx.G = ctx.Provider.AddMethod("Handle", input.ToArray(), null);
-                }
+                method = ctx.Provider.AlreadyBuildedMethods[ctx.ObjectType];
             }
             else
             {
-                ctx.Provider = new SigilFunctionProvider($"{ctx.ObjectType.Name}_{Guid.NewGuid()}");
-                ctx.G = ctx.Provider.AddMethod("Handle", ctx.InputParameters, null);
+                if (ctx.Provider == null)
+                    ctx.Provider = new SigilFunctionProvider($"{ctx.ObjectType.Name}_{Guid.NewGuid()}");
+                ctx.G = ctx.Provider.AddMethod("Handle", ctx.InputParameters, typeof(void));
             }
+
+            ctx.Element = new ElementDescriptor();
 
             if (ctx.Chain == null)
             {
@@ -138,9 +129,13 @@ namespace AmphetamineSerializer
 
                 var request = new SerializationBuildRequest()
                 {
-                    AdditionalContext = ctx,
-                    DelegateType = ctx.Manipulator.MakeDelegateType(requestType, ctx.InputParameters)
+                    Element = ctx.Element,
+                    AdditionalContext = ctx.AdditionalContext,
+                    DelegateType = ctx.Manipulator.MakeDelegateType(requestType, ctx.InputParameters),
+                    Provider = ctx.Provider,
+                    G = ctx.G
                 };
+
                 var response = ctx.Chain.Process(request) as SerializationBuildResponse;
                 var targetMethod = response.Method;
 
@@ -208,8 +203,11 @@ namespace AmphetamineSerializer
 
                 var request = new SerializationBuildRequest()
                 {
-                    AdditionalContext = ctx,
-                    DelegateType = ctx.Manipulator.MakeDelegateType(ctx.NormalizedType, ctx.InputParameters)
+                    Element = ctx.Element,
+                    AdditionalContext = ctx.AdditionalContext,
+                    DelegateType = ctx.Manipulator.MakeDelegateType(ctx.NormalizedType, ctx.InputParameters),
+                    Provider = ctx.Provider,
+                    G = ctx.G
                 };
 
                 using (var status = new StatusSaver(ctx))
@@ -258,6 +256,7 @@ namespace AmphetamineSerializer
                 ctx.G.LoadConstant(ctx.Element.CurrentAttribute.ArrayFixedSize);
                 ctx.G.StoreLocal(currentLoopContext.Size);
             }
+            ctx.Element.LoopCtx = currentLoopContext;
 
             ctx.LoopCtx.Push(currentLoopContext);
             ctx.Manipulator.AddLoopPreamble(ctx);

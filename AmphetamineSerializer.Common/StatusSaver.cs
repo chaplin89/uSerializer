@@ -11,6 +11,7 @@ namespace AmphetamineSerializer.Common
     {
         private Dictionary<PropertyInfo, object> states = new Dictionary<PropertyInfo, object>();
         private object instance;
+        private Dictionary<FieldInfo, object> fieldsState = new Dictionary<FieldInfo, object>();
 
         /// <summary>
         /// Save the state of the object (i.e. all the public fields).
@@ -29,6 +30,14 @@ namespace AmphetamineSerializer.Common
                 if (item.SetMethod != null && item.GetMethod != null)
                     states.Add(item, item.GetMethod.Invoke(instance, null));
             }
+
+            var fields = instance.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
+
+            foreach (var item in fields)
+            {
+                fieldsState.Add(item, item.GetValue(instance));
+            }
+
         }
 
         /// <summary>
@@ -41,6 +50,9 @@ namespace AmphetamineSerializer.Common
             
             foreach (var item in states)
                 item.Key.SetMethod.Invoke(instance, new object[] { item.Value });
+
+            foreach (var item in fieldsState)
+                item.Key.SetValue(instance, item.Value);
         }
     }
 }
