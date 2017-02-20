@@ -42,6 +42,7 @@ namespace AmphetamineSerializer.Helpers
             {typeof(float).MakeByRefType(),  typeof(BinaryReader).GetMethod("ReadSingle")},
             {typeof(byte[]).MakeByRefType(),  typeof(BinaryReader).GetMethod("ReadBytes")}
         };
+        private BuildedFunction function;
 
         public StreamDeserializationCtx(FoundryContext ctx)
         {
@@ -52,17 +53,21 @@ namespace AmphetamineSerializer.Helpers
         {
             get
             {
-                if (ctx.CurrentItemUnderlyingType == null)
+                if (function != null)
+                    return function;
+
+                if (ctx.Element.CurrentItemUnderlyingType == null)
                     return null;
 
-                if (ctx.CurrentItemUnderlyingType == typeof(string))
+                if (ctx.Element.CurrentItemUnderlyingType == typeof(string))
                     HandleString(ctx);
-                else if (typeHandlerMap.ContainsKey(ctx.CurrentItemUnderlyingType))
+                else if (typeHandlerMap.ContainsKey(ctx.Element.CurrentItemUnderlyingType))
                     HandlePrimitive(ctx);
                 else
                     return null;
 
-                return new BuildedFunction() { Status = BuildedFunctionStatus.NoMethodsAvailable };
+                function = new BuildedFunction() { Status = BuildedFunctionStatus.NoMethodsAvailable };
+                return function;
             }
         }
 

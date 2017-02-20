@@ -43,17 +43,17 @@ namespace AmphetamineSerializer.Common
 
         public void Load(FoundryContext ctx)
         {
-            if (ctx.CurrentItemType.IsArray)
+            if (ctx.Element.CurrentItemType.IsArray)
             {
                 ctx.G.LoadLocal(ctx.ObjectInstance);
-                ctx.G.LoadField(ctx.CurrentItemFieldInfo);
+                ctx.G.LoadField(ctx.Element.CurrentItemFieldInfo);
                 ctx.G.LoadLocal(ctx.LoopCtx.Peek().Index);
-                ctx.G.LoadElement(ctx.CurrentItemUnderlyingType);
+                ctx.G.LoadElement(ctx.Element.CurrentItemUnderlyingType);
             }
             else
             {
                 ctx.G.LoadLocal(ctx.ObjectInstance);
-                ctx.G.LoadField(ctx.CurrentItemFieldInfo);
+                ctx.G.LoadField(ctx.Element.CurrentItemFieldInfo);
             }
         }
 
@@ -64,10 +64,10 @@ namespace AmphetamineSerializer.Common
         /// <param name="loadValueToStore"></param>
         public void Store(FoundryContext ctx, Action<FoundryContext> loadValueToStore)
         {
-            if (ctx.CurrentItemType.IsArray)
+            if (ctx.Element.CurrentItemType.IsArray)
             {
                 ctx.G.LoadLocal(ctx.ObjectInstance);
-                ctx.G.LoadField(ctx.CurrentItemFieldInfo);
+                ctx.G.LoadField(ctx.Element.CurrentItemFieldInfo);
                 ctx.G.LoadLocal(ctx.LoopCtx.Peek().Index);
             }
             else
@@ -77,10 +77,10 @@ namespace AmphetamineSerializer.Common
 
             loadValueToStore(ctx);
 
-            if (ctx.CurrentItemType.IsArray)
-                ctx.G.StoreElement(ctx.CurrentItemUnderlyingType);
+            if (ctx.Element.CurrentItemType.IsArray)
+                ctx.G.StoreElement(ctx.Element.CurrentItemUnderlyingType);
             else
-                ctx.G.StoreField(ctx.CurrentItemFieldInfo);
+                ctx.G.StoreField(ctx.Element.CurrentItemFieldInfo);
         }
 
         /// <summary>
@@ -140,9 +140,7 @@ namespace AmphetamineSerializer.Common
         /// 3. Mark the begin of the loop's body
         /// </summary>
         /// <param name="ctx">Context of the loop</param>
-        /// <remarks>The loop context can be provided by the caller or it can be null.
-        /// If it's null, the function will generate a new loop context that you need to pass to the 
-        /// <see cref="AddLoopEpilogue(LoopContext)"/> function.
+        /// <remarks>
         /// C# Translation:
         ///     Index = 0;
         ///     (Initialize the array);
@@ -155,7 +153,7 @@ namespace AmphetamineSerializer.Common
             currentLoopContext.Body = ctx.G.DefineLabel();
             currentLoopContext.CheckOutOfBound = ctx.G.DefineLabel();
 
-            Type indexType = ctx.CurrentItemFieldInfo.GetCustomAttribute<ASIndexAttribute>(false)?.SizeType;
+            Type indexType = ctx.Element.CurrentAttribute?.SizeType;
             if (indexType == null)
                 indexType = typeof(uint);
 
@@ -163,6 +161,7 @@ namespace AmphetamineSerializer.Common
             {
                 Type requestType = indexType;
 
+                // Write the size of the array
                 var request = new SerializationBuildRequest()
                 {
                     DelegateType = MakeDelegateType(requestType, ctx.InputParameters),
@@ -175,8 +174,8 @@ namespace AmphetamineSerializer.Common
                 {
                     currentLoopContext.Size = ctx.G.DeclareLocal(typeof(uint));
                     ctx.G.LoadLocal(ctx.ObjectInstance); // this (stfld) --> stack
-                    ctx.G.LoadField(ctx.CurrentItemFieldInfo); // this.CurrentItemFieldInfo --> stack
-                    ctx.G.LoadLength(ctx.CurrentItemFieldInfo.FieldType.GetElementType());
+                    ctx.G.LoadField(ctx.Element.CurrentItemFieldInfo); // this.CurrentItemFieldInfo --> stack
+                    ctx.G.LoadLength(ctx.Element.CurrentItemFieldInfo.FieldType.GetElementType());
                     ctx.G.StoreLocal(currentLoopContext.Size);
                     ctx.G.LoadLocal(currentLoopContext.Size);
 
@@ -217,18 +216,18 @@ namespace AmphetamineSerializer.Common
                     // ObjectInstance.CurrentItemFieldInfo = new CurrentItemUnderlyingType[Size];
                     ctx.G.LoadLocal(ctx.ObjectInstance); // this (stfld) --> stack
                     ctx.G.LoadLocal(currentLoopContext.Size); // size --> stack
-                    ctx.G.NewArray(ctx.CurrentItemUnderlyingType); // new Array[size] --> stack
-                    ctx.G.StoreField(ctx.CurrentItemFieldInfo); // stack --> item
+                    ctx.G.NewArray(ctx.Element.CurrentItemUnderlyingType); // new Array[size] --> stack
+                    ctx.G.StoreField(ctx.Element.CurrentItemFieldInfo); // stack --> item
                 }
                 else
                 {
                     // ObjectInstance.CurrentItemFieldInfo[StoreAtPosition] = new CurrentItemUnderlyingType[Size]
                     ctx.G.LoadLocal(ctx.ObjectInstance); // this (stfld) --> stack
-                    ctx.G.LoadField(ctx.CurrentItemFieldInfo); // this.CurrentItemFieldInfo --> stack
+                    ctx.G.LoadField(ctx.Element.CurrentItemFieldInfo); // this.CurrentItemFieldInfo --> stack
                     ctx.G.LoadConstant(currentLoopContext.StoreAtPosition.Value); // StoreAtPosition --> stack
                     ctx.G.LoadLocal(currentLoopContext.Size); // size --> stack
-                    ctx.G.NewArray(ctx.CurrentItemUnderlyingType); // new Array[size] --> stack
-                    ctx.G.StoreElement(ctx.CurrentItemType);
+                    ctx.G.NewArray(ctx.Element.CurrentItemUnderlyingType); // new Array[size] --> stack
+                    ctx.G.StoreElement(ctx.Element.CurrentItemType);
                 }
             }
             // int indexLocal = 0;
@@ -270,8 +269,8 @@ namespace AmphetamineSerializer.Common
             if (currentLoopContext.Size == null)
             {
                 ctx.G.LoadLocal(ctx.ObjectInstance); // this --> stack
-                ctx.G.LoadField(ctx.CurrentItemFieldInfo); // Array --> stack
-                ctx.G.LoadLength<int>(); // Array.Lenght --> stack
+                ctx.G.LoadField(ctx.Element.CurrentItemFieldInfo); // Array --> stack
+                ctx.G.LoadLength(ctx.Element.CurrentItemUnderlyingType); // Array.Lenght --> stack
             }
             else
             {

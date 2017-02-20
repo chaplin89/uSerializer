@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Sigil.NonGeneric;
 using Sigil;
 using System.Diagnostics;
@@ -17,6 +16,7 @@ namespace AmphetamineSerializer.Common
 
         private FoundryContext()
         {
+            LoopCtx = new Stack<LoopContext>();
         }
 
         /// <summary>
@@ -34,24 +34,7 @@ namespace AmphetamineSerializer.Common
             };
         }
 
-        /// <summary>
-        /// The <see cref="FieldInfo"/> structure for the current item.
-        /// </summary>
-        /// <seealso cref="CurrentItemType"/>
-        public FieldInfo CurrentItemFieldInfo { get; set; }
-
-        /// <summary>
-        /// When building the deserializing logic for a type, 
-        /// this field contains the type for the currently processed
-        /// field.
-        /// </summary>
-        public Type CurrentItemType { get; set; }
-
-        /// <summary>
-        /// If it's an array or an enum, this field contains the type
-        /// contained inside.
-        /// </summary>
-        public Type CurrentItemUnderlyingType { get; set; }
+        public ElementDescriptor Element;
 
         /// <summary>
         /// The instance of the object in course of deserialization.
@@ -122,19 +105,6 @@ namespace AmphetamineSerializer.Common
         public IChainManager Chain { get; set; }
 
         /// <summary>
-        /// Return the index type for current field.
-        /// </summary>
-        public ASIndexAttribute CurrentAttribute
-        {
-            get
-            {
-                if (CurrentItemFieldInfo != null)
-                    return CurrentItemFieldInfo.GetCustomAttribute<ASIndexAttribute>();
-                return null;
-            }
-        }
-
-        /// <summary>
         /// Indicate wether the builder is managing the life-cycle of the elements.
         /// For the moment, this means:
         /// 1) true if the input is passed ByRef
@@ -160,9 +130,9 @@ namespace AmphetamineSerializer.Common
         public Type NormalizedType {
             get
             {
-                Type normalizedType = CurrentItemUnderlyingType;
+                Type normalizedType = Element.CurrentItemUnderlyingType;
 
-                if (CurrentItemUnderlyingType.IsEnum)
+                if (Element.CurrentItemUnderlyingType.IsEnum)
                     normalizedType = normalizedType.GetEnumUnderlyingType();
                 if (ManageLifeCycle)
                     normalizedType = normalizedType.MakeByRefType();

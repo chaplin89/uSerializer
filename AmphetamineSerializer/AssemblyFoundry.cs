@@ -146,14 +146,14 @@ namespace AmphetamineSerializer
                 {
                     Local local = ctx.G.DeclareLocal(field.FieldType);
                     ctx.G.LoadLocalAddress(local);
-                    ctx.Manipulator.ForwardParameters(ctx.InputParameters, targetMethod, ctx.CurrentAttribute);
+                    ctx.Manipulator.ForwardParameters(ctx.InputParameters, targetMethod, ctx.Element.CurrentAttribute);
                     ctx.G.LoadLocal(local);
                     ctx.Manipulator.EmitStoreObject(ctx.ObjectInstance, field, local);
                 }
                 else
                 {
                     ctx.Manipulator.EmitAccessObject(ctx.ObjectInstance, field);
-                    ctx.Manipulator.ForwardParameters(ctx.InputParameters, targetMethod, ctx.CurrentAttribute);
+                    ctx.Manipulator.ForwardParameters(ctx.InputParameters, targetMethod, ctx.Element.CurrentAttribute);
                     ctx.Manipulator.EmitAccessObject(ctx.ObjectInstance, field);
                 }
 
@@ -194,14 +194,14 @@ namespace AmphetamineSerializer
                 // 2. Anything else implementing IList (excluing List ofc)
                 SerializationBuildResponse response = null;
 
-                ctx.CurrentItemFieldInfo = item;
-                ctx.CurrentItemType = item.FieldType;
-                ctx.CurrentItemUnderlyingType = item.FieldType;
+                ctx.Element.CurrentItemFieldInfo = item;
+                ctx.Element.CurrentItemType = item.FieldType;
+                ctx.Element.CurrentItemUnderlyingType = item.FieldType;
 
-                if (ctx.CurrentItemUnderlyingType.IsInterface || ctx.CurrentItemUnderlyingType.IsAbstract)
+                if (ctx.Element.CurrentItemUnderlyingType.IsInterface || ctx.Element.CurrentItemUnderlyingType.IsAbstract)
                     throw new InvalidOperationException("Incomplete types are not allowed.");
 
-                if (ctx.CurrentItemType.IsArray)
+                if (ctx.Element.CurrentItemType.IsArray)
                     ManageArray(ctx);
 
                 var request = new SerializationBuildRequest()
@@ -236,30 +236,28 @@ namespace AmphetamineSerializer
                         ctx.G.Call(response.Method.Method, null);
                 }
 
-                if (ctx.CurrentItemType.IsArray)
+                if (ctx.Element.CurrentItemType.IsArray)
                     ctx.Manipulator.AddLoopEpilogue(ctx);
             }
         }
 
         private void ManageArray(FoundryContext ctx)
         {
-            ctx.CurrentItemUnderlyingType = ctx.CurrentItemFieldInfo.FieldType.GetElementType();
+            ctx.Element.CurrentItemUnderlyingType = ctx.Element.CurrentItemFieldInfo.FieldType.GetElementType();
 
             var currentLoopContext = new LoopContext()
             {
                 Index = ctx.G.DeclareLocal(typeof(int))
             };
 
-            ctx.LoopCtx.Push(currentLoopContext);
-
-
-            if (ctx.ObjectType.IsByRef && ctx.CurrentAttribute.ArrayFixedSize != -1)
+            if (ctx.ObjectType.IsByRef && ctx.Element.CurrentAttribute.ArrayFixedSize != -1)
             {
                 currentLoopContext.Size = ctx.G.DeclareLocal(typeof(int));
-                ctx.G.LoadConstant(ctx.CurrentAttribute.ArrayFixedSize);
+                ctx.G.LoadConstant(ctx.Element.CurrentAttribute.ArrayFixedSize);
                 ctx.G.StoreLocal(currentLoopContext.Size);
             }
 
+            ctx.LoopCtx.Push(currentLoopContext);
             ctx.Manipulator.AddLoopPreamble(ctx);
         }
         #endregion
@@ -272,26 +270,26 @@ namespace AmphetamineSerializer
         /// <param name="ctx">Context</param>
         private void HandleType(FoundryContext ctx)
         {
-            if (!ctx.CurrentItemType.IsArray)
+            if (!ctx.Element.CurrentItemType.IsArray)
             {
-                ctx.G.LoadLocal(ctx.ObjectInstance);                              // this --> stack
+                ctx.G.LoadLocal(ctx.ObjectInstance); // this --> stack
                 if (ctx.ObjectType.IsByRef)
-                    ctx.G.LoadFieldAddress(ctx.CurrentItemFieldInfo);
+                    ctx.G.LoadFieldAddress(ctx.Element.CurrentItemFieldInfo);
                 else
-                    ctx.G.LoadField(ctx.CurrentItemFieldInfo);
+                    ctx.G.LoadField(ctx.Element.CurrentItemFieldInfo);
             }
             else
             {
-                ctx.G.LoadLocal(ctx.ObjectInstance);                         // this       --> stack
-                ctx.G.LoadField(ctx.CurrentItemFieldInfo);                   // field      --> stack
-                ctx.G.LoadLocal(ctx.LoopCtx.Peek().Index);                                  // indexLocal --> stack
+                ctx.G.LoadLocal(ctx.ObjectInstance);// this --> stack
+                ctx.G.LoadField(ctx.Element.CurrentItemFieldInfo); // field --> stack
+                ctx.G.LoadLocal(ctx.LoopCtx.Peek().Index); // indexLocal --> stack
                 if (ctx.ObjectType.IsByRef)
-                    ctx.G.LoadElementAddress(ctx.CurrentItemUnderlyingType); // stack      --> arraylocal[indexLocal]
+                    ctx.G.LoadElementAddress(ctx.Element.CurrentItemUnderlyingType); // stack --> arraylocal[indexLocal]
                 else
-                    ctx.G.LoadElement(ctx.CurrentItemUnderlyingType);
+                    ctx.G.LoadElement(ctx.Element.CurrentItemUnderlyingType);
             }
 
-            ctx.Manipulator.ForwardParameters(ctx.InputParameters, null, ctx.CurrentAttribute);
+            ctx.Manipulator.ForwardParameters(ctx.InputParameters, null, ctx.Element.CurrentAttribute);
         }
         #endregion
     }

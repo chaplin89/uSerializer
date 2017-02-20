@@ -20,7 +20,7 @@ namespace AmphetamineSerializer.Tests
         public byte Field5;
         [ASIndex(6)]
         public string Field6;
-        //[ASIndex(7)]
-        //public string[] Field7;
+        [ASIndex(7)]
+        public string[] Field7;
     }
 }
