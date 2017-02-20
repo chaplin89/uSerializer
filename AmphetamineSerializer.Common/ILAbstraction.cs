@@ -287,6 +287,16 @@ namespace AmphetamineSerializer.Common
             // Case #2: The Size variable was already initialized by someone else; Use it.
             else if (currentLoopContext.Size == null)
             {
+                var currentElement = ctx.Element;
+                currentLoopContext.Size = ctx.G.DeclareLocal(indexType);
+
+                ctx.Element = new ElementDescriptor()
+                {
+                    LocalVariable = currentLoopContext.Size,
+                    ItemType = indexType,
+                    UnderlyingType = indexType
+                };
+
                 var request = new SerializationBuildRequest()
                 {
                     DelegateType = MakeDelegateType(indexType.MakeByRefType(), ctx.InputParameters),
@@ -294,12 +304,14 @@ namespace AmphetamineSerializer.Common
                 };
 
                 var response = ctx.Chain.Process(request) as SerializationBuildResponse;
+                ctx.Element = currentElement;
 
-                currentLoopContext.Size = ctx.G.DeclareLocal(indexType);
-
-                // this.DecodeUInt(ref size, buffer, ref position);
-                ctx.G.LoadLocalAddress(currentLoopContext.Size);
-                ForwardParameters(ctx.InputParameters, response.Method);
+                if (response.Method.Status != BuildedFunctionStatus.NoMethodsAvailable)
+                {
+                    // this.DecodeUInt(ref size, buffer, ref position);
+                    ctx.G.LoadLocalAddress(currentLoopContext.Size);
+                    ForwardParameters(ctx.InputParameters, response.Method);
+                }
             }
 
             if (ctx.ManageLifeCycle)

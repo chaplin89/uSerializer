@@ -31,8 +31,8 @@ namespace AmphetamineSerializer.SystemTests
             Serializator<Test> serializator = new Serializator<Test>();
             var currentInstance = (Test)ScenarioContext.Current[instanceName];
 
-            using (FileStream file = File.OpenWrite(path))
-                serializator.Serialize(currentInstance, new BinaryWriter(file));
+           // using (FileStream file = File.OpenWrite(path))
+           //     serializator.Serialize(currentInstance, new BinaryWriter(file));
         }
 
         [When(@"I deserialize the instance (.*) of type (.*) from (.*)")]
