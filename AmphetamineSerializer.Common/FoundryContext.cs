@@ -8,12 +8,6 @@ using System.Diagnostics;
 
 namespace AmphetamineSerializer.Common
 {
-    public enum FoundryMode
-    {
-        ManageLifeCycle,
-        ReadOnly
-    }
-
     /// <summary>
     /// Context of the assembly building process.
     /// </summary>
@@ -64,7 +58,10 @@ namespace AmphetamineSerializer.Common
         /// </summary>
         public Local ObjectInstance { get; set; }
 
-        public LoopContext LoopCtx { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public Stack<LoopContext> LoopCtx { get; set; }
 
         /// <summary>
         /// Type upon wich build the deserialization logic.

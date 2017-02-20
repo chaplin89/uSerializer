@@ -55,6 +55,7 @@
     <Compile Include="FuzzyFunctionResolver.cs" />
     <Compile Include="Attribute\IndexAttribute.cs" />
     <Compile Include="ILAbstraction.cs" />
+    <Compile Include="LoopContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Attribute\SerializationAttribute.cs" />
     <Compile Include="Options.cs" />

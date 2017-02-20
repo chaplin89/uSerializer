@@ -245,20 +245,22 @@ namespace AmphetamineSerializer
         {
             ctx.CurrentItemUnderlyingType = ctx.CurrentItemFieldInfo.FieldType.GetElementType();
 
-            ctx.LoopCtx = new LoopContext()
+            var currentLoopContext = new LoopContext()
             {
                 Index = ctx.G.DeclareLocal(typeof(int))
             };
 
+            ctx.LoopCtx.Push(currentLoopContext);
+
 
             if (ctx.ObjectType.IsByRef && ctx.CurrentAttribute.ArrayFixedSize != -1)
             {
-                ctx.LoopCtx.Size = ctx.G.DeclareLocal(typeof(int));
+                currentLoopContext.Size = ctx.G.DeclareLocal(typeof(int));
                 ctx.G.LoadConstant(ctx.CurrentAttribute.ArrayFixedSize);
-                ctx.G.StoreLocal(ctx.LoopCtx.Size);
+                ctx.G.StoreLocal(currentLoopContext.Size);
             }
 
-            ctx.Manipulator.AddLoopPreamble(ref ctx);
+            ctx.Manipulator.AddLoopPreamble(ctx);
         }
         #endregion
 
@@ -282,12 +284,13 @@ namespace AmphetamineSerializer
             {
                 ctx.G.LoadLocal(ctx.ObjectInstance);                         // this       --> stack
                 ctx.G.LoadField(ctx.CurrentItemFieldInfo);                   // field      --> stack
-                ctx.G.LoadLocal(ctx.LoopCtx.Index);                                  // indexLocal --> stack
+                ctx.G.LoadLocal(ctx.LoopCtx.Peek().Index);                                  // indexLocal --> stack
                 if (ctx.ObjectType.IsByRef)
                     ctx.G.LoadElementAddress(ctx.CurrentItemUnderlyingType); // stack      --> arraylocal[indexLocal]
                 else
                     ctx.G.LoadElement(ctx.CurrentItemUnderlyingType);
             }
+
             ctx.Manipulator.ForwardParameters(ctx.InputParameters, null, ctx.CurrentAttribute);
         }
         #endregion

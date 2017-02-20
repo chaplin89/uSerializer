@@ -66,44 +66,6 @@ namespace AmphetamineSerializer.Helpers
             }
         }
 
-        private void Load()
-        {
-            if (ctx.CurrentItemType.IsArray)
-            {
-                ctx.G.LoadLocal(ctx.ObjectInstance);
-                ctx.G.LoadField(ctx.CurrentItemFieldInfo);
-                ctx.G.LoadLocal(ctx.LoopCtx.Index);
-                ctx.G.LoadElement(ctx.CurrentItemUnderlyingType);
-            }
-            else
-            {
-                ctx.G.LoadLocal(ctx.ObjectInstance);
-                ctx.G.LoadField(ctx.CurrentItemFieldInfo);
-            }
-        }
-
-        void BeginStore()
-        {
-            if (ctx.CurrentItemType.IsArray)
-            {
-                ctx.G.LoadLocal(ctx.ObjectInstance);
-                ctx.G.LoadField(ctx.CurrentItemFieldInfo);
-                ctx.G.LoadLocal(ctx.LoopCtx.Index);
-            }
-            else
-            {
-                ctx.G.LoadLocal(ctx.ObjectInstance);
-            }
-        }
-
-        void EndStore()
-        {
-            if (ctx.CurrentItemType.IsArray)
-                ctx.G.StoreElement(ctx.CurrentItemUnderlyingType);
-            else
-                ctx.G.StoreField(ctx.CurrentItemFieldInfo);
-        }
-
         [SerializationHandler(typeof(string))]
         public void HandleString(FoundryContext ctx)
         {
@@ -117,25 +79,17 @@ namespace AmphetamineSerializer.Helpers
         {
             // Rough C# translation:
             // Encoding.ASCII.GetString(reader.ReadBytes(reader.ReadInt32()));
-
-            // Encoding.ASCII instance (Encoder#1)
-            // BinaryReader (Reader#1)
-            // Duplicate (Reader#2)
-            // ReadInt(Reader#2) -> Size in stack
-            // ReadBytes(Reader#1, Size) -> bytes in stack
-            // Encoding.ASCII.GetString(Encoder#1, bytes)
-
-            // Put the decoded string in the stack.
-            BeginStore();
+            
+            ctx.Manipulator.Store(ctx, (context) =>
             {
-                ctx.G.Call(typeof(Encoding).GetProperty("ASCII").GetMethod);
-                ctx.G.LoadArgument(1);
-                ctx.G.LoadArgument(1);
-                ctx.G.CallVirtual(typeHandlerMap[typeof(int).MakeByRefType()]);
-                ctx.G.CallVirtual(typeHandlerMap[typeof(byte[]).MakeByRefType()]);
-                ctx.G.CallVirtual(typeof(Encoding).GetMethod("GetString", new Type[] { typeof(byte[]) }));
-            }
-            EndStore();
+                // Put the decoded string in the stack.
+                context.G.Call(typeof(Encoding).GetProperty("ASCII").GetMethod);
+                context.G.LoadArgument(1);
+                context.G.LoadArgument(1);
+                context.G.CallVirtual(typeHandlerMap[typeof(int).MakeByRefType()]);
+                context.G.CallVirtual(typeHandlerMap[typeof(byte[]).MakeByRefType()]);
+                context.G.CallVirtual(typeof(Encoding).GetMethod("GetString", new Type[] { typeof(byte[]) }));
+            });
         }
 
         public BuildedFunction EncodeString(FoundryContext ctx)
@@ -147,7 +101,7 @@ namespace AmphetamineSerializer.Helpers
             {
                 ctx.G.LoadArgument(1);
                 ctx.G.Call(typeof(Encoding).GetProperty("ASCII").GetMethod);
-                Load();
+                ctx.Manipulator.Load(ctx);
                 ctx.G.CallVirtual(typeof(Encoding).GetMethod("GetByteCount", new Type[] { typeof(string) }));
                 ctx.G.CallVirtual(typeHandlerMap[typeof(int)]);
             }
@@ -155,7 +109,7 @@ namespace AmphetamineSerializer.Helpers
             {
                 ctx.G.LoadArgument(1);
                 ctx.G.Call(typeof(Encoding).GetProperty("ASCII").GetMethod);
-                Load();
+                ctx.Manipulator.Load(ctx);
                 ctx.G.CallVirtual(typeof(Encoding).GetMethod("GetBytes", new Type[] { typeof(string) }));
                 ctx.G.CallVirtual(typeHandlerMap[typeof(byte[])]);
             }
@@ -174,17 +128,19 @@ namespace AmphetamineSerializer.Helpers
         public void HandlePrimitive(FoundryContext ctx)
         {
             if (ctx.ManageLifeCycle)
-                BeginStore();
-
-            ctx.G.LoadArgument(1); // argument i --> stack
-
-            if (!ctx.ManageLifeCycle)
-                Load();
-
-            ctx.G.CallVirtual(typeHandlerMap[ctx.NormalizedType]);
-
-            if (ctx.ManageLifeCycle)
-                EndStore();
+            {
+                ctx.Manipulator.Store(ctx, (context) =>
+                {
+                    context.G.LoadArgument(1); // argument i --> stack                
+                    ctx.G.CallVirtual(typeHandlerMap[ctx.NormalizedType]);
+                });
+            }
+            else
+            {
+                ctx.G.LoadArgument(1); // argument i --> stack
+                ctx.Manipulator.Load(ctx);
+                ctx.G.CallVirtual(typeHandlerMap[ctx.NormalizedType]);
+            }
         }
     }
 }
