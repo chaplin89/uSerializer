@@ -38,7 +38,7 @@ namespace AmphetamineSerializer.Common
 
             BuildedFunction bf = new BuildedFunction()
             {
-                Emiter = Emit.BuildStaticMethod(returnValue, inputTypes, typeBuilder, v, MethodAttributes.Public, true),
+                Emiter = Emit.BuildStaticMethod(returnValue, inputTypes, typeBuilder, v, MethodAttributes.Public, true, false),
                 Status = BuildedFunctionStatus.FunctionNotFinalized,
             };
 

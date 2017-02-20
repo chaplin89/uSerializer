@@ -37,11 +37,6 @@ namespace AmphetamineSerializer.Common
         public ElementDescriptor Element;
 
         /// <summary>
-        /// The instance of the object in course of deserialization.
-        /// </summary>
-        public Local ObjectInstance { get; set; }
-
-        /// <summary>
         /// 
         /// </summary>
         public Stack<LoopContext> LoopCtx { get; set; }
@@ -130,9 +125,9 @@ namespace AmphetamineSerializer.Common
         public Type NormalizedType {
             get
             {
-                Type normalizedType = Element.CurrentItemUnderlyingType;
+                Type normalizedType = Element.UnderlyingType;
 
-                if (Element.CurrentItemUnderlyingType.IsEnum)
+                if (Element.UnderlyingType.IsEnum)
                     normalizedType = normalizedType.GetEnumUnderlyingType();
                 if (ManageLifeCycle)
                     normalizedType = normalizedType.MakeByRefType();

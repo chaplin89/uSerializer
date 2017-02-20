@@ -56,12 +56,12 @@ namespace AmphetamineSerializer.Helpers
                 if (function != null)
                     return function;
 
-                if (ctx.Element.CurrentItemUnderlyingType == null)
+                if (ctx.Element.UnderlyingType == null)
                     return null;
 
-                if (ctx.Element.CurrentItemUnderlyingType == typeof(string))
+                if (ctx.Element.UnderlyingType == typeof(string))
                     HandleString(ctx);
-                else if (typeHandlerMap.ContainsKey(ctx.Element.CurrentItemUnderlyingType))
+                else if (typeHandlerMap.ContainsKey(ctx.Element.UnderlyingType))
                     HandlePrimitive(ctx);
                 else
                     return null;

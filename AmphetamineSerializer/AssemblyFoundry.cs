@@ -98,23 +98,25 @@ namespace AmphetamineSerializer
         {
             Type normalizedType;
             int[] versions;
+            ctx.Element.FieldElement = new FieldElementInfo();
+
             if (ctx.ManageLifeCycle)
             {
                 normalizedType = ctx.ObjectType.GetElementType();
                 ctx.G.LoadArgument(0);
                 var ctor = normalizedType.GetConstructor(new Type[] { });
-                ctx.ObjectInstance = ctx.G.DeclareLocal(normalizedType);
+                ctx.Element.FieldElement.Instance = ctx.G.DeclareLocal(normalizedType);
                 ctx.G.NewObject(ctx.ObjectType.GetElementType());
-                ctx.G.StoreLocal(ctx.ObjectInstance);
-                ctx.G.LoadLocal(ctx.ObjectInstance);
+                ctx.G.StoreLocal(ctx.Element.FieldElement.Instance);
+                ctx.G.LoadLocal(ctx.Element.FieldElement.Instance);
                 ctx.G.StoreIndirect(normalizedType);
             }
             else
             {
                 normalizedType = ctx.ObjectType;
-                ctx.ObjectInstance = ctx.G.DeclareLocal(ctx.ObjectType);
+                ctx.Element.FieldElement.Instance = ctx.G.DeclareLocal(ctx.ObjectType);
                 ctx.G.LoadArgument(0);
-                ctx.G.StoreLocal(ctx.ObjectInstance);
+                ctx.G.StoreLocal(ctx.Element.FieldElement.Instance);
             }
 
             versions = VersionHelper.GetExplicitlyManagedVersions(normalizedType).ToArray();
@@ -148,13 +150,13 @@ namespace AmphetamineSerializer
                     ctx.G.LoadLocalAddress(local);
                     ctx.Manipulator.ForwardParameters(ctx.InputParameters, targetMethod, ctx.Element.CurrentAttribute);
                     ctx.G.LoadLocal(local);
-                    ctx.Manipulator.EmitStoreObject(ctx.ObjectInstance, field, local);
+                    ctx.Manipulator.EmitStoreObject(ctx.Element.FieldElement.Instance, field, local);
                 }
                 else
                 {
-                    ctx.Manipulator.EmitAccessObject(ctx.ObjectInstance, field);
+                    ctx.Manipulator.EmitAccessObject(ctx.Element.FieldElement.Instance, field);
                     ctx.Manipulator.ForwardParameters(ctx.InputParameters, targetMethod, ctx.Element.CurrentAttribute);
-                    ctx.Manipulator.EmitAccessObject(ctx.ObjectInstance, field);
+                    ctx.Manipulator.EmitAccessObject(ctx.Element.FieldElement.Instance, field);
                 }
 
                 // Deserialize versions
@@ -194,14 +196,14 @@ namespace AmphetamineSerializer
                 // 2. Anything else implementing IList (excluing List ofc)
                 SerializationBuildResponse response = null;
 
-                ctx.Element.CurrentItemFieldInfo = item;
-                ctx.Element.CurrentItemType = item.FieldType;
-                ctx.Element.CurrentItemUnderlyingType = item.FieldType;
+                ctx.Element.FieldElement.Field = item;
+                ctx.Element.ItemType = item.FieldType;
+                ctx.Element.UnderlyingType = item.FieldType;
 
-                if (ctx.Element.CurrentItemUnderlyingType.IsInterface || ctx.Element.CurrentItemUnderlyingType.IsAbstract)
+                if (ctx.Element.UnderlyingType.IsInterface || ctx.Element.UnderlyingType.IsAbstract)
                     throw new InvalidOperationException("Incomplete types are not allowed.");
 
-                if (ctx.Element.CurrentItemType.IsArray)
+                if (ctx.Element.ItemType.IsArray)
                     ManageArray(ctx);
 
                 var request = new SerializationBuildRequest()
@@ -236,14 +238,14 @@ namespace AmphetamineSerializer
                         ctx.G.Call(response.Method.Method, null);
                 }
 
-                if (ctx.Element.CurrentItemType.IsArray)
+                if (ctx.Element.ItemType.IsArray)
                     ctx.Manipulator.AddLoopEpilogue(ctx);
             }
         }
 
         private void ManageArray(FoundryContext ctx)
         {
-            ctx.Element.CurrentItemUnderlyingType = ctx.Element.CurrentItemFieldInfo.FieldType.GetElementType();
+            ctx.Element.UnderlyingType = ctx.Element.FieldElement.Field.FieldType.GetElementType();
 
             var currentLoopContext = new LoopContext()
             {
@@ -270,23 +272,23 @@ namespace AmphetamineSerializer
         /// <param name="ctx">Context</param>
         private void HandleType(FoundryContext ctx)
         {
-            if (!ctx.Element.CurrentItemType.IsArray)
+            if (!ctx.Element.ItemType.IsArray)
             {
-                ctx.G.LoadLocal(ctx.ObjectInstance); // this --> stack
+                ctx.G.LoadLocal(ctx.Element.FieldElement.Instance); // this --> stack
                 if (ctx.ObjectType.IsByRef)
-                    ctx.G.LoadFieldAddress(ctx.Element.CurrentItemFieldInfo);
+                    ctx.G.LoadFieldAddress(ctx.Element.FieldElement.Field);
                 else
-                    ctx.G.LoadField(ctx.Element.CurrentItemFieldInfo);
+                    ctx.G.LoadField(ctx.Element.FieldElement.Field);
             }
             else
             {
-                ctx.G.LoadLocal(ctx.ObjectInstance);// this --> stack
-                ctx.G.LoadField(ctx.Element.CurrentItemFieldInfo); // field --> stack
+                ctx.G.LoadLocal(ctx.Element.FieldElement.Instance);// this --> stack
+                ctx.G.LoadField(ctx.Element.FieldElement.Field); // field --> stack
                 ctx.G.LoadLocal(ctx.LoopCtx.Peek().Index); // indexLocal --> stack
                 if (ctx.ObjectType.IsByRef)
-                    ctx.G.LoadElementAddress(ctx.Element.CurrentItemUnderlyingType); // stack --> arraylocal[indexLocal]
+                    ctx.G.LoadElementAddress(ctx.Element.UnderlyingType); // stack --> arraylocal[indexLocal]
                 else
-                    ctx.G.LoadElement(ctx.Element.CurrentItemUnderlyingType);
+                    ctx.G.LoadElement(ctx.Element.UnderlyingType);
             }
 
             ctx.Manipulator.ForwardParameters(ctx.InputParameters, null, ctx.Element.CurrentAttribute);

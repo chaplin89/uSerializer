@@ -35,6 +35,9 @@ namespace AmphetamineSerializer.Common
         /// </summary>
         public int? StoreAtPosition { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void Dispose()
         {
             throw new NotImplementedException();
