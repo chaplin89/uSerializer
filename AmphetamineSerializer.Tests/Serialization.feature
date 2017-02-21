@@ -5,6 +5,6 @@
 @mytag
 Scenario: Serializing and deserializing data produce the same result
 	Given The instance Instance1 of type Test filled with random data
-	And I serialize the instance Instance1 of type Test in d:\test.bin
-	When I deserialize the instance Instance2 of type Test from d:\test.bin
+	And I serialize the instance Instance1 in Stream1
+	When I deserialize the instance Instance2 from Stream1
 	Then Instance1 and Instance2 are identical

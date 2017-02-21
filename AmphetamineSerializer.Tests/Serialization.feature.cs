@@ -76,9 +76,9 @@ this.ScenarioSetup(scenarioInfo);
 #line 7
  testRunner.Given("The instance Instance1 of type Test filled with random data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line 8
- testRunner.And("I serialize the instance Instance1 of type Test in d:\\test.bin", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+ testRunner.And("I serialize the instance Instance1 in Stream1", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line 9
- testRunner.When("I deserialize the instance Instance2 of type Test from d:\\test.bin", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+ testRunner.When("I deserialize the instance Instance2 from Stream1", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line 10
  testRunner.Then("Instance1 and Instance2 are identical", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden

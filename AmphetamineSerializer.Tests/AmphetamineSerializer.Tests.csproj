@@ -71,6 +71,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Serialization.feature</DependentUpon>
     </Compile>
+    <Compile Include="SerializationHelpers.cs" />
     <Compile Include="SerializationSteps.cs" />
     <Compile Include="TestClass.cs" />
   </ItemGroup>
