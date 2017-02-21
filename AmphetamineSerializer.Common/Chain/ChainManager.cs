@@ -1,5 +1,4 @@
 ﻿using System;
-using AmphetamineSerializer.Chain;
 using AmphetamineSerializer.Interfaces;
 using System.Collections.Generic;
 
@@ -12,16 +11,6 @@ namespace AmphetamineSerializer
 
         public ChainManager()
         {
-        }
-
-        static public IChainManager MakeDefaultChain()
-        {
-            var manager = new ChainManager()
-                       .SetNext(new CustomSerializerFinder())
-                       .SetNext(new CustomBuilderFinder())
-                       .SetNext(new DefaultHandlerFinder())
-                       .SetNext(new CacheManager());
-            return manager;
         }
 
         public IChainManager SetNext(IChainElement next)

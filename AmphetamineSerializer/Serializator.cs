@@ -1,4 +1,5 @@
-﻿using AmphetamineSerializer.Common;
+﻿using AmphetamineSerializer.Chain;
+using AmphetamineSerializer.Common.Chain;
 using AmphetamineSerializer.Interfaces;
 using System;
 using System.IO;
@@ -20,7 +21,11 @@ namespace AmphetamineSerializer
         protected SerializeBinaryWriter serializeFromStream;
 
         private object additionalContext;
-        IChainManager chain = ChainManager.MakeDefaultChain();
+        IChainManager chain = new ChainManager()
+                                  .SetNext(new CustomSerializerFinder())
+                                  .SetNext(new CustomBuilderFinder())
+                                  .SetNext(new DefaultHandlerFinder())
+                                  .SetNext(new CacheManager());
 
         /// <summary>
         ///

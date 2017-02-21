@@ -1,6 +1,4 @@
-﻿using AmphetamineSerializer.Common;
-using AmphetamineSerializer.Interfaces;
-using System;
+﻿using AmphetamineSerializer.Chain;
 using System.Diagnostics;
 using System.IO;
 
@@ -13,7 +11,11 @@ namespace AmphetamineSerializer
     public class LenghtBoundSerializator<T> : Serializator<T>
     {
         private object additionalContext;
-        IChainManager chain = ChainManager.MakeDefaultChain();
+        IChainManager chain = new ChainManager()
+                                  .SetNext(new CustomSerializerFinder())
+                                  .SetNext(new CustomBuilderFinder())
+                                  .SetNext(new DefaultHandlerFinder())
+                                  .SetNext(new CacheManager());
 
         /// <summary>
         ///

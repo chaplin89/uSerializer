@@ -6,6 +6,7 @@ using System.Reflection;
 using AmphetamineSerializer.Interfaces;
 using AmphetamineSerializer.Common;
 using Sigil;
+using AmphetamineSerializer.Common.Chain;
 
 namespace AmphetamineSerializer
 {

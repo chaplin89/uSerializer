@@ -3,7 +3,7 @@ using AmphetamineSerializer.Interfaces;
 using System.Linq;
 using Sigil.NonGeneric;
 
-namespace AmphetamineSerializer.Common
+namespace AmphetamineSerializer.Common.Chain
 {
     public class SerializationBuildRequest : IRequest
     {
@@ -11,7 +11,14 @@ namespace AmphetamineSerializer.Common
         private Type outputType;
         private Type delegateType;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public object AdditionalContext { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public Type DelegateType {
             get { return delegateType; }
             set
@@ -23,12 +30,35 @@ namespace AmphetamineSerializer.Common
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public Type[] InputTypes { get { return inputTypes; } }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public Type OutputType { get { return outputType; } }
-        public Type RootType { get { return inputTypes != null ? inputTypes.FirstOrDefault() : null; } }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public Type RootType
+        {
+            get
+            {
+                if (inputTypes != null)
+                    return inputTypes.FirstOrDefault();
+                return null;
+            }
+        }
 
         public ElementDescriptor Element { get; set; }
+
         public SigilFunctionProvider Provider { get; set; }
+
         public Emit G { get; set; }
+
+        TypeOfRequest RequestType { get; set; }
     }
 }

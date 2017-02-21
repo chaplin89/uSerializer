@@ -7,7 +7,7 @@
     <ProjectGuid>{4D388985-26F2-4EC4-9926-2BA2E926651C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Mermec.Trackware.Serialization</RootNamespace>
+    <RootNamespace>AmphetamineSerializer</RootNamespace>
     <AssemblyName>AmphetamineSerializer</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -51,7 +51,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Chain\CacheManager.cs" />
-    <Compile Include="Chain\ChainManager.cs" />
     <Compile Include="Chain\CustomBuilderFinder.cs" />
     <Compile Include="Chain\CustomSerializerFinder.cs" />
     <Compile Include="Chain\DefaultHandlerFinder.cs" />

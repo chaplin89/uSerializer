@@ -1,4 +1,5 @@
 ﻿using AmphetamineSerializer.Common;
+using AmphetamineSerializer.Common.Chain;
 using AmphetamineSerializer.Helpers;
 using AmphetamineSerializer.Interfaces;
 using System;
@@ -35,26 +36,23 @@ namespace AmphetamineSerializer.Chain
         {
             var request = genericRequest as SerializationBuildRequest;
 
-            FoundryContext ctx = FoundryContext.MakeContext(request.DelegateType, 
-                                                            request.AdditionalContext, 
-                                                            request.Element, 
+            FoundryContext ctx = FoundryContext.MakeContext(request.DelegateType,
+                                                            request.AdditionalContext,
+                                                            request.Element,
                                                             request.Provider,
                                                             request.G);
 
             foreach (var item in defaultHelpers)
             {
-                using (new StatusSaver(ctx))
-                {
-                    IBuilder instance = (IBuilder)Activator.CreateInstance(item, new object[] { ctx });
-                    var method = instance.Make();
-                    if (method == null)
-                        continue;
+                IBuilder instance = (IBuilder)Activator.CreateInstance(item, new object[] { ctx });
+                var method = instance.Make();
+                if (method == null)
+                    continue;
 
-                    return new SerializationBuildResponse()
-                    {
-                        Method = method
-                    };
-                }
+                return new SerializationBuildResponse()
+                {
+                    Method = method
+                };
             }
             return null;
         }

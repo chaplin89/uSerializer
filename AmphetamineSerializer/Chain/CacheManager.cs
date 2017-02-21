@@ -2,6 +2,7 @@
 using AmphetamineSerializer.Common;
 using System;
 using System.Collections.Generic;
+using AmphetamineSerializer.Common.Chain;
 
 namespace AmphetamineSerializer.Chain
 {
