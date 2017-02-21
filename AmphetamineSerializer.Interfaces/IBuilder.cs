@@ -4,6 +4,6 @@ namespace AmphetamineSerializer.Interfaces
 {
     public interface IBuilder
     {
-        BuildedFunction Method { get; }
+        BuildedFunction Make();
     }
 }

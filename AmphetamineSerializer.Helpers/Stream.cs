@@ -49,26 +49,23 @@ namespace AmphetamineSerializer.Helpers
             this.ctx = ctx;
         }
 
-        public BuildedFunction Method
+        public BuildedFunction Make()
         {
-            get
-            {
-                if (function != null)
-                    return function;
-
-                if (ctx.Element.UnderlyingType == null)
-                    return null;
-
-                if (ctx.Element.UnderlyingType == typeof(string))
-                    HandleString(ctx);
-                else if (typeHandlerMap.ContainsKey(ctx.Element.UnderlyingType))
-                    HandlePrimitive(ctx);
-                else
-                    return null;
-
-                function = new BuildedFunction() { Status = BuildedFunctionStatus.NoMethodsAvailable };
+            if (function != null)
                 return function;
-            }
+
+            if (ctx.Element.UnderlyingType == null)
+                return null;
+
+            if (ctx.Element.UnderlyingType == typeof(string))
+                HandleString(ctx);
+            else if (typeHandlerMap.ContainsKey(ctx.Element.UnderlyingType))
+                HandlePrimitive(ctx);
+            else
+                return null;
+
+            function = new BuildedFunction() { Status = BuildedFunctionStatus.NoMethodsAvailable };
+            return function;
         }
 
         [SerializationHandler(typeof(string))]
@@ -84,7 +81,7 @@ namespace AmphetamineSerializer.Helpers
         {
             // Rough C# translation:
             // Encoding.ASCII.GetString(reader.ReadBytes(reader.ReadInt32()));
-            
+
             ctx.Manipulator.Store(ctx, (context) =>
             {
                 // Put the decoded string in the stack.

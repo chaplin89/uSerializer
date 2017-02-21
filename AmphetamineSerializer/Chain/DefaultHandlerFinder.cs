@@ -46,12 +46,13 @@ namespace AmphetamineSerializer.Chain
                 using (new StatusSaver(ctx))
                 {
                     IBuilder instance = (IBuilder)Activator.CreateInstance(item, new object[] { ctx });
-                    if (instance.Method == null)
+                    var method = instance.Make();
+                    if (method == null)
                         continue;
 
                     return new SerializationBuildResponse()
                     {
-                        Method = instance.Method
+                        Method = method
                     };
                 }
             }

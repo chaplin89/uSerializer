@@ -66,15 +66,12 @@ namespace AmphetamineSerializer
         /// <summary>
         /// Expose the builded method.
         /// </summary>
-        public BuildedFunction Method
+        public BuildedFunction Make()
         {
-            get
-            {
-                if (method == null)
-                    method = Make();
+            if (method == null)
+                method = InternalMake();
 
-                return method;
-            }
+            return method;
         }
 
         #endregion
@@ -85,7 +82,7 @@ namespace AmphetamineSerializer
         /// Generate the method for the current ObjectType.
         /// </summary>
         /// <returns>Builded method</returns>
-        private BuildedFunction Make()
+        private BuildedFunction InternalMake()
         {
             Type normalizedType;
             int[] versions;

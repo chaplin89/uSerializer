@@ -46,12 +46,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ByteArrayDeserializationCtx.cs" />
-    <Compile Include="ByteArrayDeserialization.cs" />
-    <Compile Include="ByteArraySerialization.cs" />
-    <Compile Include="StreamCtx.cs" />
-    <Compile Include="StreamDeserialization.cs" />
-    <Compile Include="StreamSerialization.cs" />
+    <Compile Include="ByteArray.cs" />
+    <Compile Include="Stream.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

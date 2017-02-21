@@ -7,7 +7,7 @@ namespace AmphetamineSerializer.Helpers
     /// <summary>
     /// 
     /// </summary>
-    static public class ByteArrayDeserializationCtx
+    static public class ByteArray
     {
         [SerializationHandler(typeof(string))]
         static public void DecodeString(ref string decoded, byte[] toDeserialize, ref uint index, ulong options = 0)

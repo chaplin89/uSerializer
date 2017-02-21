@@ -42,7 +42,6 @@ namespace AmphetamineSerializer.Common
         }
 
         public ElementDescriptor Element;
-        private Emit g;
 
         /// <summary>
         /// 

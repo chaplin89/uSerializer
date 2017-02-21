@@ -38,7 +38,7 @@ namespace AmphetamineSerializer
 
             return new SerializationBuildResponse()
             {
-                Method = builder.Method,
+                Method = builder.Make(),
                 Instance = null
             };
         }
