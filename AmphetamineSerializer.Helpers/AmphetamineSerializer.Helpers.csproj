@@ -35,7 +35,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Sigil, Version=4.7.0.0, Culture=neutral, PublicKeyToken=2d06c3494341c8ab" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -58,6 +57,10 @@
     <ProjectReference Include="..\AmphetamineSerializer.Interfaces\AmphetamineSerializer.Interfaces.csproj">
       <Project>{5EB81743-BF16-4C46-B74E-2C846281AF2B}</Project>
       <Name>AmphetamineSerializer.Interfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Sigil\Sigil NET45\Sigil NET45.csproj">
+      <Project>{CC8E294D-E06C-4420-A260-D515D89EC53A}</Project>
+      <Name>Sigil NET45</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

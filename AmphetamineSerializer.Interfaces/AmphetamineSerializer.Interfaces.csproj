@@ -58,6 +58,12 @@
     <Compile Include="ISerializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Sigil\Sigil NET45\Sigil NET45.csproj">
+      <Project>{CC8E294D-E06C-4420-A260-D515D89EC53A}</Project>
+      <Name>Sigil NET45</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

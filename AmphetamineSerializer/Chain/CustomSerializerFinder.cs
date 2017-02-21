@@ -50,6 +50,7 @@ namespace AmphetamineSerializer.Chain
             var instance = Activator.CreateInstance(attribute.SerializatorType, localRequest.AdditionalContext);
             resolver.Register(attribute.SerializatorType);
             var inputType = dlgMi.GetParameters().Select(x => x.ParameterType).ToArray();
+
             var method = new BuildedFunction()
             {
                 Method = resolver.ResolveFromSignature(localRequest.RootType, inputType, dlgMi.ReturnType),
@@ -58,12 +59,11 @@ namespace AmphetamineSerializer.Chain
 
             if (method.Method == null)
                 throw new InvalidOperationException("Unable to retrieve the method from the custom deserializator.");
-
-
-
+            
             return new SerializationBuildResponse()
             {
-                Method = method,
+                ResponseType = TypeOfRequest.OnlyMethod,
+                Response = method,
                 Instance = instance
             };
         }

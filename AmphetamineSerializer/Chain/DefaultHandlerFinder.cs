@@ -14,8 +14,6 @@ namespace AmphetamineSerializer.Chain
 
         Type[] defaultHelpers = new Type[]
         {
-            // typeof(ByteArrayDeserialization),
-            // typeof(ByteArraySerialization),
             typeof(StreamDeserializationCtx),
             typeof(AssemblyFoundry)
         };
@@ -51,7 +49,7 @@ namespace AmphetamineSerializer.Chain
 
                 return new SerializationBuildResponse()
                 {
-                    Method = method
+                    Response = method
                 };
             }
             return null;

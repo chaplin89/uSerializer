@@ -267,7 +267,7 @@ namespace AmphetamineSerializer.Common
 
                 ctx.Element = currentElement;
 
-                if (response.Method.Status != BuildedFunctionStatus.NoMethodsAvailable)
+                if (response.Response.Status != BuildedFunctionStatus.NoMethodsAvailable)
                 {
                     currentLoopContext.Size = ctx.G.DeclareLocal(typeof(uint));
                     ctx.G.LoadLocal(ctx.Element.FieldElement.Instance); // this (stfld) --> stack
@@ -276,12 +276,12 @@ namespace AmphetamineSerializer.Common
                     ctx.G.StoreLocal(currentLoopContext.Size);
                     ctx.G.LoadLocal(currentLoopContext.Size);
 
-                    if (response.Method.Status == BuildedFunctionStatus.TypeFinalized)
-                        ForwardParameters(ctx.InputParameters, response.Method);
+                    if (response.Response.Status == BuildedFunctionStatus.TypeFinalized)
+                        ForwardParameters(ctx.InputParameters, response.Response);
                     else
                     {
                         ForwardParameters(ctx.InputParameters, null);
-                        ctx.G.Call(response.Method.Emiter);
+                        ctx.G.Call(response.Response.Emiter);
                     }
                 }
             }
@@ -313,11 +313,11 @@ namespace AmphetamineSerializer.Common
                 var response = ctx.Chain.Process(request) as SerializationBuildResponse;
                 ctx.Element = currentElement;
 
-                if (response.Method.Status != BuildedFunctionStatus.NoMethodsAvailable)
+                if (response.Response.Status != BuildedFunctionStatus.NoMethodsAvailable)
                 {
                     // this.DecodeUInt(ref size, buffer, ref position);
                     ctx.G.LoadLocalAddress(currentLoopContext.Size);
-                    ForwardParameters(ctx.InputParameters, response.Method);
+                    ForwardParameters(ctx.InputParameters, response.Response);
                 }
             }
 

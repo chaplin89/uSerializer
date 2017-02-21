@@ -13,7 +13,7 @@ namespace AmphetamineSerializer
     /// <summary>
     /// Make new assemblies.
     /// </summary>
-    public class AssemblyFoundry : IBuilder
+    public class AssemblyFoundry : BuilderBase
     {
         #region ctor
         /// <summary>
@@ -21,9 +21,8 @@ namespace AmphetamineSerializer
         /// </summary>
         /// <param name="ctx"></param>
         /// <param name="persist"></param>
-        public AssemblyFoundry(FoundryContext ctx)
+        public AssemblyFoundry(FoundryContext ctx) : base(ctx)
         {
-            this.ctx = ctx;
 
             if (ctx.Provider != null && ctx.Provider.AlreadyBuildedMethods.ContainsKey(ctx.ObjectType))
             {
@@ -50,24 +49,11 @@ namespace AmphetamineSerializer
         }
         #endregion
 
-        #region Private state
-
-        /// <summary>
-        /// Context for the current building process.
-        /// </summary>
-        FoundryContext ctx;
-
-        /// <summary>
-        /// Internally cached method.
-        /// </summary>
-        BuildedFunction method;
-        #endregion
-
-        #region Public properties
+        #region Public Methods
         /// <summary>
         /// Expose the builded method.
         /// </summary>
-        public BuildedFunction Make()
+        public override BuildedFunction Make()
         {
             if (method == null)
                 method = InternalMake();
@@ -109,69 +95,71 @@ namespace AmphetamineSerializer
             }
 
             versions = VersionHelper.GetExplicitlyManagedVersions(normalizedType).ToArray();
-            Label[] labels = null;
+
             if (versions.Length > 1)
-            {
-                var field = VersionHelper.GetAllFields(normalizedType).Where(x => x.Name.ToLower() == "version").Single();
-                if (VersionHelper.GetAllFields(normalizedType).First() != field)
-                    throw new InvalidOperationException("The version field should be the first.");
-
-                labels = new Label[versions.Length];
-
-                for (int i = 0; i < labels.Length; i++)
-                    labels[i] = ctx.G.DefineLabel($"Version{i}");
-
-                Type requestType = field.FieldType;
-                if (ctx.ManageLifeCycle)
-                    requestType = requestType.MakeByRefType();
-
-                var request = new SerializationBuildRequest()
-                {
-                    Element = ctx.Element,
-                    AdditionalContext = ctx.AdditionalContext,
-                    DelegateType = ctx.Manipulator.MakeDelegateType(requestType, ctx.InputParameters),
-                    Provider = ctx.Provider,
-                    G = ctx.G
-                };
-
-                var response = ctx.Chain.Process(request) as SerializationBuildResponse;
-                var targetMethod = response.Method;
-
-                if (ctx.ObjectType.IsByRef)
-                {
-                    Local local = ctx.G.DeclareLocal(field.FieldType);
-                    ctx.G.LoadLocalAddress(local);
-                    ctx.Manipulator.ForwardParameters(ctx.InputParameters, targetMethod, ctx.Element.CurrentAttribute);
-                    ctx.G.LoadLocal(local);
-                    ctx.Manipulator.EmitStoreObject(ctx.Element.FieldElement.Instance, field, local);
-                }
-                else
-                {
-                    ctx.Manipulator.EmitAccessObject(ctx.Element.FieldElement.Instance, field);
-                    ctx.Manipulator.ForwardParameters(ctx.InputParameters, targetMethod, ctx.Element.CurrentAttribute);
-                    ctx.Manipulator.EmitAccessObject(ctx.Element.FieldElement.Instance, field);
-                }
-
-                // Deserialize versions
-                ctx.G.LoadConstant(versions[0]);
-                ctx.G.Subtract();
-                ctx.G.Switch(labels);
-
-                for (int i = 0; i < versions.Length; i++)
-                {
-                    var fields = VersionHelper.GetVersionSnapshot(normalizedType, versions[i]).Where(x => x.Name.ToLower() != "version");
-                    ctx.G.MarkLabel(labels[i]);
-                    BuildFromFields(ctx, fields);
-                    ctx.G.Return();
-                }
-            }
+                ManageVersions(ctx, versions, normalizedType);
             else
-            {
                 BuildFromFields(ctx, VersionHelper.GetAllFields(normalizedType));
-            }
 
             ctx.G.Return();
             return ctx.Provider.GetMethod();
+        }
+
+        private void ManageVersions(FoundryContext ctx, int[] versions, Type normalizedType)
+        {
+            Label[] labels = null;
+            var field = VersionHelper.GetAllFields(normalizedType).Where(x => x.Name.ToLower() == "version").Single();
+            if (VersionHelper.GetAllFields(normalizedType).First() != field)
+                throw new InvalidOperationException("The version field should be the first.");
+
+            labels = new Label[versions.Length];
+
+            for (int i = 0; i < labels.Length; i++)
+                labels[i] = ctx.G.DefineLabel($"Version{i}");
+
+            Type requestType = field.FieldType;
+            if (ctx.ManageLifeCycle)
+                requestType = requestType.MakeByRefType();
+
+            var request = new SerializationBuildRequest()
+            {
+                Element = ctx.Element,
+                AdditionalContext = ctx.AdditionalContext,
+                DelegateType = ctx.Manipulator.MakeDelegateType(requestType, ctx.InputParameters),
+                Provider = ctx.Provider,
+                G = ctx.G
+            };
+
+            var response = ctx.Chain.Process(request) as SerializationBuildResponse;
+            var targetMethod = response.Response;
+
+            if (ctx.ObjectType.IsByRef)
+            {
+                Local local = ctx.G.DeclareLocal(field.FieldType);
+                ctx.G.LoadLocalAddress(local);
+                ctx.Manipulator.ForwardParameters(ctx.InputParameters, targetMethod, ctx.Element.CurrentAttribute);
+                ctx.G.LoadLocal(local);
+                ctx.Manipulator.EmitStoreObject(ctx.Element.FieldElement.Instance, field, local);
+            }
+            else
+            {
+                ctx.Manipulator.EmitAccessObject(ctx.Element.FieldElement.Instance, field);
+                ctx.Manipulator.ForwardParameters(ctx.InputParameters, targetMethod, ctx.Element.CurrentAttribute);
+                ctx.Manipulator.EmitAccessObject(ctx.Element.FieldElement.Instance, field);
+            }
+
+            // Deserialize versions
+            ctx.G.LoadConstant(versions[0]);
+            ctx.G.Subtract();
+            ctx.G.Switch(labels);
+
+            for (int i = 0; i < versions.Length; i++)
+            {
+                var fields = VersionHelper.GetVersionSnapshot(normalizedType, versions[i]).Where(x => x.Name.ToLower() != "version");
+                ctx.G.MarkLabel(labels[i]);
+                BuildFromFields(ctx, fields);
+                ctx.G.Return();
+            }
         }
 
         /// <summary>
@@ -220,18 +208,18 @@ namespace AmphetamineSerializer
                 //    handling the request. We don't need to do anything else.
                 // 2) Giving back a method that we have to call.
                 //    If that is the case, we should rearrange the input and call the method.
-                if (response.Method.Status != BuildedFunctionStatus.NoMethodsAvailable)
+                if (response.Response.Status != BuildedFunctionStatus.NoMethodsAvailable)
                 {
                     HandleType(ctx);
 
                     bool callEmiter =
-                        response.Method.Status == BuildedFunctionStatus.FunctionFinalizedTypeNotFinalized ||
-                        response.Method.Status == BuildedFunctionStatus.FunctionNotFinalized;
+                        response.Response.Status == BuildedFunctionStatus.FunctionFinalizedTypeNotFinalized ||
+                        response.Response.Status == BuildedFunctionStatus.FunctionNotFinalized;
 
                     if (callEmiter)
-                        ctx.G.Call(response.Method.Emiter, null);
+                        ctx.G.Call(response.Response.Emiter, null);
                     else
-                        ctx.G.Call(response.Method.Method, null);
+                        ctx.G.Call(response.Response.Method, null);
                 }
 
                 if (ctx.Element.ItemType.IsArray)

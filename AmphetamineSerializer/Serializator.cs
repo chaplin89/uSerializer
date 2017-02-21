@@ -80,11 +80,13 @@ namespace AmphetamineSerializer
         {
             var request = new SerializationBuildRequest()
             {
-                AdditionalContext = this.additionalContext,
-                DelegateType = delegateType
+                AdditionalContext = additionalContext,
+                DelegateType = delegateType,
+                RequestType = TypeOfRequest.OnlyMethod                
             };
+
             var response = chain.Process(request) as SerializationBuildResponse;
-            return response.Method.Method.CreateDelegate(delegateType, response.Instance);
+            return response.Response.Method.CreateDelegate(delegateType, response.Instance);
         }
 
         public Serializator(object additionalContext = null)

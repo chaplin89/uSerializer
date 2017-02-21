@@ -10,7 +10,7 @@ namespace AmphetamineSerializer
     /// <summary>
     /// 
     /// </summary>
-    public class VersionHelper
+    static public class VersionHelper
     {
         /// <summary>
         /// Get the intervals between the min version and the max version
@@ -61,16 +61,21 @@ namespace AmphetamineSerializer
         }
 
         /// <summary>
-        /// 
+        /// Get the fields from a type for a given version.
         /// </summary>
-        /// <param name="rootType"></param>
-        /// <param name="version"></param>
-        /// <returns></returns>
+        /// <param name="rootType">Type</param>
+        /// <param name="version">Version</param>
+        /// <returns>All the fields that match the given version</returns>
         static public IEnumerable<FieldInfo> GetVersionSnapshot(Type rootType, int version)
         {
             return GetFields(rootType, version);
         }
         
+        /// <summary>
+        /// Get all fields from a type.
+        /// </summary>
+        /// <param name="rootType"></param>
+        /// <returns>All the fields contained in a type</returns>
         static public IEnumerable<FieldInfo> GetAllFields(Type rootType)
         {
             return GetFields(rootType);

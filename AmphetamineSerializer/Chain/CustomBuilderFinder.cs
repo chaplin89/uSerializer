@@ -7,6 +7,9 @@ using AmphetamineSerializer.Common.Chain;
 
 namespace AmphetamineSerializer.Chain
 {
+    /// <summary>
+    /// Module that is capable of handling request for custom builders.
+    /// </summary>
     public class CustomBuilderFinder : IChainElement
     {
         readonly Dictionary<Type, RequestHandler> managedRequestes;
@@ -39,7 +42,7 @@ namespace AmphetamineSerializer.Chain
 
             return new SerializationBuildResponse()
             {
-                Method = builder.Make(),
+                Response = builder.Make(),
                 Instance = null
             };
         }

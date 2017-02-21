@@ -59,6 +59,6 @@ namespace AmphetamineSerializer.Common.Chain
 
         public Emit G { get; set; }
 
-        TypeOfRequest RequestType { get; set; }
+        public TypeOfRequest RequestType { get; set; }
     }
 }

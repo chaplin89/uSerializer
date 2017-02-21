@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="Attribute\BuildedWithAttribute.cs" />
     <Compile Include="Attribute\DeserializedWithAttribute.cs" />
+    <Compile Include="BuilderBase.cs" />
     <Compile Include="Chain\ChainManager.cs" />
     <Compile Include="Chain\TypeOfRequest.cs" />
     <Compile Include="ElementDescriptor.cs" />

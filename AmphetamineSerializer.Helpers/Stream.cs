@@ -1,6 +1,4 @@
 ﻿using AmphetamineSerializer.Common;
-using AmphetamineSerializer.Interfaces;
-using Sigil.NonGeneric;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,7 +9,7 @@ using System.Text;
 
 namespace AmphetamineSerializer.Helpers
 {
-    public class StreamDeserializationCtx : IBuilder
+    public class StreamDeserializationCtx : BuilderBase
     {
         static StreamDeserializationCtx()
         {
@@ -19,7 +17,6 @@ namespace AmphetamineSerializer.Helpers
             Debug.Assert(typeHandlerMap.Where(x => x.Value == null).Count() == 0);
         }
 
-        private FoundryContext ctx;
         static private readonly Dictionary<Type, MethodInfo> typeHandlerMap = new Dictionary<Type, MethodInfo>()
         {
             {typeof(byte),                   typeof(BinaryWriter).GetMethod("Write", new Type[] {typeof(byte),   })},
@@ -42,17 +39,15 @@ namespace AmphetamineSerializer.Helpers
             {typeof(float).MakeByRefType(),  typeof(BinaryReader).GetMethod("ReadSingle")},
             {typeof(byte[]).MakeByRefType(),  typeof(BinaryReader).GetMethod("ReadBytes")}
         };
-        private BuildedFunction function;
 
-        public StreamDeserializationCtx(FoundryContext ctx)
+        public StreamDeserializationCtx(FoundryContext ctx) : base(ctx)
         {
-            this.ctx = ctx;
         }
 
-        public BuildedFunction Make()
+        public override BuildedFunction Make()
         {
-            if (function != null)
-                return function;
+            if (method != null)
+                return method;
 
             if (ctx.Element.UnderlyingType == null)
                 return null;
@@ -64,8 +59,8 @@ namespace AmphetamineSerializer.Helpers
             else
                 return null;
 
-            function = new BuildedFunction() { Status = BuildedFunctionStatus.NoMethodsAvailable };
-            return function;
+            method = new BuildedFunction() { Status = BuildedFunctionStatus.NoMethodsAvailable };
+            return method;
         }
 
         [SerializationHandler(typeof(string))]
