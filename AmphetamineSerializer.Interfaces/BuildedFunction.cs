@@ -1,5 +1,6 @@
 ﻿using Sigil.NonGeneric;
 using System.Reflection;
+using System;
 
 namespace AmphetamineSerializer.Common
 {
@@ -35,7 +36,9 @@ namespace AmphetamineSerializer.Common
     public class BuildedFunction
     {
         public Emit Emiter { get; set; }
+        public Type[] Input { get; set; }
         public MethodInfo Method { get; set; }
+        public Type Return { get; set; }
         public BuildedFunctionStatus Status { get; set; }
     }
 }

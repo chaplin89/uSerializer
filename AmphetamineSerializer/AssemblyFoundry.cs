@@ -31,7 +31,7 @@ namespace AmphetamineSerializer
             else
             {
                 if (ctx.Provider == null)
-                    ctx.Provider = new SigilFunctionProvider($"{ctx.ObjectType.Name}_{Guid.NewGuid()}");
+                    ctx.Provider = new SigilFunctionProvider(/*$"{ctx.ObjectType.Name}_{Guid.NewGuid()}"*/);
                 ctx.G = ctx.Provider.AddMethod("Handle", ctx.InputParameters, typeof(void));
             }
 
