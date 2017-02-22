@@ -3,7 +3,7 @@
 namespace AmphetamineSerializer.Common.Chain
 {
     /// <summary>
-    /// Contain the response of a build request.
+    /// Response to a build request.
     /// </summary>
     public class SerializationBuildResponse : IResponse
     {

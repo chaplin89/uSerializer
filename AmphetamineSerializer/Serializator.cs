@@ -82,7 +82,7 @@ namespace AmphetamineSerializer
             {
                 AdditionalContext = additionalContext,
                 DelegateType = delegateType,
-                RequestType = TypeOfRequest.OnlyMethod                
+                RequestType = TypeOfRequest.Method                
             };
 
             var response = chain.Process(request) as SerializationBuildResponse;

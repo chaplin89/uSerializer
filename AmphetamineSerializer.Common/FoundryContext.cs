@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Sigil.NonGeneric;
-using Sigil;
 using System.Diagnostics;
 
 namespace AmphetamineSerializer.Common

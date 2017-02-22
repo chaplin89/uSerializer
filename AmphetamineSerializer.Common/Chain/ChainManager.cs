@@ -4,15 +4,18 @@ using System.Collections.Generic;
 
 namespace AmphetamineSerializer
 {
+    /// <summary>
+    /// Simple implementation of a chain-of-responsibility.
+    /// </summary>
     public class ChainManager : IChainManager
     {
-        public IChainElement First { get; private set; }
         List<IChainElement> chain = new List<IChainElement>();
 
-        public ChainManager()
-        {
-        }
-
+        /// <summary>
+        /// Add an element to the chain.
+        /// </summary>
+        /// <param name="next">Element to add</param>
+        /// <returns>This chain manager (for fluent syntax)</returns>
         public IChainManager SetNext(IChainElement next)
         {
             chain.Add(next);
@@ -22,6 +25,17 @@ namespace AmphetamineSerializer
             return this;
         }
 
+        /// <summary>
+        /// First element of the chain.
+        /// </summary>
+        public IChainElement First { get; private set; }
+
+        /// <summary>
+        /// Process a request.
+        /// </summary>
+        /// <param name="request">Request</param>
+        /// <returns>Response to the request</returns>
+        /// <exception cref="NotSupportedException">If there are no node availiable to handle the request</exception>
         public IResponse Process(IRequest request)
         {
             IResponse response = null;
@@ -46,7 +60,7 @@ namespace AmphetamineSerializer
                 return response;
             }
 
-            throw new NotSupportedException("The chain is unable to process the request");
+            throw new NotSupportedException("The chain is unable to process the request.");
         }
     }
 }
