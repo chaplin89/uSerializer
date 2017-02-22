@@ -1,5 +1,6 @@
 ﻿using AmphetamineSerializer.Chain;
 using AmphetamineSerializer.Chain.Nodes;
+using AmphetamineSerializer.Common.Attributes;
 using AmphetamineSerializer.Interfaces;
 using System;
 using System.IO;
@@ -12,9 +13,18 @@ namespace AmphetamineSerializer
     /// <typeparam name="T"></typeparam>
     public class Serializator<T> : ISerializator
     {
-        protected delegate void DeserializeBytes(ref T obj, byte[] buffer, ref uint position);
-        protected delegate void SerializeBinaryWriter(T obj, BinaryWriter stream);
-        protected delegate void DeserializeBinaryReader(ref T obj, BinaryReader stream);
+        protected delegate void DeserializeBytes(
+            [Tag(ParameterType.RootObject)] ref T obj,
+            [Tag(ParameterType.MandatoryForward)]   byte[] buffer,
+            [Tag(ParameterType.MandatoryForward)]   ref uint position);
+
+        protected delegate void SerializeBinaryWriter(
+            [Tag(ParameterType.RootObject)] T obj, 
+            [Tag(ParameterType.MandatoryForward)] BinaryWriter stream);
+
+        protected delegate void DeserializeBinaryReader(
+            [Tag(ParameterType.RootObject)] ref T obj,
+            [Tag(ParameterType.MandatoryForward)] BinaryReader stream);
 
         protected DeserializeBytes deserializeFromBytes;
         protected DeserializeBinaryReader deserializeFromStream;
@@ -86,7 +96,12 @@ namespace AmphetamineSerializer
             };
 
             var response = chain.Process(request) as SerializationBuildResponse;
-            return response.Response.Method.CreateDelegate(delegateType, response.Instance);
+            if (response.ResponseType == TypeOfRequest.Method)
+                return response.Response.Method.CreateDelegate(delegateType, response.Instance);
+            else if (response.ResponseType == TypeOfRequest.Delegate)
+                return response.Response.Delegate;
+            else
+                throw new InvalidOperationException("Wrong response, unable to use the builded method.");
         }
 
         public Serializator(object additionalContext = null)

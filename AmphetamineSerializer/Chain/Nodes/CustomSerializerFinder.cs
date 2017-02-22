@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
+using AmphetamineSerializer.Common.Attributes;
 
 namespace AmphetamineSerializer.Chain.Nodes
 {
@@ -61,7 +62,7 @@ namespace AmphetamineSerializer.Chain.Nodes
             
             return new SerializationBuildResponse()
             {
-                ResponseType = TypeOfRequest.Method,
+                ResponseType = TypeOfRequest.Delegate,
                 Response = method,
                 Instance = instance
             };

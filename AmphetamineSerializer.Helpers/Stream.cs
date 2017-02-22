@@ -1,4 +1,5 @@
 ﻿using AmphetamineSerializer.Common;
+using AmphetamineSerializer.Common.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -28,6 +29,9 @@ namespace AmphetamineSerializer.Helpers
             {typeof(double),                 typeof(BinaryWriter).GetMethod("Write", new Type[] {typeof(double), })},
             {typeof(float),                  typeof(BinaryWriter).GetMethod("Write", new Type[] {typeof(float),  })},
             {typeof(byte[]),                 typeof(BinaryWriter).GetMethod("Write", new Type[] {typeof(byte[]), })},
+            {typeof(ulong),                  typeof(BinaryWriter).GetMethod("Write", new Type[] {typeof(ulong),  })},
+            {typeof(long),                   typeof(BinaryWriter).GetMethod("Write", new Type[] {typeof(long),   })},
+            {typeof(char),                   typeof(BinaryWriter).GetMethod("Write", new Type[] {typeof(char),   })},
 
             {typeof(byte).MakeByRefType(),   typeof(BinaryReader).GetMethod("ReadByte")},
             {typeof(sbyte).MakeByRefType(),  typeof(BinaryReader).GetMethod("ReadSByte")},
@@ -37,7 +41,10 @@ namespace AmphetamineSerializer.Helpers
             {typeof(short).MakeByRefType(),  typeof(BinaryReader).GetMethod("ReadInt16")},
             {typeof(double).MakeByRefType(), typeof(BinaryReader).GetMethod("ReadDouble")},
             {typeof(float).MakeByRefType(),  typeof(BinaryReader).GetMethod("ReadSingle")},
-            {typeof(byte[]).MakeByRefType(),  typeof(BinaryReader).GetMethod("ReadBytes")}
+            {typeof(byte[]).MakeByRefType(), typeof(BinaryReader).GetMethod("ReadBytes")},
+            {typeof(ulong).MakeByRefType(),  typeof(BinaryReader).GetMethod("ReadUInt64")},
+            {typeof(long).MakeByRefType(),   typeof(BinaryReader).GetMethod("ReadInt64")},
+            {typeof(char).MakeByRefType(),   typeof(BinaryReader).GetMethod("ReadChar")},
         };
 
         public StreamDeserializationCtx(FoundryContext ctx) : base(ctx)
@@ -52,10 +59,10 @@ namespace AmphetamineSerializer.Helpers
             if (ctx.Element.UnderlyingType == null)
                 return null;
 
+            if (typeHandlerMap.ContainsKey(ctx.Element.UnderlyingType))
+                HandlePrimitive(ctx);
             if (ctx.Element.UnderlyingType == typeof(string))
                 HandleString(ctx);
-            else if (typeHandlerMap.ContainsKey(ctx.Element.UnderlyingType))
-                HandlePrimitive(ctx);
             else
                 return null;
 
@@ -91,6 +98,7 @@ namespace AmphetamineSerializer.Helpers
 
         public BuildedFunction EncodeString(FoundryContext ctx)
         {
+            // Rough C# translation:
             // writer.Write(Encoding.ASCII.GetByteCount(Load()));
             // writer.Write(Encoding.ASCII.GetBytes(Load());
 
@@ -128,7 +136,7 @@ namespace AmphetamineSerializer.Helpers
             {
                 ctx.Manipulator.Store(ctx, (context) =>
                 {
-                    context.G.LoadArgument(1); // argument i --> stack                
+                    context.G.LoadArgument(1); // argument i --> stack
                     ctx.G.CallVirtual(typeHandlerMap[ctx.NormalizedType]);
                 });
             }

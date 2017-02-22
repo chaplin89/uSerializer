@@ -7,6 +7,7 @@ using Sigil.NonGeneric;
 using Sigil;
 using AmphetamineSerializer.Common;
 using AmphetamineSerializer.Chain;
+using AmphetamineSerializer.Common.Attributes;
 
 namespace AmphetamineSerializer
 {

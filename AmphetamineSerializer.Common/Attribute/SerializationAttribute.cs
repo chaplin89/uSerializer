@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AmphetamineSerializer.Common
+namespace AmphetamineSerializer.Common.Attributes
 {
     /// <summary>
     /// Used for specify a method that handle the (de)serialization of a given type.

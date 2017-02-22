@@ -1,4 +1,4 @@
-﻿using AmphetamineSerializer.Common;
+﻿using AmphetamineSerializer.Common.Attributes;
 using System;
 
 namespace AmphetamineSerializer.Tests

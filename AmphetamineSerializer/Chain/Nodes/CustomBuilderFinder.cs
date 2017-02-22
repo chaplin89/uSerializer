@@ -3,6 +3,7 @@ using AmphetamineSerializer.Interfaces;
 using System;
 using System.Reflection;
 using System.Collections.Generic;
+using AmphetamineSerializer.Common.Attributes;
 
 namespace AmphetamineSerializer.Chain.Nodes
 {
@@ -42,7 +43,8 @@ namespace AmphetamineSerializer.Chain.Nodes
             return new SerializationBuildResponse()
             {
                 Response = builder.Make(),
-                Instance = null
+                Instance = null,
+                ResponseType = TypeOfRequest.Delegate
             };
         }
 

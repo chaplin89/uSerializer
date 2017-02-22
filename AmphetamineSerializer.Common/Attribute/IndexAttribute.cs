@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AmphetamineSerializer.Common
+namespace AmphetamineSerializer.Common.Attributes
 {
     /// <summary>
     /// Instruct the deserializator about how to deserialize a give field.

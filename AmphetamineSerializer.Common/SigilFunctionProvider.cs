@@ -19,6 +19,7 @@ namespace AmphetamineSerializer.Common
         Stack<BuildedFunction> methods = new Stack<BuildedFunction>();
         const MethodAttributes attributes = MethodAttributes.Public | MethodAttributes.Static;
         bool dynamic = true;
+
         public SigilFunctionProvider(string assemblyName = null)
         {
             AlreadyBuildedMethods = new Dictionary<Type, BuildedFunction>();
@@ -28,10 +29,14 @@ namespace AmphetamineSerializer.Common
 
             dynamic = false;
             this.assemblyName = new AssemblyName(assemblyName);
+#if RUN_ONLY
+            var attributes = System.Reflection.Emit.AssemblyBuilderAccess.Run;
+#else
             var attributes = System.Reflection.Emit.AssemblyBuilderAccess.RunAndSave;
+#endif
             assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(this.assemblyName, attributes, "D:\\");
-            moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName + ".dll");
-            typeBuilder = moduleBuilder.DefineType(string.Format("{0}.Handler", this.assemblyName.Name), TypeAttributes.Public);
+            moduleBuilder = assemblyBuilder.DefineDynamicModule($"{assemblyName}.dll");
+            typeBuilder = moduleBuilder.DefineType($"{this.assemblyName.Name}.Handler", TypeAttributes.Public);
         }
 
         public Emit AddMethod(string v, Type[] inputTypes, Type returnValue)
@@ -71,26 +76,21 @@ namespace AmphetamineSerializer.Common
             else
             {
                 var delegateType = Expression.GetDelegateType(bf.Input.Concat(new Type[] { bf.Return }).ToArray());
-                bf.Method = bf.Emiter.CreateDelegate(delegateType).Method;
+                bf.Delegate = bf.Emiter.CreateDelegate(delegateType);
             }
 
             bf.Status = BuildedFunctionStatus.FunctionFinalizedTypeNotFinalized;
 
             if (methods.Count == 0)
             {
-                foreach (var item in methods)
-                {
-                    BuildedFunction tempBf = item;
-                    tempBf.Method = tempBf.Emiter.CreateMethod();
-                    tempBf.Status = BuildedFunctionStatus.FunctionFinalizedTypeNotFinalized;
-                }
-
                 if (typeBuilder != null)
                 {
                     Type currentType = typeBuilder.CreateType();
                     bf.Method = currentType.GetMethod(bf.Method.Name, bf.Method.GetParameters().Select(x => x.ParameterType).ToArray());
                     Debug.Assert(assemblyBuilder != null);
+#if RUN_ONLY
                     assemblyBuilder.Save(assemblyName.Name + ".dll");
+#endif
                 }
 
                 foreach (var v in AlreadyBuildedMethods)

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AmphetamineSerializer.Common
+namespace AmphetamineSerializer.Common.Attributes
 {
     /// <summary>
     /// Specify a custom builder for a given type.

@@ -1,12 +1,9 @@
 ﻿using AmphetamineSerializer.Tests;
 using NUnit.Framework;
-using Ploeh.AutoFixture;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization.Formatters.Binary;
 using TechTalk.SpecFlow;
 
 namespace AmphetamineSerializer.SystemTests

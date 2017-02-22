@@ -3,6 +3,7 @@ using AmphetamineSerializer.Interfaces;
 using System.Linq;
 using Sigil.NonGeneric;
 using AmphetamineSerializer.Common;
+using AmphetamineSerializer.Common.Attributes;
 
 namespace AmphetamineSerializer.Chain
 {
@@ -29,6 +30,31 @@ namespace AmphetamineSerializer.Chain
             {
                 var method = value.GetMethod("Invoke");
                 inputTypes = method.GetParameters().Select(x => x.ParameterType).ToArray();
+
+                int index = 0;
+
+                var attr = method.GetParameters().Select(
+                    _ => 
+                    {
+                        var type = ParameterType.Auto;
+                        var a = _.GetCustomAttributes(typeof(TagAttribute), false)
+                                 .FirstOrDefault() as TagAttribute;
+
+                        if (a!= null)
+                            type = a.Type;
+
+                        return new
+                        {
+                            ParameterType = type,
+                            Index = index++,
+                            Parameter = _
+                        };
+                    });
+
+                var mandatory = attr.Where(_=> _.ParameterType == ParameterType.MandatoryForward);
+                var optional = attr.Where(_=> _.ParameterType == ParameterType.OptionalForward);
+                var root = attr.Where(_=> _.ParameterType == ParameterType.RootObject).Single();
+
                 outputType = method.ReturnType;
                 delegateType = value;
             }

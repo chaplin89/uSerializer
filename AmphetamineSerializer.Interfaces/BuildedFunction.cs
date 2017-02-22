@@ -30,7 +30,7 @@ namespace AmphetamineSerializer.Common
         /// The type is created and it is not possible to use the Emit.
         /// All the calls should be done with the MethodInfo object.
         /// </summary>
-        TypeFinalized
+        TypeFinalized,
     }
 
     /// <summary>
@@ -42,6 +42,7 @@ namespace AmphetamineSerializer.Common
         public Emit Emiter { get; set; }
         public Type[] Input { get; set; }
         public MethodInfo Method { get; set; }
+        public Delegate Delegate { get; set; }
         public Type Return { get; set; }
         public BuildedFunctionStatus Status { get; set; }
     }

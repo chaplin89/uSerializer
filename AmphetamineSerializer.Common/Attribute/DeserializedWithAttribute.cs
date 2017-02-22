@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AmphetamineSerializer.Common
+namespace AmphetamineSerializer.Common.Attributes
 {
     /// <summary>
     /// Used for specify an object that manage the serialization in order to completely 
