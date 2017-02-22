@@ -3,9 +3,8 @@ using AmphetamineSerializer.Interfaces;
 using System;
 using System.Reflection;
 using System.Collections.Generic;
-using AmphetamineSerializer.Common.Chain;
 
-namespace AmphetamineSerializer.Chain
+namespace AmphetamineSerializer.Chain.Nodes
 {
     /// <summary>
     /// Module that is capable of handling request for custom builders.

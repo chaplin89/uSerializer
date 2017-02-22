@@ -1,10 +1,8 @@
 ﻿using AmphetamineSerializer.Interfaces;
-using AmphetamineSerializer.Common;
 using System;
 using System.Collections.Generic;
-using AmphetamineSerializer.Common.Chain;
 
-namespace AmphetamineSerializer.Chain
+namespace AmphetamineSerializer.Chain.Nodes
 {
     public class CacheManager : IChainElement
     {

@@ -1,12 +1,10 @@
 ﻿using AmphetamineSerializer.Common;
-using AmphetamineSerializer.Common.Chain;
 using AmphetamineSerializer.Helpers;
 using AmphetamineSerializer.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 
-namespace AmphetamineSerializer.Chain
+namespace AmphetamineSerializer.Chain.Nodes
 {
     public class DefaultHandlerFinder : IChainElement
     {

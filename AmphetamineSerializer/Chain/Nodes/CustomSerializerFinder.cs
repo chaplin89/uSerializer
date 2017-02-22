@@ -4,9 +4,8 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
-using AmphetamineSerializer.Common.Chain;
 
-namespace AmphetamineSerializer.Chain
+namespace AmphetamineSerializer.Chain.Nodes
 {
     public class CustomSerializerFinder : IChainElement
     {

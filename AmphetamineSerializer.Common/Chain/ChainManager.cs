@@ -2,7 +2,7 @@
 using AmphetamineSerializer.Interfaces;
 using System.Collections.Generic;
 
-namespace AmphetamineSerializer
+namespace AmphetamineSerializer.Chain
 {
     /// <summary>
     /// Simple implementation of a chain-of-responsibility.

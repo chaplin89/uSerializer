@@ -1,4 +1,5 @@
 ﻿using AmphetamineSerializer.Chain;
+using AmphetamineSerializer.Chain.Nodes;
 using System.Diagnostics;
 using System.IO;
 

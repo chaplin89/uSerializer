@@ -1,5 +1,5 @@
 ﻿using AmphetamineSerializer.Chain;
-using AmphetamineSerializer.Common.Chain;
+using AmphetamineSerializer.Chain.Nodes;
 using AmphetamineSerializer.Interfaces;
 using System;
 using System.IO;

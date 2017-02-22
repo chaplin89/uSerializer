@@ -3,10 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using AmphetamineSerializer.Interfaces;
 using AmphetamineSerializer.Common;
 using Sigil;
-using AmphetamineSerializer.Common.Chain;
+using AmphetamineSerializer.Chain.Nodes;
 
 namespace AmphetamineSerializer
 {

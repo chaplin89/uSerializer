@@ -1,4 +1,4 @@
-﻿namespace AmphetamineSerializer.Common.Chain
+﻿namespace AmphetamineSerializer.Chain
 {
     /// <summary>
     /// Specify the type of request or response for a build.

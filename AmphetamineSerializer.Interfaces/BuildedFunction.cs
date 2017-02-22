@@ -33,6 +33,10 @@ namespace AmphetamineSerializer.Common
         TypeFinalized
     }
 
+    /// <summary>
+    /// Need to be here because it's needed by the interface IBuilder.
+    /// Need refactoring.
+    /// </summary>
     public class BuildedFunction
     {
         public Emit Emiter { get; set; }

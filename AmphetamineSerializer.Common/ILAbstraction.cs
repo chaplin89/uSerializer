@@ -1,15 +1,14 @@
-﻿using AmphetamineSerializer.Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using System.Reflection;
 using Sigil.NonGeneric;
 using Sigil;
-using System.Linq;
-using AmphetamineSerializer.Common.Chain;
+using AmphetamineSerializer.Common;
+using AmphetamineSerializer.Chain;
 
-namespace AmphetamineSerializer.Common
+namespace AmphetamineSerializer
 {
     /// <summary>
     /// Type of content to be loaded

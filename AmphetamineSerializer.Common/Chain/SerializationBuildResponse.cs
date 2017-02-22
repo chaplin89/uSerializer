@@ -1,6 +1,7 @@
-﻿using AmphetamineSerializer.Interfaces;
+﻿using AmphetamineSerializer.Common;
+using AmphetamineSerializer.Interfaces;
 
-namespace AmphetamineSerializer.Common.Chain
+namespace AmphetamineSerializer.Chain
 {
     /// <summary>
     /// Response to a build request.

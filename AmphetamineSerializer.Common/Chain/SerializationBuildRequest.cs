@@ -2,8 +2,9 @@
 using AmphetamineSerializer.Interfaces;
 using System.Linq;
 using Sigil.NonGeneric;
+using AmphetamineSerializer.Common;
 
-namespace AmphetamineSerializer.Common.Chain
+namespace AmphetamineSerializer.Chain
 {
     /// <summary>
     /// Request to build a serializator.

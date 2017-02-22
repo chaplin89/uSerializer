@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmphetamineSerializer", "AmphetamineSerializer\AmphetamineSerializer.csproj", "{4D388985-26F2-4EC4-9926-2BA2E926651C}"
 EndProject
@@ -38,10 +38,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sigil NET20", "Sigil\Sigil NET20\Sigil NET20.csproj", "{2DBFBF4D-85B9-4785-B77E-F5635B2AE599}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sigil NET45", "Sigil\Sigil NET45\Sigil NET45.csproj", "{CC8E294D-E06C-4420-A260-D515D89EC53A}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Sigil", "Sigil\Sigil\Sigil.xproj", "{3F959AB7-A1C2-41DA-A1F3-981EA89A0067}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SigilTests.DNX", "Sigil\SigilTests.DNX\SigilTests.DNX.xproj", "{AC7E3C9D-9B25-4DA8-9D1D-FD7EE39A6A9E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -90,10 +86,6 @@ Global
 		{CC8E294D-E06C-4420-A260-D515D89EC53A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CC8E294D-E06C-4420-A260-D515D89EC53A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CC8E294D-E06C-4420-A260-D515D89EC53A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3F959AB7-A1C2-41DA-A1F3-981EA89A0067}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3F959AB7-A1C2-41DA-A1F3-981EA89A0067}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AC7E3C9D-9B25-4DA8-9D1D-FD7EE39A6A9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AC7E3C9D-9B25-4DA8-9D1D-FD7EE39A6A9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -107,7 +99,5 @@ Global
 		{5A3ECA06-60D3-4AF1-B65B-12CB71514FB6} = {43CF4B42-79A9-4D1E-849A-16897E5B5EC0}
 		{2DBFBF4D-85B9-4785-B77E-F5635B2AE599} = {43CF4B42-79A9-4D1E-849A-16897E5B5EC0}
 		{CC8E294D-E06C-4420-A260-D515D89EC53A} = {43CF4B42-79A9-4D1E-849A-16897E5B5EC0}
-		{3F959AB7-A1C2-41DA-A1F3-981EA89A0067} = {43CF4B42-79A9-4D1E-849A-16897E5B5EC0}
-		{AC7E3C9D-9B25-4DA8-9D1D-FD7EE39A6A9E} = {43CF4B42-79A9-4D1E-849A-16897E5B5EC0}
 	EndGlobalSection
 EndGlobal
