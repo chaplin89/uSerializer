@@ -42,6 +42,7 @@ namespace AmphetamineSerializer
             this.g = g;
         }
 
+        #region LoadStoreContext
         public void Load(FoundryContext ctx)
         {
             switch (ctx.Element.ElementType)
@@ -157,6 +158,8 @@ namespace AmphetamineSerializer
                 ctx.G.StoreField(ctx.Element.FieldElement.Field);
         }
 
+        #endregion
+
         /// <summary>
         /// Increment a local variable with a given step
         /// </summary>
@@ -173,38 +176,6 @@ namespace AmphetamineSerializer
                 g.LoadConstant(step); // step --> stack
             g.Add(); // index + step --> stack
             g.StoreLocal(index); // stack --> index
-        }
-
-        /// <summary>
-        /// Load in the stack objectInstance.field or &amp;objectInstance.field 
-        /// </summary>
-        /// <param name="objectInstance">Instance</param>
-        /// <param name="field">Field</param>
-        /// <param name="whatToLoad">Tell if the caller is interested in the address or in the content</param>
-        public void EmitAccessObject(Local objectInstance, FieldInfo field, TypeOfContent whatToLoad = TypeOfContent.Value)
-        {
-            g.LoadLocal(objectInstance); // this --> stack
-            if (whatToLoad == TypeOfContent.Address)
-                g.LoadFieldAddress(field); // &this.CurrentItem --> stack
-            else
-                g.LoadField(field); // this.CurrentItem --> stack
-        }
-
-        /// <summary>
-        /// Load in the stack objectInstance.field or &amp;objectInstance.field 
-        /// </summary>
-        /// <param name="objectInstance">Instance</param>
-        /// <param name="field">Field</param>
-        /// <param name="whatToLoad">Tell if the caller is interested in the address or in the content</param>
-        public void EmitStoreObject(Local objectInstance, FieldInfo field, Local content, TypeOfContent whatToLoad = TypeOfContent.Value)
-        {
-            g.LoadLocal(objectInstance); // this --> stack
-
-            if (whatToLoad == TypeOfContent.Address)
-                g.LoadLocalAddress(content);// this --> stack
-            else
-                g.LoadLocal(content); // this --> stack
-            g.StoreField(field); // &this.CurrentItem --> stack
         }
 
         /// <summary>

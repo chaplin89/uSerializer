@@ -134,19 +134,21 @@ namespace AmphetamineSerializer
 
             if (ctx.ObjectType.IsByRef)
             {
-                Local local = ctx.G.DeclareLocal(field.FieldType);
-                ctx.G.LoadLocalAddress(local);
+                ctx.G.LoadLocal(ctx.Element.FieldElement.Instance); // this --> stack
+                ctx.G.LoadFieldAddress(field); // &this.CurrentItem --> stack
                 ctx.Manipulator.ForwardParameters(ctx.InputParameters, targetMethod, ctx.Element.CurrentAttribute);
-                ctx.G.LoadLocal(local);
-                ctx.Manipulator.EmitStoreObject(ctx.Element.FieldElement.Instance, field, local);
+
             }
             else
             {
-                ctx.Manipulator.EmitAccessObject(ctx.Element.FieldElement.Instance, field);
+                ctx.G.LoadLocal(ctx.Element.FieldElement.Instance); // this --> stack
+                ctx.G.LoadField(field); // this.CurrentItem --> stack
                 ctx.Manipulator.ForwardParameters(ctx.InputParameters, targetMethod, ctx.Element.CurrentAttribute);
-                ctx.Manipulator.EmitAccessObject(ctx.Element.FieldElement.Instance, field);
             }
 
+            ctx.G.LoadLocal(ctx.Element.FieldElement.Instance); // this --> stack
+            ctx.G.LoadField(field); // this.CurrentItem --> stack
+            
             // Deserialize versions
             ctx.G.LoadConstant(versions[0]);
             ctx.G.Subtract();

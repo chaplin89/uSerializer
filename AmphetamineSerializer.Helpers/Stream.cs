@@ -1,4 +1,5 @@
-﻿using AmphetamineSerializer.Common;
+﻿using AmphetamineSerializer.Chain;
+using AmphetamineSerializer.Common;
 using AmphetamineSerializer.Common.Attributes;
 using System;
 using System.Collections.Generic;
@@ -12,12 +13,9 @@ namespace AmphetamineSerializer.Helpers
 {
     public class StreamDeserializationCtx : BuilderBase
     {
-        static StreamDeserializationCtx()
-        {
-            // Not all methods were found
-            Debug.Assert(typeHandlerMap.Where(x => x.Value == null).Count() == 0);
-        }
-
+        /// <summary>
+        /// Map every trivial type with its handler inside BinaryWriter or BinaryReader.
+        /// </summary>
         static private readonly Dictionary<Type, MethodInfo> typeHandlerMap = new Dictionary<Type, MethodInfo>()
         {
             {typeof(byte),                   typeof(BinaryWriter).GetMethod("Write", new Type[] {typeof(byte),   })},
@@ -46,6 +44,13 @@ namespace AmphetamineSerializer.Helpers
             {typeof(long).MakeByRefType(),   typeof(BinaryReader).GetMethod("ReadInt64")},
             {typeof(char).MakeByRefType(),   typeof(BinaryReader).GetMethod("ReadChar")},
         };
+        ParameterDescriptor desc;
+        
+        static StreamDeserializationCtx()
+        {
+            // Not all methods were found
+            Debug.Assert(typeHandlerMap.Where(x => x.Value == null).Count() == 0);
+        }
 
         public StreamDeserializationCtx(FoundryContext ctx) : base(ctx)
         {
@@ -79,11 +84,16 @@ namespace AmphetamineSerializer.Helpers
                 EncodeString(ctx);
         }
 
+
+        /// <summary>
+        /// Rough C# translation:
+        /// Encoding.ASCII.GetString(reader.ReadBytes(reader.ReadInt32()));
+        /// 
+        /// One day this will support multiple encoding depending on attributes.
+        /// </summary>
+        /// <param name="ctx"></param>
         public void DecodeString(FoundryContext ctx)
         {
-            // Rough C# translation:
-            // Encoding.ASCII.GetString(reader.ReadBytes(reader.ReadInt32()));
-
             ctx.Manipulator.Store(ctx, (context) =>
             {
                 // Put the decoded string in the stack.

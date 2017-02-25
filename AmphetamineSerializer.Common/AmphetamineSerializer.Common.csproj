@@ -50,9 +50,11 @@
     <Compile Include="Attribute\TagAttribute.cs" />
     <Compile Include="BuilderBase.cs" />
     <Compile Include="Chain\ChainManager.cs" />
+    <Compile Include="Chain\ParameterDescriptor.cs" />
     <Compile Include="Chain\SerializationBuildRequest.cs" />
     <Compile Include="Chain\SerializationBuildResponse.cs" />
     <Compile Include="Chain\TypeOfRequest.cs" />
+    <Compile Include="Chain\TypeOfResponse.cs" />
     <Compile Include="ElementDescriptor.cs" />
     <Compile Include="FoundryContext.cs" />
     <Compile Include="FuzzyFunctionResolver.cs" />
@@ -64,6 +66,7 @@
     <Compile Include="Options.cs" />
     <Compile Include="SigilFunctionProvider.cs" />
     <Compile Include="StatusSaver.cs" />
+    <Compile Include="TypeExtension.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AmphetamineSerializer.Interfaces\AmphetamineSerializer.Interfaces.csproj">

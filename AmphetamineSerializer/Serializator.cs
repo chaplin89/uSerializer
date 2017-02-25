@@ -14,17 +14,17 @@ namespace AmphetamineSerializer
     public class Serializator<T> : ISerializator
     {
         protected delegate void DeserializeBytes(
-            [Tag(ParameterType.RootObject)] ref T obj,
-            [Tag(ParameterType.MandatoryForward)]   byte[] buffer,
-            [Tag(ParameterType.MandatoryForward)]   ref uint position);
+            [Tag(ParameterRole.RootObject)] ref T obj,
+            [Tag(ParameterRole.MandatoryForward)]   byte[] buffer,
+            [Tag(ParameterRole.MandatoryForward)]   ref uint position);
 
         protected delegate void SerializeBinaryWriter(
-            [Tag(ParameterType.RootObject)] T obj, 
-            [Tag(ParameterType.MandatoryForward)] BinaryWriter stream);
+            [Tag(ParameterRole.RootObject)] T obj, 
+            [Tag(ParameterRole.MandatoryForward)] BinaryWriter stream);
 
         protected delegate void DeserializeBinaryReader(
-            [Tag(ParameterType.RootObject)] ref T obj,
-            [Tag(ParameterType.MandatoryForward)] BinaryReader stream);
+            [Tag(ParameterRole.RootObject)] ref T obj,
+            [Tag(ParameterRole.MandatoryForward)] BinaryReader stream);
 
         protected DeserializeBytes deserializeFromBytes;
         protected DeserializeBinaryReader deserializeFromStream;
@@ -92,7 +92,7 @@ namespace AmphetamineSerializer
             {
                 AdditionalContext = additionalContext,
                 DelegateType = delegateType,
-                RequestType = TypeOfRequest.Method                
+                RequestType = TypeOfRequest.Method
             };
 
             var response = chain.Process(request) as SerializationBuildResponse;

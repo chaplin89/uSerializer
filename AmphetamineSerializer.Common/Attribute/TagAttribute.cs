@@ -5,7 +5,7 @@ namespace AmphetamineSerializer.Common.Attributes
     /// <summary>
     /// 
     /// </summary>
-    public enum ParameterType
+    public enum ParameterRole
     {
         /// <summary>
         /// 
@@ -37,7 +37,7 @@ namespace AmphetamineSerializer.Common.Attributes
         /// 
         /// </summary>
         /// <param name="type"></param>
-        public TagAttribute(ParameterType type)
+        public TagAttribute(ParameterRole type)
         {
             Type = type;
         }
@@ -45,6 +45,6 @@ namespace AmphetamineSerializer.Common.Attributes
         /// <summary>
         /// 
         /// </summary>
-        public ParameterType Type { get; private set; }
+        public ParameterRole Type { get; private set; }
     }
 }

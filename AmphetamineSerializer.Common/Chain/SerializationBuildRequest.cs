@@ -36,7 +36,7 @@ namespace AmphetamineSerializer.Chain
                 var attr = method.GetParameters().Select(
                     _ => 
                     {
-                        var type = ParameterType.Auto;
+                        var type = ParameterRole.Auto;
                         var a = _.GetCustomAttributes(typeof(TagAttribute), false)
                                  .FirstOrDefault() as TagAttribute;
 
@@ -51,9 +51,9 @@ namespace AmphetamineSerializer.Chain
                         };
                     });
 
-                var mandatory = attr.Where(_=> _.ParameterType == ParameterType.MandatoryForward);
-                var optional = attr.Where(_=> _.ParameterType == ParameterType.OptionalForward);
-                var root = attr.Where(_=> _.ParameterType == ParameterType.RootObject).Single();
+                var mandatory = attr.Where(_=> _.ParameterType == ParameterRole.MandatoryForward);
+                var optional = attr.Where(_=> _.ParameterType == ParameterRole.OptionalForward);
+                var root = attr.Where(_=> _.ParameterType == ParameterRole.RootObject).Single();
 
                 outputType = method.ReturnType;
                 delegateType = value;
