@@ -54,6 +54,7 @@ namespace AmphetamineSerializer.Helpers
 
         public StreamDeserializationCtx(FoundryContext ctx) : base(ctx)
         {
+            ctx.InputParameters
         }
 
         public override BuildedFunction Make()

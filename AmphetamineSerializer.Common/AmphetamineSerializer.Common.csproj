@@ -66,6 +66,7 @@
     <Compile Include="Options.cs" />
     <Compile Include="SigilFunctionProvider.cs" />
     <Compile Include="StatusSaver.cs" />
+    <Compile Include="StrongFunctionCaller.cs" />
     <Compile Include="TypeExtension.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -67,6 +67,11 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="InvariantCaller.feature.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>InvariantCaller.feature</DependentUpon>
+    </Compile>
     <Compile Include="Serialization.feature.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -78,6 +83,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="InvariantCaller.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>InvariantCaller.feature.cs</LastGenOutput>
+    </None>
     <None Include="packages.config" />
     <None Include="Serialization.feature">
       <Generator>SpecFlowSingleFileGenerator</Generator>

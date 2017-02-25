@@ -73,11 +73,6 @@ namespace AmphetamineSerializer.Common
             return null;
         }
 
-        public object ResolveFromSignature(object rootType, object inputTypes, object outputType)
-        {
-            throw new NotImplementedException();
-        }
-
         /// <summary>
         /// Map types with the corresponding method that is decorated using the attribute SerializationHandler.
         /// </summary>
