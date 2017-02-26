@@ -45,7 +45,9 @@ namespace AmphetamineSerializer.Helpers
             {typeof(char).MakeByRefType(),   typeof(BinaryReader).GetMethod("ReadChar")},
         };
         ParameterDescriptor desc;
-        
+
+        InvariantCaller caller = new InvariantCaller();
+
         static StreamDeserializationCtx()
         {
             // Not all methods were found
@@ -54,7 +56,7 @@ namespace AmphetamineSerializer.Helpers
 
         public StreamDeserializationCtx(FoundryContext ctx) : base(ctx)
         {
-            ctx.InputParameters
+            caller.SetInput(ctx.InputParameters);
         }
 
         public override BuildedFunction Make()
@@ -147,12 +149,31 @@ namespace AmphetamineSerializer.Helpers
             {
                 ctx.Manipulator.Store(ctx, (context) =>
                 {
-                    context.G.LoadArgument(1); // argument i --> stack
-                    ctx.G.CallVirtual(typeHandlerMap[ctx.NormalizedType]);
+                    caller.SetOutput(new ParameterDescriptor[] 
+                    {
+                        new ParameterDescriptor()
+                        {
+                            Index = 0,
+                            Parameter = typeof(BinaryReader),
+                            Role = ParameterRole.MandatoryForward
+                        }
+                    });
+                    caller.EmitInvoke(context.G);
+                    context.G.CallVirtual(typeHandlerMap[ctx.NormalizedType]);
                 });
             }
             else
             {
+                caller.SetOutput(new ParameterDescriptor[]
+                {
+                    new ParameterDescriptor()
+                    {
+                        Index = 0,
+                        Parameter = typeof(BinaryWriter),
+                        Role = ParameterRole.MandatoryForward
+                    }
+                });
+                caller.EmitInvoke(ctx.G);
                 ctx.G.LoadArgument(1); // argument i --> stack
                 ctx.Manipulator.Load(ctx);
                 ctx.G.CallVirtual(typeHandlerMap[ctx.NormalizedType]);

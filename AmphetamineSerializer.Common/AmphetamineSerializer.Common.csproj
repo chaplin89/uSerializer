@@ -59,6 +59,7 @@
     <Compile Include="FoundryContext.cs" />
     <Compile Include="FuzzyFunctionResolver.cs" />
     <Compile Include="Attribute\IndexAttribute.cs" />
+    <Compile Include="IElementInfo.cs" />
     <Compile Include="ILAbstraction.cs" />
     <Compile Include="LoopContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -66,7 +67,7 @@
     <Compile Include="Options.cs" />
     <Compile Include="SigilFunctionProvider.cs" />
     <Compile Include="StatusSaver.cs" />
-    <Compile Include="StrongFunctionCaller.cs" />
+    <Compile Include="InvariantCaller.cs" />
     <Compile Include="TypeExtension.cs" />
   </ItemGroup>
   <ItemGroup>

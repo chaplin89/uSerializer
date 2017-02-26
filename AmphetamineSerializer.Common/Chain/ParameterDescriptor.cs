@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using AmphetamineSerializer.Common.Attributes;
+using System;
 
 namespace AmphetamineSerializer.Chain
 {
@@ -10,7 +11,7 @@ namespace AmphetamineSerializer.Chain
         }
 
         public int Index { get; set; }
-        public ParameterInfo Parameter { get; set; }
+        public Type Parameter { get; set; }
         public ParameterRole Role { get; set; }
     }
 }

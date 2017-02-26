@@ -43,47 +43,58 @@ namespace AmphetamineSerializer
         }
 
         #region LoadStoreContext
-        public void Load(FoundryContext ctx)
+        public void Load(FoundryContext ctx, TypeOfContent content = TypeOfContent.Value)
         {
             switch (ctx.Element.ElementType)
             {
                 case ElementType.Field:
-                    LoadFromField(ctx);
+                    LoadFromField(ctx, content);
                     break;
                 case ElementType.Local:
-                    LoadFromLocal(ctx);
+                    LoadFromLocal(ctx, content);
                     break;
                 case ElementType.Custom:
-                    LoadCustom(ctx);
+                    LoadCustom(ctx, content);
                     break;
                 default:
                     break;
             }
         }
 
-        private void LoadCustom(FoundryContext ctx)
+        private void LoadCustom(FoundryContext ctx, TypeOfContent content)
         {
             ctx.Element.CustomElement.LoadAction(ctx);
         }
 
-        private void LoadFromLocal(FoundryContext ctx)
+        private void LoadFromLocal(FoundryContext ctx, TypeOfContent content)
         {
-            ctx.G.LoadLocal(ctx.Element.LocalVariable);
+            if (content == TypeOfContent.Value)
+                ctx.G.LoadLocal(ctx.Element.LocalVariable);
+            else
+                ctx.G.LoadLocalAddress(ctx.Element.LocalVariable);
         }
 
-        private void LoadFromField(FoundryContext ctx)
+        private void LoadFromField(FoundryContext ctx, TypeOfContent content)
         {
             if (ctx.Element.ItemType.IsArray)
             {
                 ctx.G.LoadLocal(ctx.Element.FieldElement.Instance);
                 ctx.G.LoadField(ctx.Element.FieldElement.Field);
                 ctx.G.LoadLocal(ctx.Element.LoopCtx.Index);
-                ctx.G.LoadElement(ctx.Element.UnderlyingType);
+
+                if (content == TypeOfContent.Value)
+                    ctx.G.LoadElement(ctx.Element.UnderlyingType);
+                else
+                    ctx.G.LoadElementAddress(ctx.Element.UnderlyingType);
             }
             else
             {
                 ctx.G.LoadLocal(ctx.Element.FieldElement.Instance);
-                ctx.G.LoadField(ctx.Element.FieldElement.Field);
+
+                if (content == TypeOfContent.Value)
+                    ctx.G.LoadField(ctx.Element.FieldElement.Field);
+                else
+                    ctx.G.LoadFieldAddress(ctx.Element.FieldElement.Field);
             }
         }
 
@@ -115,10 +126,9 @@ namespace AmphetamineSerializer
         /// </summary>
         /// <param name="ctx"></param>
         /// <param name="loadValueToStore"></param>
-        private void StoreOther(FoundryContext ctx, Action<FoundryContext> loadValueToStore)
-        {
-            loadValueToStore(ctx);
-            ctx.Element.CustomElement.StoreAction(ctx);
+        private void StoreOther(FoundryContext ctx, Action<FoundryContext, TypeOfContent> loadValueToStore)
+        {            
+            ctx.Element.CustomElement.StoreAction(ctx, new GenericElementInfo(loadValueToStore(ctx), null);
         }
 
         /// <summary>
@@ -211,7 +221,7 @@ namespace AmphetamineSerializer
 
                 ctx.Element = new ElementDescriptor()
                 {
-                    CustomElement = new CustomElementInfo()
+                    CustomElement = new GenericElementInfo()
                     {
                         LoadAction = (context) =>
                         {

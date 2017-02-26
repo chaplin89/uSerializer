@@ -15,8 +15,7 @@ namespace AmphetamineSerializer.Common
     {
         Type[] availableParameters;
         ushort?[] parameterOrder;
-
-
+        
         public InvariantCaller()
         {
         }
@@ -70,9 +69,8 @@ namespace AmphetamineSerializer.Common
         /// </summary>
         /// <param name="method"></param>
         /// <param name="instance"></param>
-        public void Invoke(MethodInfo method, object instance = null)
+        public void Invoke(MethodInfo method, object[] input, object instance = null)
         {
-
         }
 
         /// <summary>
@@ -93,7 +91,7 @@ namespace AmphetamineSerializer.Common
 
                     completed = false;
 
-                    if (item.Parameter.ParameterType == availableParameters[i])
+                    if (item.Parameter == availableParameters[i])
                         foundIndexes[item.Index] = i;
                 }
 

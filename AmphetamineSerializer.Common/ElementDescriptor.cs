@@ -1,6 +1,5 @@
 ﻿using AmphetamineSerializer.Common.Attributes;
 using Sigil;
-using Sigil.NonGeneric;
 using System;
 using System.Reflection;
 
@@ -14,32 +13,69 @@ namespace AmphetamineSerializer.Common
     }
 
     /// <summary>
-    /// 
+    /// Represent the tuple object instance, field.
     /// </summary>
-    public class FieldElementInfo
+    public class FieldElementInfo : GenericElementInfo
     {
+        public FieldElementInfo()
+        {
+            base.LoadAction = this.Load;
+
+        }
         /// <summary>
-        /// 
+        /// Object instance.
         /// </summary>
         public Local Instance { get; set; }
 
         /// <summary>
-        /// 
+        /// Field information.
         /// </summary>
         public FieldInfo Field { get; set; }
+
+        void Load(FoundryContext ctx, TypeOfContent content)
+        {
+
+        }
+
+        void Store(FoundryContext ctx, IElementInfo value)
+        {
+
+        }
     }
 
-    public class CustomElementInfo
+    /// <summary>
+    /// Abstract  access an element.
+    /// </summary>
+    public class GenericElementInfo : IElementInfo
     {
-        /// <summary>
-        /// Emit instruction for loading the element in the stack
-        /// </summary>
-        public Action<FoundryContext> LoadAction { get; set; }
+        public GenericElementInfo(Action<FoundryContext, TypeOfContent> loadAction, Action<FoundryContext, IElementInfo> storeAction )
+        {
+            LoadAction = loadAction;
+            StoreAction = storeAction;
+        }
+
+        protected GenericElementInfo()
+        {
+        }
+
 
         /// <summary>
-        /// Emit instruction for storing the element from the stack
+        /// Action for emitting instruction 
+        /// for loading an element into the stack.
         /// </summary>
-        public Action<FoundryContext> StoreAction { get; set; }
+        public Action<FoundryContext, TypeOfContent> LoadAction { get; protected set; }
+
+        /// <summary>
+        /// Action for emitting instructions
+        /// for storing the element from the stack.
+        /// </summary>        
+        /// <remarks>
+        /// The action has the following signature:
+        /// void Store(FoundryContext, IElementInfo).
+        /// The IElementInfo represent the element that 
+        /// will be stored inside this one.
+        /// </remarks>
+        public Action<FoundryContext, IElementInfo> StoreAction { get; protected set; }
     }
 
     /// <summary>
@@ -49,7 +85,7 @@ namespace AmphetamineSerializer.Common
     {
         FieldElementInfo fieldElement;
         Local localVariable;
-        CustomElementInfo customElement;
+        GenericElementInfo customElement;
 
         /// <summary>
         /// Map a field to the instance of the type that contain the field. 
@@ -90,7 +126,7 @@ namespace AmphetamineSerializer.Common
         /// <summary>
         /// 
         /// </summary>
-        public CustomElementInfo CustomElement
+        public GenericElementInfo CustomElement
         {
             get
             {
@@ -141,10 +177,6 @@ namespace AmphetamineSerializer.Common
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public Emit G { get; set; }
         public LoopContext LoopCtx { get; set; }
     }
 }
