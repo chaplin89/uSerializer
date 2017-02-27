@@ -56,10 +56,13 @@
     <Compile Include="Chain\TypeOfRequest.cs" />
     <Compile Include="Chain\TypeOfResponse.cs" />
     <Compile Include="ElementDescriptor.cs" />
+    <Compile Include="Element\FieldElementInfo.cs" />
+    <Compile Include="Element\LocalElement.cs" />
     <Compile Include="FoundryContext.cs" />
     <Compile Include="FuzzyFunctionResolver.cs" />
     <Compile Include="Attribute\IndexAttribute.cs" />
-    <Compile Include="IElementInfo.cs" />
+    <Compile Include="Element\GenericElementInfo.cs" />
+    <Compile Include="Element\IElementInfo.cs" />
     <Compile Include="ILAbstraction.cs" />
     <Compile Include="LoopContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -40,7 +40,7 @@ namespace AmphetamineSerializer.Common
             };
         }
 
-        public ElementDescriptor Element;
+        public IElementInfo Element;
 
         /// <summary>
         /// 

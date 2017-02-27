@@ -223,11 +223,11 @@ namespace AmphetamineSerializer
                 {
                     CustomElement = new GenericElementInfo()
                     {
-                        LoadAction = (context) =>
+                        Load = (g, ) =>
                         {
-                            context.G.LoadLocal(currentElement.FieldElement.Instance); // this (stfld) --> stack
-                            context.G.LoadField(currentElement.FieldElement.Field); // this.CurrentItemFieldInfo --> stack
-                            context.G.LoadLength(currentElement.FieldElement.Field.FieldType.GetElementType());
+                            g.LoadLocal(currentElement.FieldElement.Instance); // this (stfld) --> stack
+                            g.LoadField(currentElement.FieldElement.Field); // this.CurrentItemFieldInfo --> stack
+                            g.LoadLength(currentElement.FieldElement.Field.FieldType.GetElementType());
                         }
                     },
                     ItemType = indexType,

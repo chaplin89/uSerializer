@@ -2,6 +2,7 @@
 using Sigil;
 using System;
 using System.Reflection;
+using Sigil.NonGeneric;
 
 namespace AmphetamineSerializer.Common
 {
@@ -10,72 +11,6 @@ namespace AmphetamineSerializer.Common
         Field,
         Local,
         Custom
-    }
-
-    /// <summary>
-    /// Represent the tuple object instance, field.
-    /// </summary>
-    public class FieldElementInfo : GenericElementInfo
-    {
-        public FieldElementInfo()
-        {
-            base.LoadAction = this.Load;
-
-        }
-        /// <summary>
-        /// Object instance.
-        /// </summary>
-        public Local Instance { get; set; }
-
-        /// <summary>
-        /// Field information.
-        /// </summary>
-        public FieldInfo Field { get; set; }
-
-        void Load(FoundryContext ctx, TypeOfContent content)
-        {
-
-        }
-
-        void Store(FoundryContext ctx, IElementInfo value)
-        {
-
-        }
-    }
-
-    /// <summary>
-    /// Abstract  access an element.
-    /// </summary>
-    public class GenericElementInfo : IElementInfo
-    {
-        public GenericElementInfo(Action<FoundryContext, TypeOfContent> loadAction, Action<FoundryContext, IElementInfo> storeAction )
-        {
-            LoadAction = loadAction;
-            StoreAction = storeAction;
-        }
-
-        protected GenericElementInfo()
-        {
-        }
-
-
-        /// <summary>
-        /// Action for emitting instruction 
-        /// for loading an element into the stack.
-        /// </summary>
-        public Action<FoundryContext, TypeOfContent> LoadAction { get; protected set; }
-
-        /// <summary>
-        /// Action for emitting instructions
-        /// for storing the element from the stack.
-        /// </summary>        
-        /// <remarks>
-        /// The action has the following signature:
-        /// void Store(FoundryContext, IElementInfo).
-        /// The IElementInfo represent the element that 
-        /// will be stored inside this one.
-        /// </remarks>
-        public Action<FoundryContext, IElementInfo> StoreAction { get; protected set; }
     }
 
     /// <summary>
