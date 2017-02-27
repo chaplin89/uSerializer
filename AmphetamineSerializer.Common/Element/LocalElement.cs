@@ -6,6 +6,21 @@ namespace AmphetamineSerializer.Common.Element
 {
     public class LocalElement : IElementInfo
     {
+
+        public static implicit operator LocalElement(Local local)
+        {
+            return new LocalElement(local);
+        }
+
+        public static implicit operator Local(LocalElement local)
+        {
+            return local.LocalVariable;
+        }
+
+        public LocalElement(Local local)
+        {
+            LocalVariable = local;
+        }
         Local LocalVariable { get; set; }
         public Action<Emit, TypeOfContent> Load
         {

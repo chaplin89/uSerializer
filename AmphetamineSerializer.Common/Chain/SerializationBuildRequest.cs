@@ -87,7 +87,7 @@ namespace AmphetamineSerializer.Chain
         /// If the request allow the process to modify the a context,
         /// this will contain information about the context.
         /// </summary>
-        public ElementDescriptor Element { get; set; }
+        public IElementInfo Element { get; set; }
 
         /// <summary>
         /// If the request allow the process to modify the a context,

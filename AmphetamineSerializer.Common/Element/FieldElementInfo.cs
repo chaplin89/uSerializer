@@ -1,6 +1,7 @@
 ﻿using Sigil.NonGeneric;
 using System;
 using System.Reflection;
+using AmphetamineSerializer.Common.Attributes;
 
 namespace AmphetamineSerializer.Common
 {
@@ -13,6 +14,10 @@ namespace AmphetamineSerializer.Common
         {
             Instance = instance;
             Field = field;
+        }
+        public FieldElementInfo()
+        {
+
         }
 
         /// <summary>
@@ -82,5 +87,7 @@ namespace AmphetamineSerializer.Common
                 };
             }
         }
+
+        public ASIndexAttribute CurrentAttribute { get; set; }
     }
 }
