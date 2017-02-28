@@ -92,19 +92,14 @@ namespace AmphetamineSerializer
 
                 var currentElement = ctx.Element;
 
-                ctx.Element = new ElementDescriptor()
+                ctx.Element = new GenericElement()
                 {
-                    CustomElement = new GenericElement()
+                    Load = ((g, content) =>
                     {
-                        Load = (g, ) =>
-                        {
-                            g.LoadLocal(currentElement.FieldElement.Instance); // this (stfld) --> stack
-                            g.LoadField(currentElement.FieldElement.Field); // this.CurrentItemFieldInfo --> stack
-                            g.LoadLength(currentElement.FieldElement.Field.FieldType.GetElementType());
-                        }
-                    },
-                    ItemType = indexType,
-                    UnderlyingType = indexType
+                        g.LoadLocal(currentElement.FieldElement.Instance); // this (stfld) --> stack
+                        g.LoadField(currentElement.FieldElement.Field); // this.CurrentItemFieldInfo --> stack
+                        g.LoadLength(currentElement.FieldElement.Field.FieldType.GetElementType());
+                    })
                 };
 
                 // Write the size of the array
@@ -124,8 +119,7 @@ namespace AmphetamineSerializer
                 if (response.Response.Status != BuildedFunctionStatus.NoMethodsAvailable)
                 {
                     currentLoopContext.Size = ctx.G.DeclareLocal(typeof(uint));
-                    ctx.G.LoadLocal(ctx.Element.FieldElement.Instance); // this (stfld) --> stack
-                    ctx.G.LoadField(ctx.Element.FieldElement.Field); // this.CurrentItemFieldInfo --> stack
+                    ctx.Element.Load(g, TypeOfContent.Value);
                     ctx.G.LoadLength(ctx.Element.FieldElement.Field.FieldType.GetElementType());
                     ctx.G.StoreLocal(currentLoopContext.Size);
                     ctx.G.LoadLocal(currentLoopContext.Size);
@@ -180,7 +174,7 @@ namespace AmphetamineSerializer
                 if (!currentLoopContext.StoreAtPosition.HasValue)
                 {
                     // ObjectInstance.CurrentItemFieldInfo = new CurrentItemUnderlyingType[Size];
-                    ctx.G.LoadLocal(ctx.Element.FieldElement.Instance); // this (stfld) --> stack
+                    ctx.G.LoadLocal((Local)ctx.Element.Instance); // this (stfld) --> stack
                     ctx.G.LoadLocal(currentLoopContext.Size); // size --> stack
                     ctx.G.NewArray(ctx.Element.UnderlyingType); // new Array[size] --> stack
                     ctx.G.StoreField(ctx.Element.FieldElement.Field); // stack --> item
