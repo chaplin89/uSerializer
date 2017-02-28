@@ -21,6 +21,7 @@ namespace AmphetamineSerializer.Common.Element
         {
             LocalVariable = local;
         }
+
         Local LocalVariable { get; set; }
         public Action<Emit, TypeOfContent> Load
         {

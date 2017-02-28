@@ -7,6 +7,7 @@ using AmphetamineSerializer.Common;
 using Sigil;
 using AmphetamineSerializer.Chain.Nodes;
 using AmphetamineSerializer.Common.Element;
+using Sigil.NonGeneric;
 
 namespace AmphetamineSerializer
 {
@@ -79,10 +80,23 @@ namespace AmphetamineSerializer
                 normalizedType = ctx.ObjectType.GetElementType();
                 ctx.G.LoadArgument(0);
                 var ctor = normalizedType.GetConstructor(new Type[] { });
-                ctx.Element.Instance = (LocalElement)ctx.G.DeclareLocal(normalizedType);
-                ctx.G.NewObject(ctx.ObjectType.GetElementType());
-                ctx.G.StoreLocal((LocalElement)ctx.Element.Instance);
-                ctx.G.LoadLocal((LocalElement)ctx.Element.Instance);
+
+                if (ctor == null)
+                    throw new NotSupportedException($"The type {normalizedType.Name} does not have a parameterless constructor.");
+
+                LocalElement instance = ctx.G.DeclareLocal(normalizedType);
+                ctx.Element.Instance = instance;
+
+                GenericElementInfo load = (GenericElementInfo)((g, content)=>
+                {
+                    if (content == TypeOfContent.Address)
+                        throw new InvalidOperationException("Unable to return the content by address.");
+
+                    g.NewObject(ctx.ObjectType.GetElementType());
+                });
+
+                instance.Store(ctx.G, load, TypeOfContent.Value);
+                instance.Load(ctx.G, TypeOfContent.Value);
                 ctx.G.StoreIndirect(normalizedType);
             }
             else
@@ -148,7 +162,7 @@ namespace AmphetamineSerializer
 
             ctx.G.LoadLocal((LocalElement)ctx.Element.Instance); // this --> stack
             ctx.G.LoadField(field); // this.CurrentItem --> stack
-            
+
             // Deserialize versions
             ctx.G.LoadConstant(versions[0]);
             ctx.G.Subtract();
