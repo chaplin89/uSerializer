@@ -6,17 +6,16 @@ using AmphetamineSerializer.Common.Attributes;
 namespace AmphetamineSerializer.Common
 {
     /// <summary>
-    /// Abstract load/store of a class field.
+    /// Manage a class field.
     /// </summary>
-    public class FieldElementInfo : IElementInfo
+    public class FieldElement : IElement
     {
-
         /// <summary>
         /// Build this object and initialize instance and field.
         /// </summary>
-        /// <param name="instance"></param>
-        /// <param name="field"></param>
-        public FieldElementInfo(IElementInfo instance, FieldInfo field)
+        /// <param name="instance">Instance of the object that contain the field</param>
+        /// <param name="field">The field</param>
+        public FieldElement(IElement instance, FieldInfo field)
         {
             Instance = instance;
             Field = field;
@@ -25,20 +24,20 @@ namespace AmphetamineSerializer.Common
         /// <summary>
         /// Build this object with null instance/field.
         /// </summary>
-        public FieldElementInfo()
+        public FieldElement()
         {
         }
 
         /// <summary>
         /// Object instance.
         /// </summary>
-        public IElementInfo Instance { get; set; }
+        public IElement Instance { get; set; }
 
         /// <summary>
         /// If the field is an array, 
-        /// this is the index used in load/store.
+        /// this is the index(es) used in load/store.
         /// </summary>
-        public IElementInfo Index { get; set; }
+        public IElement Index { get; set; }
 
         /// <summary>
         /// Field information.
@@ -46,12 +45,21 @@ namespace AmphetamineSerializer.Common
         public FieldInfo Field { get; set; }
 
         /// <summary>
-        /// Access the ASIndexAttribute of Field.
+        /// Access the ASIndexAttribute of the field.
         /// </summary>
-        public ASIndexAttribute CurrentAttribute { get; }
-        
+        public ASIndexAttribute CurrentAttribute
+        {
+            get
+            {
+                if (Field == null)
+                    return null;
+                return Field.GetCustomAttribute<ASIndexAttribute>();
+            }
+        }
+
         /// <summary>
-        /// Abstract the load of a class field.
+        /// Emit instructions to load a field in the stack.
+        /// TODO: Manage jagged array and matrix.
         /// </summary>
         public Action<Emit, TypeOfContent> Load
         {
@@ -61,7 +69,7 @@ namespace AmphetamineSerializer.Common
                 {
                     Instance.Load(g, TypeOfContent.Value);
 
-                    if (Field.FieldType.IsArray)
+                    if (Field.FieldType.IsArray && Index != null)
                     {
                         g.LoadField(Field);
                         Index.Load(g, TypeOfContent.Value);
@@ -83,9 +91,9 @@ namespace AmphetamineSerializer.Common
         }
 
         /// <summary>
-        /// Abstract the store of a class field.
+        /// Emit instructions for storing something taken from the stack in a field of a class.
         /// </summary>
-        public Action<Emit, IElementInfo, TypeOfContent> Store
+        public Action<Emit, IElement, TypeOfContent> Store
         {
             get
             {

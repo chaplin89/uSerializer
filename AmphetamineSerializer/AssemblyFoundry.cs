@@ -35,7 +35,7 @@ namespace AmphetamineSerializer
                 ctx.G = ctx.Provider.AddMethod("Handle", ctx.InputParameters, typeof(void));
             }
 
-            ctx.Element = new FieldElementInfo();
+            ctx.Element = new FieldElement();
 
             if (ctx.Chain == null)
             {
@@ -73,7 +73,7 @@ namespace AmphetamineSerializer
         {
             Type normalizedType;
             int[] versions;
-            ctx.Element = new FieldElementInfo();
+            ctx.Element = new FieldElement();
 
             if (ctx.ManageLifeCycle)
             {
@@ -87,7 +87,7 @@ namespace AmphetamineSerializer
                 LocalElement instance = ctx.G.DeclareLocal(normalizedType);
                 ctx.Element.Instance = instance;
 
-                GenericElementInfo load = (GenericElementInfo)((g, content)=>
+                GenericElement load = (GenericElement)((g, content)=>
                 {
                     if (content == TypeOfContent.Address)
                         throw new InvalidOperationException("Unable to return the content by address.");

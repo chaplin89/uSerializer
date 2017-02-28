@@ -128,7 +128,7 @@ namespace AmphetamineSerializer
         /// <param name="loadValueToStore"></param>
         private void StoreOther(FoundryContext ctx, Action<FoundryContext, TypeOfContent> loadValueToStore)
         {            
-            ctx.Element.CustomElement.StoreAction(ctx, new GenericElementInfo(loadValueToStore(ctx), null);
+            ctx.Element.CustomElement.StoreAction(ctx, new GenericElement(loadValueToStore(ctx), null);
         }
 
         /// <summary>
@@ -221,7 +221,7 @@ namespace AmphetamineSerializer
 
                 ctx.Element = new ElementDescriptor()
                 {
-                    CustomElement = new GenericElementInfo()
+                    CustomElement = new GenericElement()
                     {
                         Load = (g, ) =>
                         {

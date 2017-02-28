@@ -18,14 +18,14 @@ namespace AmphetamineSerializer.Common
     /// </summary>
     public struct ElementDescriptor
     {
-        FieldElementInfo fieldElement;
+        FieldElement fieldElement;
         Local localVariable;
-        GenericElementInfo customElement;
+        GenericElement customElement;
 
         /// <summary>
         /// Map a field to the instance of the type that contain the field. 
         /// </summary>
-        public FieldElementInfo FieldElement
+        public FieldElement FieldElement
         {
             get
             {
@@ -61,7 +61,7 @@ namespace AmphetamineSerializer.Common
         /// <summary>
         /// 
         /// </summary>
-        public GenericElementInfo CustomElement
+        public GenericElement CustomElement
         {
             get
             {

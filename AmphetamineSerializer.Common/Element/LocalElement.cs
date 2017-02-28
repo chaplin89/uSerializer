@@ -5,9 +5,9 @@ using Sigil;
 namespace AmphetamineSerializer.Common.Element
 {
     /// <summary>
-    /// Manage load and store of a local variable.
+    /// Manage a local variable.
     /// </summary>
-    public class LocalElement : IElementInfo
+    public class LocalElement : IElement
     {
         /// <summary>
         /// Build a LocalElement wrapper around a Local variable.
@@ -21,7 +21,7 @@ namespace AmphetamineSerializer.Common.Element
         /// <summary>
         /// Convert this object to its contained variable.
         /// </summary>
-        /// <param name="local"></param>
+        /// <param name="local">The local variable</param>
         public static implicit operator Local(LocalElement local)
         {
             return local.LocalVariable;
@@ -30,13 +30,12 @@ namespace AmphetamineSerializer.Common.Element
         /// <summary>
         /// Build this object with a local variable.
         /// </summary>
-        /// <param name="local"></param>
+        /// <param name="local">The local variable</param>
         public LocalElement(Local local)
         {
             LocalVariable = local;
         }
-
-
+        
         /// <summary>
         /// The local variable
         /// </summary>
@@ -60,10 +59,9 @@ namespace AmphetamineSerializer.Common.Element
         }
 
         /// <summary>
-        /// Emit instructions for storing something taken from the stack in the local
-        /// variable.
+        /// Emit instructions for storing something, taken from the stack, in the local variable.
         /// </summary>
-        public Action<Emit, IElementInfo, TypeOfContent> Store
+        public Action<Emit, IElement, TypeOfContent> Store
         {
             get
             {
