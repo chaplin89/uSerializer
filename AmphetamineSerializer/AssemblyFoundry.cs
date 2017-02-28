@@ -7,7 +7,8 @@ using AmphetamineSerializer.Common;
 using Sigil;
 using AmphetamineSerializer.Chain.Nodes;
 using AmphetamineSerializer.Common.Element;
-using Sigil.NonGeneric;
+using LoadAction = System.Action<Sigil.NonGeneric.Emit, AmphetamineSerializer.TypeOfContent>;
+using StoreAction = System.Action<Sigil.NonGeneric.Emit, AmphetamineSerializer.Common.IElement, AmphetamineSerializer.TypeOfContent>;
 
 namespace AmphetamineSerializer
 {
@@ -73,13 +74,7 @@ namespace AmphetamineSerializer
                 LocalElement instance = ctx.G.DeclareLocal(normalizedType);
                 ctx.Element.Instance = instance;
 
-                GenericElement load = (GenericElement)((g, content)=>
-                {
-                    if (content == TypeOfContent.Address)
-                        throw new InvalidOperationException("Unable to return the content by address.");
-
-                    g.NewObject(ctx.ObjectType.GetElementType());
-                });
+                var load = (GenericElement)((g, _) => g.NewObject(ctx.ObjectType.GetElementType()));
 
                 instance.Store(ctx.G, load, TypeOfContent.Value);
                 instance.Load(ctx.G, TypeOfContent.Value);
@@ -88,9 +83,11 @@ namespace AmphetamineSerializer
             else
             {
                 normalizedType = ctx.ObjectType;
-                ctx.Element.Instance = (LocalElement)ctx.G.DeclareLocal(ctx.ObjectType);
+                LocalElement instance= ctx.G.DeclareLocal(ctx.ObjectType);
+
+                ctx.Element.Instance = instance;
                 ctx.G.LoadArgument(0);
-                ctx.G.StoreLocal((LocalElement)ctx.Element.Instance);
+                ctx.G.StoreLocal(instance);
             }
 
             versions = VersionHelper.GetExplicitlyManagedVersions(normalizedType).ToArray();
@@ -111,7 +108,7 @@ namespace AmphetamineSerializer
 
             if (VersionHelper.GetAllFields(normalizedType).First() != ctx.Element.Field)
                 throw new InvalidOperationException("The version field should be the first.");
-            
+
             for (int i = 0; i < labels.Length; i++)
                 labels[i] = ctx.G.DefineLabel($"Version_{i}");
 
@@ -166,13 +163,12 @@ namespace AmphetamineSerializer
             {
                 // todo:
                 // 1. List (needs a special handling because of its similarities with Array)
-                // 2. Anything else implementing IList (excluing List ofc)
+                // 2. Anything else implementing IEnumerable (excluing List ofc)
                 SerializationBuildResponse response = null;
 
                 ctx.Element.Field = item;
-
-                // TODO: IsInterface is needed if IsAbstract is true?
-                if (ctx.Element.Field.FieldType.IsInterface || ctx.Element.Field.FieldType.IsAbstract)
+                
+                if (ctx.Element.Field.FieldType.IsAbstract)
                     throw new InvalidOperationException("Incomplete types are not allowed.");
 
                 if (ctx.Element.Field.FieldType.IsArray)

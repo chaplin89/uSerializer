@@ -100,13 +100,14 @@ namespace AmphetamineSerializer.Common
                 return (g, value, content) =>
                 {
                     Instance.Load(g, TypeOfContent.Value);
+
                     if (Field.FieldType.IsArray)
                     {
                         g.LoadField(Field);
                         Index.Load(g, TypeOfContent.Value);
                     }
 
-                    value.Load(g, TypeOfContent.Value);
+                    value.Load(g, content);
 
                     if (Field.FieldType.IsArray)
                         g.StoreElement(Field.FieldType.GetElementType());

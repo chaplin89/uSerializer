@@ -131,10 +131,11 @@ namespace AmphetamineSerializer.Common
         public Type NormalizedType {
             get
             {
-                Type normalizedType = Element.UnderlyingType;
+                Type normalizedType = Element.Field.FieldType;
 
-                if (Element.UnderlyingType.IsEnum)
+                if (Element.Field.FieldType.IsEnum)
                     normalizedType = normalizedType.GetEnumUnderlyingType();
+
                 if (ManageLifeCycle)
                     normalizedType = normalizedType.MakeByRefType();
 

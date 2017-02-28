@@ -13,18 +13,11 @@ namespace AmphetamineSerializer
     /// <typeparam name="T"></typeparam>
     public class Serializator<T> : ISerializator
     {
-        protected delegate void DeserializeBytes(
-            [Tag(ParameterRole.RootObject)] ref T obj,
-            [Tag(ParameterRole.MandatoryForward)]   byte[] buffer,
-            [Tag(ParameterRole.MandatoryForward)]   ref uint position);
+        protected delegate void DeserializeBytes(ref T obj, byte[] buffer, ref uint position);
 
-        protected delegate void SerializeBinaryWriter(
-            [Tag(ParameterRole.RootObject)] T obj, 
-            [Tag(ParameterRole.MandatoryForward)] BinaryWriter stream);
+        protected delegate void SerializeBinaryWriter(T obj, BinaryWriter stream);
 
-        protected delegate void DeserializeBinaryReader(
-            [Tag(ParameterRole.RootObject)] ref T obj,
-            [Tag(ParameterRole.MandatoryForward)] BinaryReader stream);
+        protected delegate void DeserializeBinaryReader(ref T obj, BinaryReader stream);
 
         protected DeserializeBytes deserializeFromBytes;
         protected DeserializeBinaryReader deserializeFromStream;
