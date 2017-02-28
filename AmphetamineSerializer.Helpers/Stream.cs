@@ -44,7 +44,6 @@ namespace AmphetamineSerializer.Helpers
             {typeof(long).MakeByRefType(),   typeof(BinaryReader).GetMethod("ReadInt64")},
             {typeof(char).MakeByRefType(),   typeof(BinaryReader).GetMethod("ReadChar")},
         };
-        ParameterDescriptor desc;
 
         InvariantCaller caller = new InvariantCaller();
 
@@ -59,17 +58,14 @@ namespace AmphetamineSerializer.Helpers
             caller.SetInput(ctx.InputParameters);
         }
 
-        public override BuildedFunction Make()
+        protected override BuildedFunction InternalMake()
         {
-            if (method != null)
-                return method;
-
-            if (ctx.Element.UnderlyingType == null)
+            if (ctx.Element.ElementType == null)
                 return null;
 
-            if (typeHandlerMap.ContainsKey(ctx.Element.UnderlyingType))
+            if (typeHandlerMap.ContainsKey(ctx.Element.ElementType))
                 HandlePrimitive(ctx);
-            if (ctx.Element.UnderlyingType == typeof(string))
+            if (ctx.Element.ElementType == typeof(string))
                 HandleString(ctx);
             else
                 return null;
@@ -97,16 +93,18 @@ namespace AmphetamineSerializer.Helpers
         /// <param name="ctx"></param>
         public void DecodeString(FoundryContext ctx)
         {
-            ctx.Manipulator.Store(ctx, (context) =>
+            var store = (GenericElement)((g, _) =>
             {
                 // Put the decoded string in the stack.
-                context.G.Call(typeof(Encoding).GetProperty("ASCII").GetMethod);
-                context.G.LoadArgument(1);
-                context.G.LoadArgument(1);
-                context.G.CallVirtual(typeHandlerMap[typeof(int).MakeByRefType()]);
-                context.G.CallVirtual(typeHandlerMap[typeof(byte[]).MakeByRefType()]);
-                context.G.CallVirtual(typeof(Encoding).GetMethod("GetString", new Type[] { typeof(byte[]) }));
+                g.Call(typeof(Encoding).GetProperty("ASCII").GetMethod);
+                g.LoadArgument(1);
+                g.LoadArgument(1);
+                g.CallVirtual(typeHandlerMap[typeof(int).MakeByRefType()]);
+                g.CallVirtual(typeHandlerMap[typeof(byte[]).MakeByRefType()]);
+                g.CallVirtual(typeof(Encoding).GetMethod("GetString", new Type[] { typeof(byte[]) }));
             });
+
+            ctx.Element.Store(ctx.G, store, TypeOfContent.Value);
         }
 
         public BuildedFunction EncodeString(FoundryContext ctx)
@@ -119,7 +117,7 @@ namespace AmphetamineSerializer.Helpers
             {
                 ctx.G.LoadArgument(1);
                 ctx.G.Call(typeof(Encoding).GetProperty("ASCII").GetMethod);
-                ctx.Manipulator.Load(ctx);
+                ctx.Element.Load(ctx.G, TypeOfContent.Value);
                 ctx.G.CallVirtual(typeof(Encoding).GetMethod("GetByteCount", new Type[] { typeof(string) }));
                 ctx.G.CallVirtual(typeHandlerMap[typeof(int)]);
             }
@@ -127,7 +125,7 @@ namespace AmphetamineSerializer.Helpers
             {
                 ctx.G.LoadArgument(1);
                 ctx.G.Call(typeof(Encoding).GetProperty("ASCII").GetMethod);
-                ctx.Manipulator.Load(ctx);
+                ctx.Element.Load(ctx.G, TypeOfContent.Value);
                 ctx.G.CallVirtual(typeof(Encoding).GetMethod("GetBytes", new Type[] { typeof(string) }));
                 ctx.G.CallVirtual(typeHandlerMap[typeof(byte[])]);
             }
@@ -147,7 +145,7 @@ namespace AmphetamineSerializer.Helpers
         {
             if (ctx.ManageLifeCycle)
             {
-                ctx.Manipulator.Store(ctx, (context) =>
+                var store = (GenericElement)((g, _) =>
                 {
                     caller.SetOutput(new ParameterDescriptor[] 
                     {
@@ -158,8 +156,8 @@ namespace AmphetamineSerializer.Helpers
                             Role = ParameterRole.MandatoryForward
                         }
                     });
-                    caller.EmitInvoke(context.G);
-                    context.G.CallVirtual(typeHandlerMap[ctx.NormalizedType]);
+                    caller.EmitInvoke(g);
+                    g.CallVirtual(typeHandlerMap[ctx.Element.ElementType]);
                 });
             }
             else
@@ -175,7 +173,7 @@ namespace AmphetamineSerializer.Helpers
                 });
                 caller.EmitInvoke(ctx.G);
                 ctx.G.LoadArgument(1); // argument i --> stack
-                ctx.Manipulator.Load(ctx);
+                ctx.Element.Load(ctx.G, TypeOfContent.Value);
                 ctx.G.CallVirtual(typeHandlerMap[ctx.NormalizedType]);
             }
         }

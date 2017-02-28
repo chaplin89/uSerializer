@@ -2,6 +2,7 @@
 using System;
 using System.Reflection;
 using AmphetamineSerializer.Common.Attributes;
+using System.Collections.Generic;
 
 namespace AmphetamineSerializer.Common
 {
@@ -10,6 +11,8 @@ namespace AmphetamineSerializer.Common
     /// </summary>
     public class FieldElement : IElement
     {
+        private Type elementType;
+
         /// <summary>
         /// Build this object and initialize instance and field.
         /// </summary>
@@ -45,9 +48,26 @@ namespace AmphetamineSerializer.Common
         public FieldInfo Field { get; set; }
 
         /// <summary>
+        /// 
+        /// </summary>
+        public Type ElementType
+        {
+            get
+            {
+                if (elementType == null)
+                    elementType = Field.FieldType;
+                return elementType;
+            }
+            set
+            {
+                elementType = value;
+            }
+        }
+
+        /// <summary>
         /// Access the ASIndexAttribute of the field.
         /// </summary>
-        public ASIndexAttribute CurrentAttribute
+        public ASIndexAttribute Attribute
         {
             get
             {
@@ -59,7 +79,7 @@ namespace AmphetamineSerializer.Common
 
         /// <summary>
         /// Emit instructions to load a field in the stack.
-        /// TODO: Manage jagged array and matrix.
+        /// TODO: Manage matrix.
         /// </summary>
         public Action<Emit, TypeOfContent> Load
         {

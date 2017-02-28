@@ -81,7 +81,7 @@ namespace AmphetamineSerializer
             currentLoopContext.Body = ctx.G.DefineLabel();
             currentLoopContext.CheckOutOfBound = ctx.G.DefineLabel();
 
-            Type indexType = ctx.Element.CurrentAttribute?.SizeType;
+            Type indexType = ctx.Element.Attribute?.SizeType;
             if (indexType == null)
                 indexType = typeof(uint);
 
@@ -92,20 +92,17 @@ namespace AmphetamineSerializer
 
                 var currentElement = ctx.Element;
 
-                ctx.Element = new GenericElement()
+                currentLoopContext.Size = (GenericElement)((g, content) =>
                 {
-                    Load = ((g, content) =>
-                    {
-                        g.LoadLocal(currentElement.FieldElement.Instance); // this (stfld) --> stack
-                        g.LoadField(currentElement.FieldElement.Field); // this.CurrentItemFieldInfo --> stack
-                        g.LoadLength(currentElement.FieldElement.Field.FieldType.GetElementType());
-                    })
-                };
+                    //TODO: ADDRESS IF SIZE WAS NOT NULL
+                    currentElement.Load(g, TypeOfContent.Value);
+                    g.LoadLength(currentElement.ElementType);
+                });
 
                 // Write the size of the array
                 var request = new SerializationBuildRequest()
                 {
-                    Element = ctx.Element,
+                    Element = currentLoopContext.Size,
                     DelegateType = MakeDelegateType(requestType, ctx.InputParameters),
                     AdditionalContext = ctx.AdditionalContext,
                     Provider = ctx.Provider,
@@ -118,11 +115,15 @@ namespace AmphetamineSerializer
 
                 if (response.Response.Status != BuildedFunctionStatus.NoMethodsAvailable)
                 {
-                    currentLoopContext.Size = ctx.G.DeclareLocal(typeof(uint));
-                    ctx.Element.Load(g, TypeOfContent.Value);
-                    ctx.G.LoadLength(ctx.Element.FieldElement.Field.FieldType.GetElementType());
-                    ctx.G.StoreLocal(currentLoopContext.Size);
-                    ctx.G.LoadLocal(currentLoopContext.Size);
+                    currentLoopContext.Size = (LocalElement)ctx.G.DeclareLocal(typeof(uint));
+                    var lenght = (GenericElement)((g, element) =>
+                    {
+                        ctx.Element.Load(g, TypeOfContent.Value);
+                        ctx.G.LoadLength(ctx.Element.ElementType);
+                    });
+
+                    currentLoopContext.Size.Store(ctx.G, lenght, TypeOfContent.Value);
+                    currentLoopContext.Size.Load(ctx.G, TypeOfContent.Value);
 
                     if (response.Response.Status == BuildedFunctionStatus.TypeFinalized)
                         ForwardParameters(ctx.InputParameters, response.Response);
@@ -140,18 +141,11 @@ namespace AmphetamineSerializer
             else if (currentLoopContext.Size == null)
             {
                 var currentElement = ctx.Element;
-                currentLoopContext.Size = ctx.G.DeclareLocal(indexType);
-
-                ctx.Element = new ElementDescriptor()
-                {
-                    LocalVariable = currentLoopContext.Size,
-                    ItemType = indexType,
-                    UnderlyingType = indexType
-                };
+                currentLoopContext.Size = (LocalElement)ctx.G.DeclareLocal(indexType);
 
                 var request = new SerializationBuildRequest()
                 {
-                    Element = ctx.Element,
+                    Element = currentLoopContext.Size,
                     DelegateType = MakeDelegateType(indexType.MakeByRefType(), ctx.InputParameters),
                     AdditionalContext = ctx.AdditionalContext,
                     Provider = ctx.Provider,
@@ -164,36 +158,27 @@ namespace AmphetamineSerializer
                 if (response.Response.Status != BuildedFunctionStatus.NoMethodsAvailable)
                 {
                     // this.DecodeUInt(ref size, buffer, ref position);
-                    ctx.G.LoadLocalAddress(currentLoopContext.Size);
+                    currentLoopContext.Size.Load(ctx.G, TypeOfContent.Address);
                     ForwardParameters(ctx.InputParameters, response.Response);
                 }
             }
 
             if (ctx.ManageLifeCycle)
             {
-                if (!currentLoopContext.StoreAtPosition.HasValue)
+                // ObjectInstance.CurrentItemFieldInfo = new CurrentItemUnderlyingType[Size];
+                var newArray = (GenericElement)((g, _) =>
                 {
-                    // ObjectInstance.CurrentItemFieldInfo = new CurrentItemUnderlyingType[Size];
-                    ctx.G.LoadLocal((Local)ctx.Element.Instance); // this (stfld) --> stack
-                    ctx.G.LoadLocal(currentLoopContext.Size); // size --> stack
-                    ctx.G.NewArray(ctx.Element.UnderlyingType); // new Array[size] --> stack
-                    ctx.G.StoreField(ctx.Element.FieldElement.Field); // stack --> item
-                }
-                else
-                {
-                    // ObjectInstance.CurrentItemFieldInfo[StoreAtPosition] = new CurrentItemUnderlyingType[Size]
-                    ctx.G.LoadLocal(ctx.Element.FieldElement.Instance); // this (stfld) --> stack
-                    ctx.G.LoadField(ctx.Element.FieldElement.Field); // this.CurrentItemFieldInfo --> stack
-                    ctx.G.LoadConstant(currentLoopContext.StoreAtPosition.Value); // StoreAtPosition --> stack
-                    ctx.G.LoadLocal(currentLoopContext.Size); // size --> stack
-                    ctx.G.NewArray(ctx.Element.UnderlyingType); // new Array[size] --> stack
-                    ctx.G.StoreElement(ctx.Element.ItemType);
-                }
+                    currentLoopContext.Size.Load(g, TypeOfContent.Value);
+                    ctx.G.NewArray(ctx.Element.ElementType);
+                });
+
+                ctx.Element.Store(ctx.G, newArray, TypeOfContent.Value);
             }
+
             // int indexLocal = 0;
             // goto CheckOutOfBound;
-            ctx.G.LoadConstant(0); // 0 --> stack
-            ctx.G.StoreLocal(currentLoopContext.Index); // stack --> indexLocal
+            ctx.G.LoadConstant(0);
+            ctx.G.StoreLocal(currentLoopContext.Index);
             ctx.G.Branch(currentLoopContext.CheckOutOfBound); // Local variables initialized, jump
 
             // Loop start
@@ -218,26 +203,28 @@ namespace AmphetamineSerializer
             Contract.Ensures(ctx != null);
             Contract.Ensures(ctx.LoopCtx.Count > 0);
 
-            var currentLoopContext = ctx.LoopCtx.Pop();
-
-            IncrementLocalVariable(currentLoopContext.Index);
-
-            ctx.G.MarkLabel(currentLoopContext.CheckOutOfBound);
-            ctx.G.LoadLocal(currentLoopContext.Index); // Index --> stack
-
-            // If the Size is not provided, load the lenght of the array.
-            if (currentLoopContext.Size == null)
+            while (ctx.LoopCtx.Count > 0)
             {
-                ctx.G.LoadLocal((LocalElement)ctx.Element.Instance); // this --> stack
-                ctx.G.LoadField(ctx.Element.Field); // Array --> stack
-                ctx.G.LoadLength(ctx.Element.UnderlyingType); // Array.Lenght --> stack
-            }
-            else
-            {
-                ctx.G.LoadLocal(currentLoopContext.Size);
-            }
+                var currentLoopContext = ctx.LoopCtx.Pop();
 
-            ctx.G.BranchIfLess(currentLoopContext.Body);
+                IncrementLocalVariable(currentLoopContext.Index);
+
+                ctx.G.MarkLabel(currentLoopContext.CheckOutOfBound);
+                ctx.G.LoadLocal(currentLoopContext.Index);
+
+                // If the Size is not provided, load the lenght of the array.
+                if (currentLoopContext.Size == null)
+                {
+                    ctx.Element.Load(ctx.G, TypeOfContent.Value);
+                    ctx.G.LoadLength(ctx.Element.ElementType);
+                }
+                else
+                {
+                    currentLoopContext.Size.Load(g, TypeOfContent.Value);
+                }
+
+                ctx.G.BranchIfLess(currentLoopContext.Body);
+            }
         }
 
         public Type MakeDelegateType(Type objectType, Type[] inputTypes)

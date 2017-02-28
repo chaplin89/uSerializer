@@ -56,6 +56,7 @@
     <Compile Include="Chain\TypeOfRequest.cs" />
     <Compile Include="Chain\TypeOfResponse.cs" />
     <Compile Include="ElementDescriptor.cs" />
+    <Compile Include="Element\ArgumentElement.cs" />
     <Compile Include="Element\ConstantElement.cs" />
     <Compile Include="Element\FieldElement.cs" />
     <Compile Include="Element\LocalElement.cs" />

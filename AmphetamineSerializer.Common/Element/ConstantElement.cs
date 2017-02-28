@@ -8,7 +8,7 @@ namespace AmphetamineSerializer.Common.Element
     /// Manage the load of a constant value in the stack.
     /// </summary>
     /// <typeparam name="ConstantType">Type of constant value</typeparam>
-    class ConstantElement<ConstantType> : IElement
+    public class ConstantElement<ConstantType> : IElement
     {
         /// <summary>
         /// Build a ConstantElement wrapper arount a constant.

@@ -8,6 +8,11 @@ namespace AmphetamineSerializer.Common
     /// </summary>
     public class LoopContext : IDisposable
     {
+        public LoopContext(Local index)
+        {
+            Index = index;
+        }
+
         /// <summary>
         /// This is the index.
         /// </summary>
@@ -16,7 +21,7 @@ namespace AmphetamineSerializer.Common
         /// <summary>
         /// Size of the array.
         /// </summary>
-        public Local Size { get; set; }
+        public IElement Size { get; set; }
 
         /// <summary>
         /// Label that point to the end of the loop,

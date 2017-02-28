@@ -26,7 +26,7 @@ namespace AmphetamineSerializer.Common
         /// <returns></returns>
         public static FoundryContext MakeContext(Type delegateType, 
                                                  object additionalContext,
-                                                 FieldElement element, 
+                                                 IElement element, 
                                                  SigilFunctionProvider provider,
                                                  Emit g)
         {
@@ -34,7 +34,7 @@ namespace AmphetamineSerializer.Common
             {
                 InputParameters = delegateType.GetMethod("Invoke").GetParameters().Select(x => x.ParameterType).ToArray(),
                 AdditionalContext = additionalContext,
-                Element = element,
+                Element = element as FieldElement,
                 Provider = provider,
                 G = g
             };

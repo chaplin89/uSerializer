@@ -23,9 +23,9 @@ namespace AmphetamineSerializer
             int? maxExplicitlyManagedVersion = null;
             int? minExplicitlyManagedVersion = null;
 
-            foreach (var item in GetFields(rootType))
+            foreach (var item in GetFields(null, rootType))
             {
-                var attribute = item.GetCustomAttribute<ASIndexAttribute>(false);
+                var attribute = item.Attribute;
                 if (attribute.VersionBegin != -1)
                 {
                     if (!minExplicitlyManagedVersion.HasValue)
@@ -67,9 +67,9 @@ namespace AmphetamineSerializer
         /// <param name="rootType">Type</param>
         /// <param name="version">Version</param>
         /// <returns>All the fields that match the given version</returns>
-        static public IEnumerable<FieldInfo> GetVersionSnapshot(Type rootType, int version)
+        static public IEnumerable<FieldElement> GetVersionSnapshot(IElement instance, Type rootType, int version)
         {
-            return GetFields(rootType, version);
+            return GetFields(instance, rootType, version);
         }
         
         /// <summary>
@@ -77,9 +77,9 @@ namespace AmphetamineSerializer
         /// </summary>
         /// <param name="rootType"></param>
         /// <returns>All the fields contained in a type</returns>
-        static public IEnumerable<FieldInfo> GetAllFields(Type rootType)
+        static public IEnumerable<FieldElement> GetAllFields(IElement instance, Type rootType)
         {
-            return GetFields(rootType);
+            return GetFields(instance, rootType);
         }
 
         /// <summary>
@@ -87,21 +87,24 @@ namespace AmphetamineSerializer
         /// </summary>
         /// <param name="rootType">Context</param>
         /// <param name="version">Version used to filter fields.</param>
-        static private IEnumerable<FieldInfo> GetFields(Type rootType, int? version = null)
+        static private IEnumerable<FieldElement> GetFields(IElement instance, Type rootType, int? version = null)
         {
+            var attributes = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+
             var allFields = rootType
-                            .GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                            .GetFields(attributes)
                             .Where(x => x.GetCustomAttribute<ASIndexAttribute>(false) != null)
-                            .OrderBy(x => x.GetCustomAttribute<ASIndexAttribute>(false).Index);
+                            .OrderBy(x => x.GetCustomAttribute<ASIndexAttribute>(false).Index)
+                            .Select(x=> new FieldElement(instance, x));
 
             if (version.HasValue)
             {
                 return allFields
-                          .Where(x => !(x.GetCustomAttribute<ASIndexAttribute>().VersionBegin != -1) ||
-                                       x.GetCustomAttribute<ASIndexAttribute>().VersionBegin <= version.Value)
-                          .Where(x => !(x.GetCustomAttribute<ASIndexAttribute>().VersionEnd != -1) ||
-                                       x.GetCustomAttribute<ASIndexAttribute>().VersionEnd >= version.Value)
-                          .OrderBy(x => x.GetCustomAttribute<ASIndexAttribute>().Index);
+                          .Where(x => !(x.Attribute.VersionBegin != -1) ||
+                                       x.Attribute.VersionBegin <= version.Value)
+                          .Where(x => !(x.Attribute.VersionEnd != -1) ||
+                                       x.Attribute.VersionEnd >= version.Value)
+                          .OrderBy(x => x.Attribute.Index);
             }
 
             return allFields;

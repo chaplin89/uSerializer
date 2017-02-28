@@ -2,13 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using AmphetamineSerializer.Common;
 using Sigil;
 using AmphetamineSerializer.Chain.Nodes;
 using AmphetamineSerializer.Common.Element;
-using LoadAction = System.Action<Sigil.NonGeneric.Emit, AmphetamineSerializer.TypeOfContent>;
-using StoreAction = System.Action<Sigil.NonGeneric.Emit, AmphetamineSerializer.Common.IElement, AmphetamineSerializer.TypeOfContent>;
 
 namespace AmphetamineSerializer
 {
@@ -36,8 +33,6 @@ namespace AmphetamineSerializer
                 ctx.G = ctx.Provider.AddMethod("Handle", ctx.InputParameters, typeof(void));
             }
 
-            ctx.Element = new FieldElement();
-
             if (ctx.Chain == null)
             {
                 var manager = new ChainManager()
@@ -59,67 +54,55 @@ namespace AmphetamineSerializer
         protected override BuildedFunction InternalMake()
         {
             Type normalizedType;
-            int[] versions;
-            ctx.Element = new FieldElement();
+
+            ArgumentElement instance = new ArgumentElement(0);
 
             if (ctx.ManageLifeCycle)
             {
                 normalizedType = ctx.ObjectType.GetElementType();
-                ctx.G.LoadArgument(0);
                 var ctor = normalizedType.GetConstructor(new Type[] { });
 
                 if (ctor == null)
                     throw new NotSupportedException($"The type {normalizedType.Name} does not have a parameterless constructor.");
 
-                LocalElement instance = ctx.G.DeclareLocal(normalizedType);
-                ctx.Element.Instance = instance;
-
-                var load = (GenericElement)((g, _) => g.NewObject(ctx.ObjectType.GetElementType()));
+                var load = (GenericElement)((g, _) => g.NewObject(normalizedType));
 
                 instance.Store(ctx.G, load, TypeOfContent.Value);
-                instance.Load(ctx.G, TypeOfContent.Value);
-                ctx.G.StoreIndirect(normalizedType);
             }
             else
             {
                 normalizedType = ctx.ObjectType;
-                LocalElement instance= ctx.G.DeclareLocal(ctx.ObjectType);
-
-                ctx.Element.Instance = instance;
-                ctx.G.LoadArgument(0);
-                ctx.G.StoreLocal(instance);
             }
 
-            versions = VersionHelper.GetExplicitlyManagedVersions(normalizedType).ToArray();
+            var versions = VersionHelper.GetExplicitlyManagedVersions(normalizedType).ToArray();
 
             if (versions.Length > 1)
-                ManageVersions(ctx, versions, normalizedType);
+                ManageVersions(ctx, instance, versions, normalizedType);
             else
-                BuildFromFields(ctx, VersionHelper.GetAllFields(normalizedType));
+                BuildFromFields(ctx, VersionHelper.GetAllFields(instance, normalizedType));
 
             ctx.G.Return();
             return ctx.Provider.GetMethod();
         }
 
-        private void ManageVersions(FoundryContext ctx, int[] versions, Type normalizedType)
+        private void ManageVersions(FoundryContext ctx, IElement instance, int[] versions, Type normalizedType)
         {
             Label[] labels = new Label[versions.Length];
-            ctx.Element.Field = VersionHelper.GetAllFields(normalizedType).Where(x => x.Name.ToLower() == "version").Single();
+            var versionField = VersionHelper.GetAllFields(instance, normalizedType).First();
 
-            if (VersionHelper.GetAllFields(normalizedType).First() != ctx.Element.Field)
+            if (versionField.Field.Name.ToLowerInvariant() != "version")
                 throw new InvalidOperationException("The version field should be the first.");
 
             for (int i = 0; i < labels.Length; i++)
                 labels[i] = ctx.G.DefineLabel($"Version_{i}");
 
-            // TODO: ALL THIS S*IT SHOULD BE MANAGED BY A Type CLASS EXTENSION.
-            Type requestType = ctx.Element.Field.FieldType;
+            Type requestType = versionField.Field.FieldType;
             if (ctx.ManageLifeCycle)
                 requestType = requestType.MakeByRefType();
 
             var request = new SerializationBuildRequest()
             {
-                Element = ctx.Element,
+                Element = versionField,
                 AdditionalContext = ctx.AdditionalContext,
                 DelegateType = ctx.Manipulator.MakeDelegateType(requestType, ctx.InputParameters),
                 Provider = ctx.Provider,
@@ -129,22 +112,26 @@ namespace AmphetamineSerializer
             var response = ctx.Chain.Process(request) as SerializationBuildResponse;
             var targetMethod = response.Response;
 
-            if (ctx.ObjectType.IsByRef)
-                ctx.Element.Load(ctx.G, TypeOfContent.Address);
-            else
-                ctx.Element.Load(ctx.G, TypeOfContent.Value);
+            if (targetMethod != null)
+            {
+                if (ctx.ManageLifeCycle)
+                    versionField.Load(ctx.G, TypeOfContent.Address);
+                else
+                    versionField.Load(ctx.G, TypeOfContent.Value);
 
-            ctx.Manipulator.ForwardParameters(ctx.InputParameters, targetMethod, ctx.Element.CurrentAttribute);
+                ctx.Manipulator.ForwardParameters(ctx.InputParameters, targetMethod, versionField.Attribute);
+            }
 
             // Enter switch case
-            ctx.Element.Load(ctx.G, TypeOfContent.Value);
+            versionField.Load(ctx.G, TypeOfContent.Value);
             ctx.G.LoadConstant(versions[0]);
             ctx.G.Subtract();
             ctx.G.Switch(labels);
 
             for (int i = 0; i < versions.Length; i++)
             {
-                var fields = VersionHelper.GetVersionSnapshot(normalizedType, versions[i]).Where(x => x.Name.ToLower() != "version");
+                var fields = VersionHelper.GetVersionSnapshot(instance, normalizedType, versions[i])
+                                          .Where(x => x.Field.Name.ToLowerInvariant() != "version");
                 ctx.G.MarkLabel(labels[i]);
                 BuildFromFields(ctx, fields);
                 ctx.G.Return();
@@ -157,22 +144,27 @@ namespace AmphetamineSerializer
         /// </summary>
         /// <param name="ctx">Context</param>
         /// <param name="fields">Fields to manage</param>
-        private void BuildFromFields(FoundryContext ctx, IEnumerable<FieldInfo> fields)
+        private void BuildFromFields(FoundryContext ctx, IEnumerable<IElement> fields)
         {
-            foreach (var item in fields)
+            var linkedList = new LinkedList<IElement>(fields);
+
+            while(linkedList.Count > 0)
             {
+                ctx.Element = (FieldElement)linkedList.First.Value;
+
                 // todo:
                 // 1. List (needs a special handling because of its similarities with Array)
                 // 2. Anything else implementing IEnumerable (excluing List ofc)
                 SerializationBuildResponse response = null;
 
-                ctx.Element.Field = item;
-                
                 if (ctx.Element.Field.FieldType.IsAbstract)
                     throw new InvalidOperationException("Incomplete types are not allowed.");
 
-                if (ctx.Element.Field.FieldType.IsArray)
+                if (ctx.Element.ElementType.IsArray)
+                { 
                     ManageArray(ctx);
+                    continue;
+                }
 
                 var request = new SerializationBuildRequest()
                 {
@@ -216,21 +208,40 @@ namespace AmphetamineSerializer
 
                 if (ctx.Element.Field.FieldType.IsArray)
                     ctx.Manipulator.AddLoopEpilogue(ctx);
+
+                linkedList.RemoveFirst();
             }
         }
 
         private void ManageArray(FoundryContext ctx)
         {
-            var currentLoopContext = new LoopContext()
-            {
-                Index = ctx.G.DeclareLocal(typeof(int))
-            };
+            var currentLoopContext = new LoopContext(ctx.G.DeclareLocal(typeof(int)));
 
-            if (ctx.ObjectType.IsByRef && ctx.Element.CurrentAttribute.ArrayFixedSize != -1)
+            ctx.Element.ElementType = ctx.Element.ElementType.GetElementType();
+
+            if (ctx.ObjectType.IsByRef && ctx.Element.Attribute.ArrayFixedSize != -1)
             {
-                currentLoopContext.Size = ctx.G.DeclareLocal(typeof(int));
-                ctx.G.LoadConstant(ctx.Element.CurrentAttribute.ArrayFixedSize);
-                ctx.G.StoreLocal(currentLoopContext.Size);
+                if (ctx.Element.Index != null)
+                    throw new NotSupportedException("Fixed size arrays for multi-dimensional array is not supported.");
+
+                int size = ctx.Element.Attribute.ArrayFixedSize;
+                currentLoopContext.Size = (ConstantElement<int>)size;
+            }
+
+            if (ctx.Element.Index == null)
+            {
+                ctx.Element.Index = (LocalElement)currentLoopContext.Index;
+            }
+            else
+            {
+                var currentIndex = ctx.Element.Index;
+
+                ctx.Element.Index = (GenericElement)((g, _) =>
+                {
+                    currentIndex.Load(g, TypeOfContent.Value);
+                    g.LoadElementAddress(ctx.Element.ElementType);
+                    g.LoadLocal(currentLoopContext.Index);
+                });
             }
 
             // TODO: REPLACE THIS WITH INDEX!!
@@ -255,7 +266,7 @@ namespace AmphetamineSerializer
             else
                 ctx.Element.Load(ctx.G, TypeOfContent.Value);
 
-            ctx.Manipulator.ForwardParameters(ctx.InputParameters, null, ctx.Element.CurrentAttribute);
+            ctx.Manipulator.ForwardParameters(ctx.InputParameters, null, ctx.Element.Attribute);
         }
         #endregion
     }
