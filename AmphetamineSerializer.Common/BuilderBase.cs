@@ -27,9 +27,21 @@ namespace AmphetamineSerializer.Common
         }
 
         /// <summary>
-        /// Build a function based on its context.
+        /// Return a cached function or build a new one.
         /// </summary>
-        /// <returns></returns>
-        public abstract BuildedFunction Make();
+        /// <returns>The function</returns>
+        public BuildedFunction Make()
+        {
+            if (method == null)
+                method = InternalMake();
+
+            return method;
+        }
+
+        /// <summary>
+        /// Build a function.
+        /// </summary>
+        /// <returns>The function</returns>
+        protected abstract BuildedFunction InternalMake();
     }
 }

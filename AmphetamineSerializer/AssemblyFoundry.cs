@@ -17,11 +17,11 @@ namespace AmphetamineSerializer
     public class AssemblyFoundry : BuilderBase
     {
         #region ctor
+
         /// <summary>
-        /// Build an AssemblyFoundry object.
+        /// Build an AssemblyFoundry object starting from a context.
         /// </summary>
-        /// <param name="ctx"></param>
-        /// <param name="persist"></param>
+        /// <param name="ctx">Context</param>
         public AssemblyFoundry(FoundryContext ctx) : base(ctx)
         {
             if (ctx.Provider != null && ctx.Provider.AlreadyBuildedMethods.ContainsKey(ctx.ObjectType))
@@ -49,27 +49,13 @@ namespace AmphetamineSerializer
         }
         #endregion
 
-        #region Public Methods
-        /// <summary>
-        /// Expose the builded method.
-        /// </summary>
-        public override BuildedFunction Make()
-        {
-            if (method == null)
-                method = InternalMake();
-
-            return method;
-        }
-
-        #endregion
-
         #region Building related methods
 
         /// <summary>
         /// Generate the method for the current ObjectType.
         /// </summary>
         /// <returns>Builded method</returns>
-        private BuildedFunction InternalMake()
+        protected override BuildedFunction InternalMake()
         {
             Type normalizedType;
             int[] versions;
@@ -201,9 +187,9 @@ namespace AmphetamineSerializer
                     G = ctx.G
                 };
 
-                // TODO: THERE ISN'T REALLY ANY GOOD REASON FOR MAKING ASSEMBLYFOUNDRY PART OF THE CHAIN.
+                // TODO: THERE AREN'T REALLY ANY GOOD REASON FOR MAKING AssemblyFoundry PART OF THE CHAIN.
                 //       THIS IS ONLY WASTING SPACE ON THE STACK.
-                //       ASSEMBLYFOUNDRY SHOULD SEND A REQUEST AND IF THE RESPONSE IS NULL, IT SHOULD TRY TO HANDLE
+                //       AssemblyFoundry SHOULD SEND A REQUEST AND IF THE RESPONSE IS NULL, IT SHOULD TRY TO HANDLE
                 //       THE REQUEST BY ITSELF PUTTING THE REQUEST IN A LIFO QUEUE.
                 response = ctx.Chain.Process(request) as SerializationBuildResponse;
 

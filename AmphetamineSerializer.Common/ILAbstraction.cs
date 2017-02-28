@@ -8,6 +8,7 @@ using Sigil;
 using AmphetamineSerializer.Common;
 using AmphetamineSerializer.Chain;
 using AmphetamineSerializer.Common.Attributes;
+using AmphetamineSerializer.Common.Element;
 
 namespace AmphetamineSerializer
 {
@@ -41,134 +42,6 @@ namespace AmphetamineSerializer
         {
             this.g = g;
         }
-
-        #region LoadStoreContext
-        public void Load(FoundryContext ctx, TypeOfContent content = TypeOfContent.Value)
-        {
-            switch (ctx.Element.ElementType)
-            {
-                case ElementType.Field:
-                    LoadFromField(ctx, content);
-                    break;
-                case ElementType.Local:
-                    LoadFromLocal(ctx, content);
-                    break;
-                case ElementType.Custom:
-                    LoadCustom(ctx, content);
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        private void LoadCustom(FoundryContext ctx, TypeOfContent content)
-        {
-            ctx.Element.CustomElement.LoadAction(ctx);
-        }
-
-        private void LoadFromLocal(FoundryContext ctx, TypeOfContent content)
-        {
-            if (content == TypeOfContent.Value)
-                ctx.G.LoadLocal(ctx.Element.LocalVariable);
-            else
-                ctx.G.LoadLocalAddress(ctx.Element.LocalVariable);
-        }
-
-        private void LoadFromField(FoundryContext ctx, TypeOfContent content)
-        {
-            if (ctx.Element.ItemType.IsArray)
-            {
-                ctx.G.LoadLocal(ctx.Element.FieldElement.Instance);
-                ctx.G.LoadField(ctx.Element.FieldElement.Field);
-                ctx.G.LoadLocal(ctx.Element.LoopCtx.Index);
-
-                if (content == TypeOfContent.Value)
-                    ctx.G.LoadElement(ctx.Element.UnderlyingType);
-                else
-                    ctx.G.LoadElementAddress(ctx.Element.UnderlyingType);
-            }
-            else
-            {
-                ctx.G.LoadLocal(ctx.Element.FieldElement.Instance);
-
-                if (content == TypeOfContent.Value)
-                    ctx.G.LoadField(ctx.Element.FieldElement.Field);
-                else
-                    ctx.G.LoadFieldAddress(ctx.Element.FieldElement.Field);
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="ctx"></param>
-        /// <param name="loadValueToStore"></param>
-        public void Store(FoundryContext ctx, Action<FoundryContext> loadValueToStore)
-        {
-            switch (ctx.Element.ElementType)
-            {
-                case ElementType.Field:
-                    StoreInField(ctx, loadValueToStore);
-                    break;
-                case ElementType.Local:
-                    StoreInLocal(ctx, loadValueToStore);
-                    break;
-                case ElementType.Custom:
-                    StoreOther(ctx, loadValueToStore);
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="ctx"></param>
-        /// <param name="loadValueToStore"></param>
-        private void StoreOther(FoundryContext ctx, Action<FoundryContext, TypeOfContent> loadValueToStore)
-        {            
-            ctx.Element.CustomElement.StoreAction(ctx, new GenericElement(loadValueToStore(ctx), null);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="ctx"></param>
-        /// <param name="loadValueToStore"></param>
-        private void StoreInLocal(FoundryContext ctx, Action<FoundryContext> loadValueToStore)
-        {
-            loadValueToStore(ctx);
-            ctx.G.StoreLocal(ctx.Element.LocalVariable);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="ctx"></param>
-        /// <param name="loadValueToStore"></param>
-        private void StoreInField(FoundryContext ctx, Action<FoundryContext> loadValueToStore)
-        {
-            if (ctx.Element.ItemType.IsArray)
-            {
-                ctx.G.LoadLocal(ctx.Element.FieldElement.Instance);
-                ctx.G.LoadField(ctx.Element.FieldElement.Field);
-                ctx.G.LoadLocal(ctx.Element.LoopCtx.Index);
-            }
-            else
-            {
-                ctx.G.LoadLocal(ctx.Element.FieldElement.Instance);
-            }
-
-            loadValueToStore(ctx);
-
-            if (ctx.Element.ItemType.IsArray)
-                ctx.G.StoreElement(ctx.Element.UnderlyingType);
-            else
-                ctx.G.StoreField(ctx.Element.FieldElement.Field);
-        }
-
-        #endregion
 
         /// <summary>
         /// Increment a local variable with a given step
@@ -361,8 +234,8 @@ namespace AmphetamineSerializer
             // If the Size is not provided, load the lenght of the array.
             if (currentLoopContext.Size == null)
             {
-                ctx.G.LoadLocal(ctx.Element.FieldElement.Instance); // this --> stack
-                ctx.G.LoadField(ctx.Element.FieldElement.Field); // Array --> stack
+                ctx.G.LoadLocal((LocalElement)ctx.Element.Instance); // this --> stack
+                ctx.G.LoadField(ctx.Element.Field); // Array --> stack
                 ctx.G.LoadLength(ctx.Element.UnderlyingType); // Array.Lenght --> stack
             }
             else
