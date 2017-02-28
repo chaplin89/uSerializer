@@ -3,23 +3,23 @@ using System;
 
 namespace AmphetamineSerializer.Common
 {
+    /// <summary>
+    /// Represent an abstract way for reading or writing something.
+    /// </summary>
     public interface IElementInfo
     {
         /// <summary>
-        /// Action for emitting instruction 
-        /// for loading an element into the stack.
+        /// Action for emitting instruction for loading an element into the stack.
         /// </summary>
         Action<Emit, TypeOfContent> Load { get; }
 
         /// <summary>
-        /// Action for emitting instructions
-        /// for storing the element from the stack.
+        /// Action for emitting instructions for storing the element from the stack.
         /// </summary>        
         /// <remarks>
         /// The action has the following signature:
         /// void Store(FoundryContext, IElementInfo).
-        /// The IElementInfo represent the element that 
-        /// will be stored inside this one.
+        /// The IElementInfo represent the element that will be stored inside this one.
         /// </remarks>
         Action<Emit, IElementInfo, TypeOfContent> Store { get; }
     }
