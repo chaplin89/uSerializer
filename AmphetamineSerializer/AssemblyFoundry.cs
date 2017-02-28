@@ -120,17 +120,17 @@ namespace AmphetamineSerializer
 
         private void ManageVersions(FoundryContext ctx, int[] versions, Type normalizedType)
         {
-            Label[] labels = null;
-            var field = VersionHelper.GetAllFields(normalizedType).Where(x => x.Name.ToLower() == "version").Single();
-            if (VersionHelper.GetAllFields(normalizedType).First() != field)
+            Label[] labels = new Label[versions.Length];
+            ctx.Element.Field = VersionHelper.GetAllFields(normalizedType).Where(x => x.Name.ToLower() == "version").Single();
+
+            if (VersionHelper.GetAllFields(normalizedType).First() != ctx.Element.Field)
                 throw new InvalidOperationException("The version field should be the first.");
-
-            labels = new Label[versions.Length];
-
+            
             for (int i = 0; i < labels.Length; i++)
-                labels[i] = ctx.G.DefineLabel($"Version{i}");
+                labels[i] = ctx.G.DefineLabel($"Version_{i}");
 
-            Type requestType = field.FieldType;
+            // TODO: ALL THIS S*IT SHOULD BE MANAGED BY A Type CLASS EXTENSION.
+            Type requestType = ctx.Element.Field.FieldType;
             if (ctx.ManageLifeCycle)
                 requestType = requestType.MakeByRefType();
 
@@ -147,23 +147,14 @@ namespace AmphetamineSerializer
             var targetMethod = response.Response;
 
             if (ctx.ObjectType.IsByRef)
-            {
-                ctx.G.LoadLocal((LocalElement)ctx.Element.Instance); // this --> stack
-                ctx.G.LoadFieldAddress(field); // &this.CurrentItem --> stack
-                ctx.Manipulator.ForwardParameters(ctx.InputParameters, targetMethod, ctx.Element.CurrentAttribute);
-
-            }
+                ctx.Element.Load(ctx.G, TypeOfContent.Address);
             else
-            {
-                ctx.G.LoadLocal((LocalElement)ctx.Element.Instance); // this --> stack
-                ctx.G.LoadField(field); // this.CurrentItem --> stack
-                ctx.Manipulator.ForwardParameters(ctx.InputParameters, targetMethod, ctx.Element.CurrentAttribute);
-            }
+                ctx.Element.Load(ctx.G, TypeOfContent.Value);
 
-            ctx.G.LoadLocal((LocalElement)ctx.Element.Instance); // this --> stack
-            ctx.G.LoadField(field); // this.CurrentItem --> stack
+            ctx.Manipulator.ForwardParameters(ctx.InputParameters, targetMethod, ctx.Element.CurrentAttribute);
 
-            // Deserialize versions
+            // Enter switch case
+            ctx.Element.Load(ctx.G, TypeOfContent.Value);
             ctx.G.LoadConstant(versions[0]);
             ctx.G.Subtract();
             ctx.G.Switch(labels);
@@ -210,8 +201,11 @@ namespace AmphetamineSerializer
                     G = ctx.G
                 };
 
-                using (var status = new StatusSaver(ctx))
-                    response = ctx.Chain.Process(request) as SerializationBuildResponse;
+                // TODO: THERE ISN'T REALLY ANY GOOD REASON FOR MAKING ASSEMBLYFOUNDRY PART OF THE CHAIN.
+                //       THIS IS ONLY WASTING SPACE ON THE STACK.
+                //       ASSEMBLYFOUNDRY SHOULD SEND A REQUEST AND IF THE RESPONSE IS NULL, IT SHOULD TRY TO HANDLE
+                //       THE REQUEST BY ITSELF PUTTING THE REQUEST IN A LIFO QUEUE.
+                response = ctx.Chain.Process(request) as SerializationBuildResponse;
 
                 if (response == null)
                     throw new InvalidOperationException($"Unable to find an handler for type {ctx.NormalizedType}");

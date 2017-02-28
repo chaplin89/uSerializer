@@ -6,18 +6,27 @@ using AmphetamineSerializer.Common.Attributes;
 namespace AmphetamineSerializer.Common
 {
     /// <summary>
-    /// Represent the tuple object instance, field.
+    /// Abstract load/store of a class field.
     /// </summary>
     public class FieldElementInfo : IElementInfo
     {
+
+        /// <summary>
+        /// Build this object and initialize instance and field.
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="field"></param>
         public FieldElementInfo(IElementInfo instance, FieldInfo field)
         {
             Instance = instance;
             Field = field;
         }
+
+        /// <summary>
+        /// Build this object with null instance/field.
+        /// </summary>
         public FieldElementInfo()
         {
-
         }
 
         /// <summary>
@@ -36,6 +45,14 @@ namespace AmphetamineSerializer.Common
         /// </summary>
         public FieldInfo Field { get; set; }
 
+        /// <summary>
+        /// Access the ASIndexAttribute of Field.
+        /// </summary>
+        public ASIndexAttribute CurrentAttribute { get; }
+        
+        /// <summary>
+        /// Abstract the load of a class field.
+        /// </summary>
         public Action<Emit, TypeOfContent> Load
         {
             get
@@ -65,6 +82,9 @@ namespace AmphetamineSerializer.Common
             }
         }
 
+        /// <summary>
+        /// Abstract the store of a class field.
+        /// </summary>
         public Action<Emit, IElementInfo, TypeOfContent> Store
         {
             get
@@ -87,7 +107,5 @@ namespace AmphetamineSerializer.Common
                 };
             }
         }
-
-        public ASIndexAttribute CurrentAttribute { get; set; }
     }
 }
