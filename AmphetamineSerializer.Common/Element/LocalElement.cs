@@ -110,14 +110,23 @@ namespace AmphetamineSerializer.Common.Element
         {
             get
             {
-                if (elementType == null && LocalVariable != null)
-                    elementType = LocalVariable.LocalType;
+                if (elementType == null)
+                    elementType = RootType;
                 return elementType;
             }
             set
             {
                 elementType = value;
             }
+        }
+
+        /// <summary>
+        /// <see cref="IElement.RootType"/>
+        /// </summary>
+        public Type RootType
+        {
+            get { return LocalVariable?.LocalType; }
+            set { throw new InvalidOperationException("Can't set the RootType for LocalElement because it's fixed."); }
         }
     }
 }

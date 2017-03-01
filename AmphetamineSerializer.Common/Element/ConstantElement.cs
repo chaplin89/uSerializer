@@ -102,8 +102,17 @@ namespace AmphetamineSerializer.Common.Element
         /// <exception cref="InvalidOperationException">If the set accessor is invoked.</exception>
         public Type ElementType
         {
+            get { return RootType; }
+            set { throw new InvalidOperationException("Element type for a constant value is fixed."); }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public Type RootType
+        {
             get { return typeof(ValueType); }
-            set { throw new InvalidOperationException("Can't set the element type for a constant value because it is fixed."); }
+            set { throw new InvalidOperationException("RootType for constant type is fixed."); }
         }
     }
 }

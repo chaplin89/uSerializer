@@ -8,6 +8,8 @@ namespace AmphetamineSerializer.Common
     /// </summary>
     public class GenericElement : IElement
     {
+        private Type rootType;
+        private Type elementType;
         #region Conversions
         /// <summary>
         /// Build a GenericElement wrapper around an action that load the element in the stack.
@@ -65,6 +67,35 @@ namespace AmphetamineSerializer.Common
         /// <summary>
         /// If it is well defined, this is the type of the element loaded.
         /// </summary>
-        public Type ElementType { get; set; }
+        public Type ElementType
+        {
+            get
+            {
+                if (elementType == null)
+                    elementType = RootType;
+                return elementType;
+            }
+            set
+            {
+                elementType = value;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public Type RootType
+        {
+            get
+            {
+                return rootType;
+            }
+
+            set
+            {
+                rootType = value;
+                ElementType = value;
+            }
+        }
     }
 }

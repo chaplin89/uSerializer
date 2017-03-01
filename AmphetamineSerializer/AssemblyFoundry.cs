@@ -55,7 +55,7 @@ namespace AmphetamineSerializer
         {
             Type normalizedType;
 
-            ArgumentElement instance = new ArgumentElement(0);
+            ArgumentElement instance = new ArgumentElement(0) {RootType = ctx.ObjectType };
 
             if (ctx.ManageLifeCycle)
             {
@@ -157,11 +157,11 @@ namespace AmphetamineSerializer
                 // 2. Anything else implementing IEnumerable (excluing List ofc)
                 SerializationBuildResponse response = null;
 
-                if (ctx.Element.Field.FieldType.IsAbstract)
+                if (ctx.Element.ElementType.IsAbstract)
                     throw new InvalidOperationException("Incomplete types are not allowed.");
 
                 if (ctx.Element.ElementType.IsArray)
-                { 
+                {
                     ManageArray(ctx);
                     continue;
                 }
@@ -206,7 +206,7 @@ namespace AmphetamineSerializer
                         ctx.G.Call(response.Response.Delegate.Method, null);
                 }
 
-                if (ctx.Element.Field.FieldType.IsArray)
+                if (ctx.Element.RootType.IsArray)
                     ctx.Manipulator.AddLoopEpilogue(ctx);
 
                 linkedList.RemoveFirst();
@@ -219,12 +219,12 @@ namespace AmphetamineSerializer
 
             ctx.Element.ElementType = ctx.Element.ElementType.GetElementType();
 
-            if (ctx.ObjectType.IsByRef && ctx.Element.Attribute.ArrayFixedSize != -1)
+            if (ctx.ObjectType.IsByRef && ((FieldElement)ctx.Element).Attribute.ArrayFixedSize != -1)
             {
                 if (ctx.Element.Index != null)
                     throw new NotSupportedException("Fixed size arrays for multi-dimensional array is not supported.");
 
-                int size = ctx.Element.Attribute.ArrayFixedSize;
+                int size = ((FieldElement)ctx.Element).Attribute.ArrayFixedSize;
                 currentLoopContext.Size = (ConstantElement<int>)size;
             }
 
@@ -243,10 +243,7 @@ namespace AmphetamineSerializer
                     g.LoadLocal(currentLoopContext.Index);
                 });
             }
-
-            // TODO: REPLACE THIS WITH INDEX!!
-            // ctx.Element.LoopCtx = currentLoopContext;
-
+            
             ctx.LoopCtx.Push(currentLoopContext);
             ctx.Manipulator.AddLoopPreamble(ctx);
         }
@@ -260,13 +257,12 @@ namespace AmphetamineSerializer
         /// <param name="ctx">Context</param>
         private void HandleType(FoundryContext ctx)
         {
-            // TODO: SET INDEX?!
             if (ctx.ObjectType.IsByRef)
                 ctx.Element.Load(ctx.G, TypeOfContent.Address);
             else
                 ctx.Element.Load(ctx.G, TypeOfContent.Value);
 
-            ctx.Manipulator.ForwardParameters(ctx.InputParameters, null, ctx.Element.Attribute);
+            ctx.Manipulator.ForwardParameters(ctx.InputParameters, null, ((FieldElement)ctx.Element).Attribute);
         }
         #endregion
     }

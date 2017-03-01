@@ -29,6 +29,7 @@ namespace AmphetamineSerializer
 
     /// <summary>
     /// Provide basic abstraction from IL.
+    /// TODO: REMOVE THIS MESS!!
     /// </summary>
     public class ILAbstraction
     {
@@ -81,7 +82,7 @@ namespace AmphetamineSerializer
             currentLoopContext.Body = ctx.G.DefineLabel();
             currentLoopContext.CheckOutOfBound = ctx.G.DefineLabel();
 
-            Type indexType = ctx.Element.Attribute?.SizeType;
+            Type indexType = ((FieldElement)ctx.Element).Attribute?.SizeType;
             if (indexType == null)
                 indexType = typeof(uint);
 

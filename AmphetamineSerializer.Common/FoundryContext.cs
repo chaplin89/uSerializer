@@ -34,13 +34,13 @@ namespace AmphetamineSerializer.Common
             {
                 InputParameters = delegateType.GetMethod("Invoke").GetParameters().Select(x => x.ParameterType).ToArray(),
                 AdditionalContext = additionalContext,
-                Element = element as FieldElement,
+                Element = element,
                 Provider = provider,
                 G = g
             };
         }
 
-        public FieldElement Element;
+        public IElement Element;
 
         /// <summary>
         /// 
@@ -126,14 +126,14 @@ namespace AmphetamineSerializer.Common
         }
 
         /// <summary>
-        /// CurrentUnderlyingType 
+        ///  
         /// </summary>
         public Type NormalizedType {
             get
             {
-                Type normalizedType = Element.Field.FieldType;
+                Type normalizedType = Element.RootType;
 
-                if (Element.Field.FieldType.IsEnum)
+                if (normalizedType.IsEnum)
                     normalizedType = normalizedType.GetEnumUnderlyingType();
 
                 if (ManageLifeCycle)

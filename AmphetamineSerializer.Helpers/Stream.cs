@@ -60,7 +60,7 @@ namespace AmphetamineSerializer.Helpers
 
         protected override BuildedFunction InternalMake()
         {
-            if (ctx.Element.ElementType == null)
+            if (ctx.Element?.ElementType == null)
                 return null;
 
             if (typeHandlerMap.ContainsKey(ctx.Element.ElementType))
@@ -162,19 +162,19 @@ namespace AmphetamineSerializer.Helpers
             }
             else
             {
-                caller.SetOutput(new ParameterDescriptor[]
-                {
-                    new ParameterDescriptor()
-                    {
-                        Index = 0,
-                        Parameter = typeof(BinaryWriter),
-                        Role = ParameterRole.MandatoryForward
-                    }
-                });
-                caller.EmitInvoke(ctx.G);
+                // caller.SetOutput(new ParameterDescriptor[]
+                // {
+                //     new ParameterDescriptor()
+                //     {
+                //         Index = 0,
+                //         Parameter = typeof(BinaryWriter),
+                //         Role = ParameterRole.MandatoryForward
+                //     }
+                // });
+                // caller.EmitInvoke(ctx.G);
                 ctx.G.LoadArgument(1); // argument i --> stack
                 ctx.Element.Load(ctx.G, TypeOfContent.Value);
-                ctx.G.CallVirtual(typeHandlerMap[ctx.NormalizedType]);
+                ctx.G.CallVirtual(typeHandlerMap[ctx.Element.ElementType]);
             }
         }
     }

@@ -33,12 +33,12 @@ namespace AmphetamineSerializer.Common.Element
         {
             get
             {
+                if (elementType == null)
+                    elementType = RootType;
                 return elementType;
             }
             set
             {
-                if (rootType == null)
-                    rootType = value;
                 elementType = value;
             }
         }
@@ -100,6 +100,23 @@ namespace AmphetamineSerializer.Common.Element
                     else
                         g.StoreArgument(ArgumentIndex);
                 };
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public Type RootType
+        {
+            get
+            {
+                return rootType;
+            }
+
+            set
+            {
+                elementType = value;
+                rootType = value;
             }
         }
     }

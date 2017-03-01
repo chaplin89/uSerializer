@@ -50,11 +50,7 @@ namespace AmphetamineSerializer.Chain
                             Parameter = _
                         };
                     });
-
-                var mandatory = attr.Where(_=> _.ParameterType == ParameterRole.MandatoryForward);
-                var optional = attr.Where(_=> _.ParameterType == ParameterRole.OptionalForward);
-                var root = attr.Where(_=> _.ParameterType == ParameterRole.RootObject).Single();
-
+                
                 outputType = method.ReturnType;
                 delegateType = value;
             }

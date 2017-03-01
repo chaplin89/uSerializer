@@ -136,5 +136,11 @@ namespace AmphetamineSerializer.Common
                 };
             }
         }
+
+        public Type RootType
+        {
+            get { return Field?.FieldType; }
+            set { throw new InvalidOperationException("RootType for FieldElement type is fixed."); }
+        }
     }
 }
