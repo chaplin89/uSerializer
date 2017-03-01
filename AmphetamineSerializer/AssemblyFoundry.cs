@@ -6,6 +6,8 @@ using AmphetamineSerializer.Common;
 using Sigil;
 using AmphetamineSerializer.Chain.Nodes;
 using AmphetamineSerializer.Common.Element;
+using System.Diagnostics.Contracts;
+using System.Diagnostics;
 
 namespace AmphetamineSerializer
 {
@@ -96,7 +98,7 @@ namespace AmphetamineSerializer
             for (int i = 0; i < labels.Length; i++)
                 labels[i] = ctx.G.DefineLabel($"Version_{i}");
 
-            Type requestType = versionField.Field.FieldType;
+            Type requestType = versionField.ElementType;
             if (ctx.ManageLifeCycle)
                 requestType = requestType.MakeByRefType();
 
@@ -152,11 +154,11 @@ namespace AmphetamineSerializer
             {
                 ctx.Element = (FieldElement)linkedList.First.Value;
 
-                // todo:
-                // 1. List (needs a special handling because of its similarities with Array)
-                // 2. Anything else implementing IEnumerable (excluing List ofc)
                 SerializationBuildResponse response = null;
 
+                // todo:
+                // 1. List (needs a special handling because of its similarities with Array)
+                // 2. Anything else implementing IEnumerable (excluding List ofc)
                 if (ctx.Element.ElementType.IsAbstract)
                     throw new InvalidOperationException("Incomplete types are not allowed.");
 
@@ -175,6 +177,9 @@ namespace AmphetamineSerializer
                     G = ctx.G
                 };
 
+                if (ctx.Element.RootType.Name == "Test1[]")
+                    Debugger.Break();
+
                 // TODO: THERE AREN'T REALLY ANY GOOD REASON FOR MAKING AssemblyFoundry PART OF THE CHAIN.
                 //       THIS IS ONLY WASTING SPACE ON THE STACK.
                 //       AssemblyFoundry SHOULD SEND A REQUEST AND IF THE RESPONSE IS NULL, IT SHOULD TRY TO HANDLE
@@ -182,7 +187,7 @@ namespace AmphetamineSerializer
                 response = ctx.Chain.Process(request) as SerializationBuildResponse;
 
                 if (response == null)
-                    throw new InvalidOperationException($"Unable to find an handler for type {ctx.NormalizedType}");
+                    throw new NotSupportedException();
 
                 // So we have correctly send a request we have its reply.
                 // Whoever handled the request had chance to:
@@ -207,7 +212,7 @@ namespace AmphetamineSerializer
                 }
 
                 if (ctx.Element.RootType.IsArray)
-                    ctx.Manipulator.AddLoopEpilogue(ctx);
+                    AddLoopEpilogue(ctx);
 
                 linkedList.RemoveFirst();
             }
@@ -228,24 +233,8 @@ namespace AmphetamineSerializer
                 currentLoopContext.Size = (ConstantElement<int>)size;
             }
 
-            if (ctx.Element.Index == null)
-            {
-                ctx.Element.Index = (LocalElement)currentLoopContext.Index;
-            }
-            else
-            {
-                var currentIndex = ctx.Element.Index;
-
-                ctx.Element.Index = (GenericElement)((g, _) =>
-                {
-                    currentIndex.Load(g, TypeOfContent.Value);
-                    g.LoadElementAddress(ctx.Element.ElementType);
-                    g.LoadLocal(currentLoopContext.Index);
-                });
-            }
-            
             ctx.LoopCtx.Push(currentLoopContext);
-            ctx.Manipulator.AddLoopPreamble(ctx);
+            AddLoopPreamble(ctx);
         }
         #endregion
 
@@ -265,5 +254,159 @@ namespace AmphetamineSerializer
             ctx.Manipulator.ForwardParameters(ctx.InputParameters, null, ((FieldElement)ctx.Element).Attribute);
         }
         #endregion
+
+        /// <summary>
+        /// Generate a loop preamble:
+        /// 1. Initialize the index
+        /// 2. Jump for checking if current index is out of bound
+        /// 3. Mark the begin of the loop's body
+        /// </summary>
+        /// <param name="ctx">Context of the loop</param>
+        /// <remarks>
+        /// C# Translation:
+        ///     Index = 0;
+        ///     (Initialize the array);
+        /// </remarks>
+        public void AddLoopPreamble(FoundryContext ctx)
+        {
+            Contract.Ensures(ctx != null);
+
+            var currentLoopContext = ctx.LoopCtx.Peek();
+            currentLoopContext.Body = ctx.G.DefineLabel($"Body_{ctx.Element.GetHashCode()}");
+            currentLoopContext.CheckOutOfBound = ctx.G.DefineLabel($"OutOfBound_{ctx.Element.GetHashCode()}");
+
+            Type indexType = ((FieldElement)ctx.Element).Attribute?.SizeType;
+            if (indexType == null)
+                indexType = typeof(uint);
+
+            // Write in stream
+            if (!ctx.ManageLifeCycle)
+            {
+                var currentElement = ctx.Element;
+
+                currentLoopContext.Size = (LocalElement)ctx.G.DeclareLocal(typeof(uint));
+                var lenght = (GenericElement)ctx.Element.LoadLenght();
+
+                currentLoopContext.Size.Store(ctx.G, lenght, TypeOfContent.Value);
+
+                // Write the size of the array
+                var request = new SerializationBuildRequest()
+                {
+                    Element = currentLoopContext.Size,
+                    DelegateType = ctx.Manipulator.MakeDelegateType(indexType, ctx.InputParameters),
+                    AdditionalContext = ctx.AdditionalContext,
+                    Provider = ctx.Provider,
+                    G = ctx.G
+                };
+
+                var response = ctx.Chain.Process(request) as SerializationBuildResponse;
+
+                if (response.Response.Status != BuildedFunctionStatus.NoMethodsAvailable)
+                {
+                    currentLoopContext.Size.Load(ctx.G, TypeOfContent.Value);
+
+                    if (response.Response.Status == BuildedFunctionStatus.TypeFinalized)
+                        ctx.Manipulator.ForwardParameters(ctx.InputParameters, response.Response);
+                    else
+                    {
+                        ctx.Manipulator.ForwardParameters(ctx.InputParameters, null);
+                        ctx.G.Call(response.Response.Emiter);
+                    }
+                }
+            }
+
+            // Case #1: Noone created the Size variable; create a new one and expect to find its value
+            //          in the stream.
+            // Case #2: The Size variable was already initialized by someone else; Use it.
+            else if (currentLoopContext.Size == null)
+            {
+                var currentElement = ctx.Element;
+                currentLoopContext.Size = new LocalElement(ctx.G.DeclareLocal(indexType));
+
+                var request = new SerializationBuildRequest()
+                {
+                    Element = currentLoopContext.Size,
+                    DelegateType = ctx.Manipulator.MakeDelegateType(indexType.MakeByRefType(), ctx.InputParameters),
+                    AdditionalContext = ctx.AdditionalContext,
+                    Provider = ctx.Provider,
+                    G = ctx.G
+                };
+
+                var response = ctx.Chain.Process(request) as SerializationBuildResponse;
+                ctx.Element = currentElement;
+
+                if (response.Response.Status != BuildedFunctionStatus.NoMethodsAvailable)
+                {
+                    // this.DecodeUInt(ref size, buffer, ref position);
+                    currentLoopContext.Size.Load(ctx.G, TypeOfContent.Address);
+                    ctx.Manipulator.ForwardParameters(ctx.InputParameters, response.Response);
+                }
+            }
+
+            if (ctx.ManageLifeCycle)
+            {
+                // ObjectInstance.CurrentItemFieldInfo = new CurrentItemUnderlyingType[Size];
+                var newArray = (GenericElement)((g, _) =>
+                {
+                    currentLoopContext.Size.Load(g, TypeOfContent.Value);
+                    ctx.G.NewArray(ctx.Element.ElementType);
+                });
+
+                ctx.Element.Store(ctx.G, newArray, TypeOfContent.Value);
+            }
+
+            // int indexLocal = 0;
+            // goto CheckOutOfBound;
+            ctx.G.LoadConstant(0);
+            ctx.G.StoreLocal(currentLoopContext.Index);
+            ctx.G.Branch(currentLoopContext.CheckOutOfBound); // Local variables initialized, jump
+
+            // Loop start
+            ctx.G.MarkLabel(currentLoopContext.Body);
+
+            ctx.Element.EnterArray((LocalElement)currentLoopContext.Index);
+        }
+
+        /// <summary>
+        /// Generate a loop epilogue:
+        /// 1. Increment index
+        /// 2. Out of bound check, eventually jump to the body
+        /// </summary>
+        /// <param name="ctx">Context</param>
+        /// <remarks>The loop context must be a valid context and must be the same passed
+        /// (or generated) by the <see cref="AddLoopPreamble(ref LoopContext)"/> function.
+        /// C# Translation:
+        ///     while (Index++ &lt; Size) {
+        ///         (here follow the Body label)
+        ///     }
+        /// </remarks>
+        public void AddLoopEpilogue(FoundryContext ctx)
+        {
+            Contract.Ensures(ctx != null);
+            Contract.Ensures(ctx.LoopCtx.Count > 0);
+
+            while (ctx.LoopCtx.Count > 0)
+            {
+                var currentLoopContext = ctx.LoopCtx.Pop();
+
+                ctx.Manipulator.IncrementLocalVariable(currentLoopContext.Index);
+
+                ctx.G.MarkLabel(currentLoopContext.CheckOutOfBound);
+                ctx.G.LoadLocal(currentLoopContext.Index);
+
+                // If the Size is not provided, load the lenght of the array.
+                if (currentLoopContext.Size == null)
+                {
+                    ctx.Element.Load(ctx.G, TypeOfContent.Value);
+                    ctx.G.LoadLength(ctx.Element.ElementType);
+                }
+                else
+                {
+                    currentLoopContext.Size.Load(ctx.G, TypeOfContent.Value);
+                }
+
+                ctx.G.BranchIfLess(currentLoopContext.Body);
+            }
+        }
     }
 }

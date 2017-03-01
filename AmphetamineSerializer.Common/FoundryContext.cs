@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Sigil.NonGeneric;
 using System.Diagnostics;
+using AmphetamineSerializer.Common.Element;
 
 namespace AmphetamineSerializer.Common
 {
@@ -26,7 +27,7 @@ namespace AmphetamineSerializer.Common
         /// <returns></returns>
         public static FoundryContext MakeContext(Type delegateType, 
                                                  object additionalContext,
-                                                 IElement element, 
+                                                 BaseElement element, 
                                                  SigilFunctionProvider provider,
                                                  Emit g)
         {
@@ -40,7 +41,7 @@ namespace AmphetamineSerializer.Common
             };
         }
 
-        public IElement Element;
+        public BaseElement Element;
 
         /// <summary>
         /// 

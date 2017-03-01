@@ -50,7 +50,7 @@ namespace AmphetamineSerializer.Common
 
             Emit emiter;
             if (typeBuilder != null)
-                emiter = Emit.BuildStaticMethod(returnValue, inputTypes, typeBuilder, v, MethodAttributes.Public, true, false);
+                emiter = Emit.BuildStaticMethod(returnValue, inputTypes, typeBuilder, v, MethodAttributes.Public, true, true);
             else
                 emiter = Emit.NewDynamicMethod(returnValue, inputTypes);
 
@@ -88,7 +88,7 @@ namespace AmphetamineSerializer.Common
                     Type currentType = typeBuilder.CreateType();
                     bf.Method = currentType.GetMethod(bf.Method.Name, bf.Method.GetParameters().Select(x => x.ParameterType).ToArray());
                     Debug.Assert(assemblyBuilder != null);
-#if RUN_ONLY
+#if !RUN_ONLY
                     assemblyBuilder.Save(assemblyName.Name + ".dll");
 #endif
                 }

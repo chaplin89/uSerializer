@@ -1,4 +1,5 @@
-﻿using Sigil.NonGeneric;
+﻿using AmphetamineSerializer.Common.Element;
+using Sigil.NonGeneric;
 using System;
 
 namespace AmphetamineSerializer.Common
@@ -6,10 +7,11 @@ namespace AmphetamineSerializer.Common
     /// <summary>
     /// Manage a generic element.
     /// </summary>
-    public class GenericElement : IElement
+    public class GenericElement : BaseElement
     {
         private Type rootType;
         private Type elementType;
+
         #region Conversions
         /// <summary>
         /// Build a GenericElement wrapper around an action that load the element in the stack.
@@ -29,6 +31,7 @@ namespace AmphetamineSerializer.Common
         {
             return new GenericElement(null, store);
         }
+
         #endregion
 
         /// <summary>
@@ -52,22 +55,22 @@ namespace AmphetamineSerializer.Common
         /// <summary>
         /// Action for emitting instructions to load the element in the stack.
         /// </summary>
-        public Action<Emit, TypeOfContent> Load { get; set; }
+        public override Action<Emit, TypeOfContent> Load { get; set; }
 
         /// <summary>
         /// Action for emitting instructions that store in the element a value taken from the stack.
         /// </remarks>
-        public Action<Emit, IElement, TypeOfContent> Store { get; set; }
+        public override Action<Emit, IElement, TypeOfContent> Store { get; set; }
 
         /// <summary>
         /// If the GenericElement supports type that can be indexed, this is the index.
         /// </summary>
-        public IElement Index { get; set; }
+        public override IElement Index { get; set; }
 
         /// <summary>
         /// If it is well defined, this is the type of the element loaded.
         /// </summary>
-        public Type ElementType
+        public override Type ElementType
         {
             get
             {
@@ -84,7 +87,7 @@ namespace AmphetamineSerializer.Common
         /// <summary>
         /// 
         /// </summary>
-        public Type RootType
+        public override Type RootType
         {
             get
             {
@@ -96,6 +99,16 @@ namespace AmphetamineSerializer.Common
                 rootType = value;
                 ElementType = value;
             }
+        }
+
+        protected override Action<Emit, IElement, TypeOfContent> InternalStore(IElement index)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override Action<Emit, TypeOfContent> InternalLoad(IElement index)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -8,7 +8,7 @@ namespace AmphetamineSerializer.Common.Element
     /// Manage the load of a constant value in the stack.
     /// </summary>
     /// <typeparam name="ConstantType">Type of constant value.</typeparam>
-    public class ConstantElement<ConstantType> : IElement
+    public class ConstantElement<ConstantType> : BaseElement
     {
         MethodInfo method;
 
@@ -57,7 +57,7 @@ namespace AmphetamineSerializer.Common.Element
         /// </summary>
         /// <exception cref="NotSupportedException">If the content is requested by address</exception>
         /// <exception cref="InvalidOperationException">If the method for emitting the constant was not found.</exception>
-        public Action<Emit, TypeOfContent> Load
+        public override Action<Emit, TypeOfContent> Load
         {
             get
             {
@@ -72,25 +72,13 @@ namespace AmphetamineSerializer.Common.Element
                 };
             }
         }
-
-        /// <summary>
-        /// Not supported because a constant value can't be modified.
-        /// </summary>
-        /// <exception cref="NotSupportedException">Always</exception>
-        public Action<Emit, IElement, TypeOfContent> Store
-        {
-            get
-            {
-                throw new InvalidOperationException("Trying to store something inside a constant value.");
-            }
-        }
-
+        
         /// <summary>
         /// The index for a constant value does not make sense.
         /// <see cref="IElement.Index"/>
         /// </summary>
         /// <exception cref="InvalidOperationException">If the set accessor is invoked.</exception>
-        public IElement Index
+        public override IElement Index
         {
             get { return null; }
             set { throw new InvalidOperationException("Can't set an index for a constant value."); }
@@ -100,7 +88,7 @@ namespace AmphetamineSerializer.Common.Element
         /// Return the type of the element.
         /// </summary>
         /// <exception cref="InvalidOperationException">If the set accessor is invoked.</exception>
-        public Type ElementType
+        public override Type ElementType
         {
             get { return RootType; }
             set { throw new InvalidOperationException("Element type for a constant value is fixed."); }
@@ -109,10 +97,20 @@ namespace AmphetamineSerializer.Common.Element
         /// <summary>
         /// 
         /// </summary>
-        public Type RootType
+        public override Type RootType
         {
             get { return typeof(ValueType); }
             set { throw new InvalidOperationException("RootType for constant type is fixed."); }
+        }
+
+        protected override Action<Emit, IElement, TypeOfContent> InternalStore(IElement index)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override Action<Emit, TypeOfContent> InternalLoad(IElement index)
+        {
+            throw new NotImplementedException();
         }
     }
 }

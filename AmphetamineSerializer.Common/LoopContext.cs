@@ -1,4 +1,5 @@
-﻿using Sigil;
+﻿using AmphetamineSerializer.Common.Element;
+using Sigil;
 using System;
 
 namespace AmphetamineSerializer.Common
@@ -21,7 +22,7 @@ namespace AmphetamineSerializer.Common
         /// <summary>
         /// Size of the array.
         /// </summary>
-        public IElement Size { get; set; }
+        public BaseElement Size { get; set; }
 
         /// <summary>
         /// Label that point to the end of the loop,

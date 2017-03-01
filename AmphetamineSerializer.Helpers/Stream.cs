@@ -65,7 +65,7 @@ namespace AmphetamineSerializer.Helpers
 
             if (typeHandlerMap.ContainsKey(ctx.Element.ElementType))
                 HandlePrimitive(ctx);
-            if (ctx.Element.ElementType == typeof(string))
+            else if (ctx.Element.ElementType == typeof(string))
                 HandleString(ctx);
             else
                 return null;
@@ -93,7 +93,7 @@ namespace AmphetamineSerializer.Helpers
         /// <param name="ctx"></param>
         public void DecodeString(FoundryContext ctx)
         {
-            var store = (GenericElement)((g, _) =>
+            var valueToLoad = (GenericElement)((g, _) =>
             {
                 // Put the decoded string in the stack.
                 g.Call(typeof(Encoding).GetProperty("ASCII").GetMethod);
@@ -104,7 +104,7 @@ namespace AmphetamineSerializer.Helpers
                 g.CallVirtual(typeof(Encoding).GetMethod("GetString", new Type[] { typeof(byte[]) }));
             });
 
-            ctx.Element.Store(ctx.G, store, TypeOfContent.Value);
+            ctx.Element.Store(ctx.G, valueToLoad, TypeOfContent.Value);
         }
 
         public BuildedFunction EncodeString(FoundryContext ctx)
@@ -114,21 +114,18 @@ namespace AmphetamineSerializer.Helpers
             // writer.Write(Encoding.ASCII.GetBytes(Load());
 
             // Write lenght
-            {
-                ctx.G.LoadArgument(1);
-                ctx.G.Call(typeof(Encoding).GetProperty("ASCII").GetMethod);
-                ctx.Element.Load(ctx.G, TypeOfContent.Value);
-                ctx.G.CallVirtual(typeof(Encoding).GetMethod("GetByteCount", new Type[] { typeof(string) }));
-                ctx.G.CallVirtual(typeHandlerMap[typeof(int)]);
-            }
+            ctx.G.LoadArgument(1);
+            ctx.G.Call(typeof(Encoding).GetProperty("ASCII").GetMethod);
+            ctx.Element.Load(ctx.G, TypeOfContent.Value);
+            ctx.G.CallVirtual(typeof(Encoding).GetMethod("GetByteCount", new Type[] { typeof(string) }));
+            ctx.G.CallVirtual(typeHandlerMap[typeof(int)]);
+
             // Write string
-            {
-                ctx.G.LoadArgument(1);
-                ctx.G.Call(typeof(Encoding).GetProperty("ASCII").GetMethod);
-                ctx.Element.Load(ctx.G, TypeOfContent.Value);
-                ctx.G.CallVirtual(typeof(Encoding).GetMethod("GetBytes", new Type[] { typeof(string) }));
-                ctx.G.CallVirtual(typeHandlerMap[typeof(byte[])]);
-            }
+            ctx.G.LoadArgument(1);
+            ctx.G.Call(typeof(Encoding).GetProperty("ASCII").GetMethod);
+            ctx.Element.Load(ctx.G, TypeOfContent.Value);
+            ctx.G.CallVirtual(typeof(Encoding).GetMethod("GetBytes", new Type[] { typeof(string) }));
+            ctx.G.CallVirtual(typeHandlerMap[typeof(byte[])]);
 
             return new BuildedFunction() { Status = BuildedFunctionStatus.NoMethodsAvailable };
         }
@@ -147,7 +144,7 @@ namespace AmphetamineSerializer.Helpers
             {
                 var store = (GenericElement)((g, _) =>
                 {
-                    caller.SetOutput(new ParameterDescriptor[] 
+                    caller.SetOutput(new ParameterDescriptor[]
                     {
                         new ParameterDescriptor()
                         {

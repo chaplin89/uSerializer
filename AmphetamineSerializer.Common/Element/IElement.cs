@@ -27,10 +27,22 @@ namespace AmphetamineSerializer.Common
         Action<Emit, IElement, TypeOfContent> Store { get; }
 
         /// <summary>
-        /// If the field is an array, those element is loaded before accessing the element 
-        /// o.
+        /// If the element support indexing, this emit the action for accessing the element
+        /// at a given index.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        Action<Emit, TypeOfContent> this[IElement index] { get; }
+
+        /// <summary>
+        /// If the element support indexing, this is the element for accessing the index.
         /// </summary>
         IElement Index { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        bool SupportIndexing { get; }
 
         /// <summary>
         /// This is the type accessed when Index is null.

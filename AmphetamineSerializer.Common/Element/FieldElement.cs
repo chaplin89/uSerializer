@@ -2,13 +2,14 @@
 using System;
 using System.Reflection;
 using AmphetamineSerializer.Common.Attributes;
+using AmphetamineSerializer.Common.Element;
 
 namespace AmphetamineSerializer.Common
 {
     /// <summary>
     /// Manage a class field.
     /// </summary>
-    public class FieldElement : IElement
+    public class FieldElement : BaseElement
     {
         private Type elementType;
 
@@ -39,7 +40,7 @@ namespace AmphetamineSerializer.Common
         /// If the field is an array, 
         /// this is the index(es) used in load/store.
         /// </summary>
-        public IElement Index { get; set; }
+        public override IElement Index { get; set; }
 
         /// <summary>
         /// Field information.
@@ -50,7 +51,7 @@ namespace AmphetamineSerializer.Common
         /// Type of the element.
         /// <seealso cref="IElement.ElementType"/>
         /// </summary>
-        public Type ElementType
+        public override Type ElementType
         {
             get
             {
@@ -77,67 +78,54 @@ namespace AmphetamineSerializer.Common
             }
         }
 
-        /// <summary>
-        /// Emit instructions to load a field in the stack.
-        /// TODO: Manage matrix.
-        /// </summary>
-        public Action<Emit, TypeOfContent> Load
+        protected override Action<Emit, TypeOfContent> InternalLoad(IElement index)
         {
-            get
+            return (g, content) =>
             {
-                return (g, content) =>
+                Instance.Load(g, TypeOfContent.Value);
+            
+                if (Field.FieldType.IsArray && index != null)
                 {
-                    Instance.Load(g, TypeOfContent.Value);
+                    g.LoadField(Field);
+                    index.Load(g, TypeOfContent.Value);
 
-                    if (Field.FieldType.IsArray && Index != null)
-                    {
-                        g.LoadField(Field);
-                        Index.Load(g, TypeOfContent.Value);
-
-                        if (content == TypeOfContent.Value)
-                            g.LoadElement(Field.FieldType.GetElementType());
-                        else
-                            g.LoadElementAddress(Field.FieldType.GetElementType());
-                    }
+                    if (content == TypeOfContent.Value)
+                        g.LoadElement(ElementType);
                     else
-                    {
-                        if (content == TypeOfContent.Value)
-                            g.LoadField(Field);
-                        else
-                            g.LoadFieldAddress(Field);
-                    }
-                };
-            }
+                        g.LoadElementAddress(ElementType);
+                }
+                else
+                {
+                    if (content == TypeOfContent.Value)
+                        g.LoadField(Field);
+                    else
+                        g.LoadFieldAddress(Field);
+                }
+            };
         }
 
-        /// <summary>
-        /// Emit instructions for storing something taken from the stack in a field of a class.
-        /// </summary>
-        public Action<Emit, IElement, TypeOfContent> Store
+        protected override Action<Emit, IElement, TypeOfContent> InternalStore(IElement index)
         {
-            get
+            return (g, value, content) =>
             {
-                return (g, value, content) =>
+                Instance.Load(g, TypeOfContent.Value);
+
+                if (Field.FieldType.IsArray)
                 {
-                    Instance.Load(g, TypeOfContent.Value);
+                    g.LoadField(Field);
+                    Index.Load(g, TypeOfContent.Value);
+                }
 
-                    if (Field.FieldType.IsArray)
-                    {
-                        g.LoadField(Field);
-                        Index.Load(g, TypeOfContent.Value);
-                    }
+                value.Load(g, content);
 
-                    value.Load(g, content);
-
-                    if (Field.FieldType.IsArray)
-                        g.StoreElement(Field.FieldType.GetElementType());
-                    else
-                        g.StoreField(Field);
-                };
-            }
+                if (Field.FieldType.IsArray)
+                    g.StoreElement(ElementType);
+                else
+                    g.StoreField(Field);
+            };
         }
 
-        public Type RootType
+        public override Type RootType
         {
             get { return Field?.FieldType; }
             set { throw new InvalidOperationException("RootType for FieldElement type is fixed."); }

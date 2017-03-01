@@ -7,7 +7,7 @@ namespace AmphetamineSerializer.Common.Element
     /// <summary>
     /// Manage a local variable.
     /// </summary>
-    public class LocalElement : IElement
+    public class LocalElement : BaseElement
     {
         private Type elementType;
 
@@ -46,7 +46,7 @@ namespace AmphetamineSerializer.Common.Element
         /// <summary>
         /// Emit instructions for loading the local variable in the stack.
         /// </summary>
-        public Action<Emit, TypeOfContent> Load
+        public override Action<Emit, TypeOfContent> Load
         {
             get
             {
@@ -76,7 +76,7 @@ namespace AmphetamineSerializer.Common.Element
         /// <summary>
         /// Emit instructions for storing something, taken from the stack, in the local variable.
         /// </summary>
-        public Action<Emit, IElement, TypeOfContent> Store
+        public override Action<Emit, IElement, TypeOfContent> Store
         {
             get
             {
@@ -101,12 +101,12 @@ namespace AmphetamineSerializer.Common.Element
         /// <summary>
         /// <see cref="IElement.Index"/>
         /// </summary>
-        public IElement Index { get; set; }
+        public override IElement Index { get; set; }
 
         /// <summary>
         /// <see cref="IElement.ElementType"/>
         /// </summary>
-        public Type ElementType
+        public override Type ElementType
         {
             get
             {
@@ -123,10 +123,20 @@ namespace AmphetamineSerializer.Common.Element
         /// <summary>
         /// <see cref="IElement.RootType"/>
         /// </summary>
-        public Type RootType
+        public override Type RootType
         {
             get { return LocalVariable?.LocalType; }
             set { throw new InvalidOperationException("Can't set the RootType for LocalElement because it's fixed."); }
+        }
+
+        protected override Action<Emit, IElement, TypeOfContent> InternalStore(IElement index)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override Action<Emit, TypeOfContent> InternalLoad(IElement index)
+        {
+            throw new NotImplementedException();
         }
     }
 }
