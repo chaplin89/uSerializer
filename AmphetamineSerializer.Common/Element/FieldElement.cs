@@ -2,7 +2,6 @@
 using System;
 using System.Reflection;
 using AmphetamineSerializer.Common.Attributes;
-using System.Collections.Generic;
 
 namespace AmphetamineSerializer.Common
 {
@@ -48,7 +47,8 @@ namespace AmphetamineSerializer.Common
         public FieldInfo Field { get; set; }
 
         /// <summary>
-        /// 
+        /// Type of the element.
+        /// <seealso cref="IElement.ElementType"/>
         /// </summary>
         public Type ElementType
         {

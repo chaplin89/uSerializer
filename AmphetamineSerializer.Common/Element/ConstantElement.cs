@@ -7,13 +7,15 @@ namespace AmphetamineSerializer.Common.Element
     /// <summary>
     /// Manage the load of a constant value in the stack.
     /// </summary>
-    /// <typeparam name="ConstantType">Type of constant value</typeparam>
+    /// <typeparam name="ConstantType">Type of constant value.</typeparam>
     public class ConstantElement<ConstantType> : IElement
     {
+        MethodInfo method;
+
         /// <summary>
         /// Build a ConstantElement wrapper arount a constant.
         /// </summary>
-        /// <param name="constant">The constant</param>
+        /// <param name="constant">The constant.</param>
         public static implicit operator ConstantElement<ConstantType>(ConstantType constant)
         {
             return new ConstantElement<ConstantType>(constant);
@@ -22,25 +24,27 @@ namespace AmphetamineSerializer.Common.Element
         /// <summary>
         /// Return the constant contained in this object.
         /// </summary>
-        /// <param name="constant">The constant</param>
+        /// <param name="constant">The constant.</param>
         public static implicit operator ConstantType(ConstantElement<ConstantType> constant)
         {
             return constant.Constant;
         }
 
-        MethodInfo method;
-
         /// <summary>
-        /// Build a 
+        /// Build a ConstantElement object initializing the constant.
         /// </summary>
-        /// <param name="constant"></param>
+        /// <param name="constant">Initial constant.</param>
+        /// <remarks>
+        /// There should exist the method LoadConstant(ConstantType) inside the Emit class.
+        /// </remarks>
+        /// <exception cref="NotSupportedException">If the method for emitting the constant was not found.</exception>
         public ConstantElement(ConstantType constant)
         {
             Constant = constant;
             method = typeof(Emit).GetMethod("LoadConstant", new Type[] { typeof(ConstantType) });
 
             if (method == null)
-                throw new InvalidOperationException("Unrecognized type");
+                throw new NotSupportedException("Unrecognized type");
         }
 
         /// <summary>
@@ -77,8 +81,29 @@ namespace AmphetamineSerializer.Common.Element
         {
             get
             {
-                throw new NotSupportedException("Trying to set a constant value.");
+                throw new InvalidOperationException("Trying to store something inside a constant value.");
             }
+        }
+
+        /// <summary>
+        /// The index for a constant value does not make sense.
+        /// <see cref="IElement.Index"/>
+        /// </summary>
+        /// <exception cref="InvalidOperationException">If the set accessor is invoked.</exception>
+        public IElement Index
+        {
+            get { return null; }
+            set { throw new InvalidOperationException("Can't set an index for a constant value."); }
+        }
+
+        /// <summary>
+        /// Return the type of the element.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">If the set accessor is invoked.</exception>
+        public Type ElementType
+        {
+            get { return typeof(ValueType); }
+            set { throw new InvalidOperationException("Can't set the element type for a constant value because it is fixed."); }
         }
     }
 }
