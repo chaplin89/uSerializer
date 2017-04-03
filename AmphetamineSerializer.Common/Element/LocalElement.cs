@@ -9,8 +9,6 @@ namespace AmphetamineSerializer.Common.Element
     /// </summary>
     public class LocalElement : BaseElement
     {
-        private Type elementType;
-
         /// <summary>
         /// Build a LocalElement wrapper around a Local variable.
         /// </summary>

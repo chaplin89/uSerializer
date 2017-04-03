@@ -9,9 +9,6 @@ namespace AmphetamineSerializer.Common
     /// </summary>
     public class GenericElement : BaseElement
     {
-        private Type rootType;
-        private Type elementType;
-
         #region Conversions
         /// <summary>
         /// Build a GenericElement wrapper around an action that load the element in the stack.

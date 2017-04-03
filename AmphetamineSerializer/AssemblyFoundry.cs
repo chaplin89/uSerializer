@@ -98,7 +98,7 @@ namespace AmphetamineSerializer
             for (int i = 0; i < labels.Length; i++)
                 labels[i] = ctx.G.DefineLabel($"Version_{i}");
 
-            Type requestType = versionField.ElementType;
+            Type requestType = versionField.LoadedType;
             if (ctx.ManageLifeCycle)
                 requestType = requestType.MakeByRefType();
 
@@ -159,10 +159,10 @@ namespace AmphetamineSerializer
                 // todo:
                 // 1. List (needs a special handling because of its similarities with Array)
                 // 2. Anything else implementing IEnumerable (excluding List ofc)
-                if (ctx.Element.ElementType.IsAbstract)
+                if (ctx.Element.LoadedType.IsAbstract)
                     throw new InvalidOperationException("Incomplete types are not allowed.");
 
-                if (ctx.Element.ElementType.IsArray)
+                if (ctx.Element.IsIndexable)
                 {
                     ManageArray(ctx);
                     continue;
@@ -222,7 +222,7 @@ namespace AmphetamineSerializer
         {
             var currentLoopContext = new LoopContext(ctx.G.DeclareLocal(typeof(int)));
 
-            ctx.Element.ElementType = ctx.Element.ElementType.GetElementType();
+            ctx.Element.LoadedType = ctx.Element.LoadedType.GetElementType();
 
             if (ctx.ObjectType.IsByRef && ((FieldElement)ctx.Element).Attribute.ArrayFixedSize != -1)
             {
@@ -285,7 +285,7 @@ namespace AmphetamineSerializer
                 var currentElement = ctx.Element;
 
                 currentLoopContext.Size = (LocalElement)ctx.G.DeclareLocal(typeof(uint));
-                var lenght = (GenericElement)ctx.Element.LoadLenght();
+                var lenght = (GenericElement)ctx.Element.LoadArrayLenght();
 
                 currentLoopContext.Size.Store(ctx.G, lenght, TypeOfContent.Value);
 
@@ -349,7 +349,7 @@ namespace AmphetamineSerializer
                 var newArray = (GenericElement)((g, _) =>
                 {
                     currentLoopContext.Size.Load(g, TypeOfContent.Value);
-                    ctx.G.NewArray(ctx.Element.ElementType);
+                    ctx.G.NewArray(ctx.Element.LoadedType);
                 });
 
                 ctx.Element.Store(ctx.G, newArray, TypeOfContent.Value);
@@ -398,7 +398,7 @@ namespace AmphetamineSerializer
                 if (currentLoopContext.Size == null)
                 {
                     ctx.Element.Load(ctx.G, TypeOfContent.Value);
-                    ctx.G.LoadLength(ctx.Element.ElementType);
+                    ctx.G.LoadLength(ctx.Element.LoadedType);
                 }
                 else
                 {
