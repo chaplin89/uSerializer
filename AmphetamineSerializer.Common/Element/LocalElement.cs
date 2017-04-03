@@ -42,101 +42,27 @@ namespace AmphetamineSerializer.Common.Element
         /// The local variable
         /// </summary>
         public Local LocalVariable { get; set; }
-
+        
         /// <summary>
-        /// Emit instructions for loading the local variable in the stack.
+        /// <see cref="IElement.LoadedType"/>
         /// </summary>
-        public override Action<Emit, TypeOfContent> Load
-        {
-            get
-            {
-                return (g, content) =>
-                {
-                    if (LocalVariable.LocalType.IsArray && Index != null)
-                    {
-                        g.LoadLocal(LocalVariable);
-                        Index.Load(g, TypeOfContent.Value);
-
-                        if (content == TypeOfContent.Value)
-                            g.LoadElement(ElementType);
-                        else
-                            g.LoadElementAddress(ElementType);
-                    }
-                    else
-                    {
-                        if (content == TypeOfContent.Value)
-                            g.LoadLocal(LocalVariable);
-                        else
-                            g.LoadLocalAddress(LocalVariable);
-                    }
-                };
-            }
-        }
-
-        /// <summary>
-        /// Emit instructions for storing something, taken from the stack, in the local variable.
-        /// </summary>
-        public override Action<Emit, IElement, TypeOfContent> Store
-        {
-            get
-            {
-                return (g, value, content) =>
-                {
-                    if (LocalVariable.LocalType.IsArray && Index != null)
-                    {
-                        g.LoadLocal(LocalVariable);
-                        Index.Load(g, TypeOfContent.Value);
-                    }
-
-                    value.Load(g, content);
-
-                    if (LocalVariable.LocalType.IsArray && Index != null)
-                        g.StoreElement(ElementType);
-                    else
-                        g.StoreLocal(LocalVariable);
-                };
-            }
-        }
-
-        /// <summary>
-        /// <see cref="IElement.Index"/>
-        /// </summary>
-        public override IElement Index { get; set; }
-
-        /// <summary>
-        /// <see cref="IElement.ElementType"/>
-        /// </summary>
-        public override Type ElementType
-        {
-            get
-            {
-                if (elementType == null)
-                    elementType = RootType;
-                return elementType;
-            }
-            set
-            {
-                elementType = value;
-            }
-        }
-
-        /// <summary>
-        /// <see cref="IElement.RootType"/>
-        /// </summary>
-        public override Type RootType
+        public override Type LoadedType
         {
             get { return LocalVariable?.LocalType; }
             set { throw new InvalidOperationException("Can't set the RootType for LocalElement because it's fixed."); }
         }
 
-        protected override Action<Emit, IElement, TypeOfContent> InternalStore(IElement index)
+        protected override void InternalStore(Emit g, TypeOfContent content)
         {
-            throw new NotImplementedException();
+            g.StoreLocal(LocalVariable);
         }
 
-        protected override Action<Emit, TypeOfContent> InternalLoad(IElement index)
+        protected override void InternalLoad(Emit g, TypeOfContent content)
         {
-            throw new NotImplementedException();
+            if (content == TypeOfContent.Value)
+                g.LoadLocal(LocalVariable);
+            else
+                g.LoadLocalAddress(LocalVariable);
         }
     }
 }

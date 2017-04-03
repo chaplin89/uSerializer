@@ -11,8 +11,6 @@ namespace AmphetamineSerializer.Common
     /// </summary>
     public class FieldElement : BaseElement
     {
-        private Type elementType;
-
         /// <summary>
         /// Build this object and initialize instance and field.
         /// </summary>
@@ -37,33 +35,9 @@ namespace AmphetamineSerializer.Common
         public IElement Instance { get; set; }
 
         /// <summary>
-        /// If the field is an array, 
-        /// this is the index(es) used in load/store.
-        /// </summary>
-        public override IElement Index { get; set; }
-
-        /// <summary>
         /// Field information.
         /// </summary>
         public FieldInfo Field { get; set; }
-
-        /// <summary>
-        /// Type of the element.
-        /// <seealso cref="IElement.ElementType"/>
-        /// </summary>
-        public override Type ElementType
-        {
-            get
-            {
-                if (elementType == null)
-                    elementType = Field.FieldType;
-                return elementType;
-            }
-            set
-            {
-                elementType = value;
-            }
-        }
 
         /// <summary>
         /// Access the ASIndexAttribute of the field.
@@ -78,54 +52,44 @@ namespace AmphetamineSerializer.Common
             }
         }
 
-        protected override Action<Emit, TypeOfContent> InternalLoad(IElement index)
+        public override Action<Emit, TypeOfContent> Load
         {
-            return (g, content) =>
+            get
             {
-                Instance.Load(g, TypeOfContent.Value);
-            
-                if (Field.FieldType.IsArray && index != null)
+                return (g, content) =>
                 {
-                    g.LoadField(Field);
-                    index.Load(g, TypeOfContent.Value);
-
-                    if (content == TypeOfContent.Value)
-                        g.LoadElement(ElementType);
-                    else
-                        g.LoadElementAddress(ElementType);
-                }
-                else
-                {
-                    if (content == TypeOfContent.Value)
-                        g.LoadField(Field);
-                    else
-                        g.LoadFieldAddress(Field);
-                }
-            };
+                    Instance.Load(g, TypeOfContent.Value);
+                    base.Load(g, content);
+                };
+            }
         }
 
-        protected override Action<Emit, IElement, TypeOfContent> InternalStore(IElement index)
+        public override Action<Emit, IElement, TypeOfContent> Store
         {
-            return (g, value, content) =>
+            get
             {
-                Instance.Load(g, TypeOfContent.Value);
-
-                if (Field.FieldType.IsArray)
+                return (g, value, content) =>
                 {
-                    g.LoadField(Field);
-                    Index.Load(g, TypeOfContent.Value);
-                }
-
-                value.Load(g, content);
-
-                if (Field.FieldType.IsArray)
-                    g.StoreElement(ElementType);
-                else
-                    g.StoreField(Field);
-            };
+                    Instance.Load(g, TypeOfContent.Value);
+                    base.Store(g, value, content);
+                };
+            }
         }
 
-        public override Type RootType
+        protected override void InternalStore(Emit g, TypeOfContent content)
+        {
+            g.StoreField(Field);
+        }
+
+        protected override void InternalLoad(Emit g, TypeOfContent content)
+        {
+            if (content == TypeOfContent.Value)
+                g.LoadField(Field);
+            else
+                g.LoadFieldAddress(Field);
+        }
+
+        public override Type LoadedType
         {
             get { return Field?.FieldType; }
             set { throw new InvalidOperationException("RootType for FieldElement type is fixed."); }

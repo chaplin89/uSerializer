@@ -57,7 +57,7 @@ namespace AmphetamineSerializer
         {
             Type normalizedType;
 
-            ArgumentElement instance = new ArgumentElement(0) {RootType = ctx.ObjectType };
+            ArgumentElement instance = new ArgumentElement(0) {LoadedType = ctx.ObjectType };
 
             if (ctx.ManageLifeCycle)
             {
@@ -177,7 +177,7 @@ namespace AmphetamineSerializer
                     G = ctx.G
                 };
 
-                if (ctx.Element.RootType.Name == "Test1[]")
+                if (ctx.Element.LoadedType.Name == "Test1[]")
                     Debugger.Break();
 
                 // TODO: THERE AREN'T REALLY ANY GOOD REASON FOR MAKING AssemblyFoundry PART OF THE CHAIN.
@@ -211,7 +211,7 @@ namespace AmphetamineSerializer
                         ctx.G.Call(response.Response.Delegate.Method, null);
                 }
 
-                if (ctx.Element.RootType.IsArray)
+                if (ctx.Element.LoadedType.IsArray)
                     AddLoopEpilogue(ctx);
 
                 linkedList.RemoveFirst();

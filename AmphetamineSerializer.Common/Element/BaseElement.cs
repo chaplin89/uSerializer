@@ -1,29 +1,40 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Sigil.NonGeneric;
 
 namespace AmphetamineSerializer.Common.Element
 {
     public abstract class BaseElement : IElement
     {
-        private IElement indexElement;
+        private BaseElement next;
+        private BaseElement previous;
 
-        public abstract Type ElementType { get; set; }
+        public virtual IElement Index { get; set; }
 
-        public abstract IElement Index { get; set; }
+        protected abstract void InternalStore(Emit g, TypeOfContent content);
 
-        protected abstract Action<Emit, IElement, TypeOfContent> InternalStore(IElement index);
-
-        protected abstract Action<Emit, TypeOfContent> InternalLoad(IElement index);
+        protected abstract void InternalLoad(Emit g, TypeOfContent content);
 
         public virtual Action<Emit, TypeOfContent> Load
         {
             get
             {
-                return InternalLoad(Index);
+                return (g, content) =>
+                {
+                    if (Index != null)
+                    {
+                        InternalLoad(g, TypeOfContent.Value);
+                        Index.Load(g, TypeOfContent.Value);
+
+                        if (content == TypeOfContent.Value)
+                            g.LoadElement(LoadedType);
+                        else
+                            g.LoadElementAddress(LoadedType);
+                    }
+                    else
+                    {
+                        InternalLoad(g, content);
+                    }
+                };
             }
             set
             {
@@ -31,30 +42,43 @@ namespace AmphetamineSerializer.Common.Element
             }
         }
 
-        public abstract Type RootType { get; set; }
+        public abstract Type LoadedType { get; set; }
 
         public virtual Action<Emit, IElement, TypeOfContent> Store
         {
             get
             {
-                return InternalStore(Index);
+                return (g, value, content) =>
+                {
+                    if (Index != null)
+                    {
+                        InternalLoad(g, TypeOfContent.Value);
+                        Index.Load(g, TypeOfContent.Value);
+                    }
+
+                    value.Load(g, content);
+
+                    if (Index != null)
+                        g.StoreElement(LoadedType);
+                    else
+                        InternalStore(g, TypeOfContent.Value);
+                };
             }
             set
             {
                 throw new NotSupportedException("This element doesn't support Store action.");
             }
         }
-
-        public Action<Emit, TypeOfContent> LoadLenght()
+        
+        public virtual bool IsIndexable
         {
-            return (g, value) =>
-            {
-                var load = InternalLoad(indexElement);
-                load(g, TypeOfContent.Value);
-                g.LoadLength(ElementType);
-            };
+            get { return LoadedType.IsArray; }
         }
 
+        public IElement Next { get { return next; } }
+
+        public IElement Previous { get { return previous; } }
+        
         public void EnterArray(IElement index)
         {
             if (Index == null)
@@ -63,14 +87,23 @@ namespace AmphetamineSerializer.Common.Element
             }
             else
             {
-                indexElement = Index;
+                var indexElement = Index;
 
-                Index = (GenericElement)((g, _) =>
-                {
-                    indexElement.Load(g, TypeOfContent.Value);
-                    g.LoadElementAddress(ElementType);
-                    index.Load(g, TypeOfContent.Value);
-                });
+                // Index = (GenericElement)((g, _) =>
+                // {
+                //     indexElement.Load(g, TypeOfContent.Value);
+                //     g.LoadElementAddress(ElementType);
+                //     Index.Load(g, TypeOfContent.Value);
+                // });
+            };
+        }
+
+        public Action<Emit, TypeOfContent> LoadArrayLenght()
+        {
+            return (g, value) =>
+            {
+                previous.InternalLoad(g, TypeOfContent.Value);
+                g.LoadLength(previous.LoadedType);
             };
         }
     }

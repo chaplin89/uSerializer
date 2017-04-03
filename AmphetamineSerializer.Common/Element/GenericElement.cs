@@ -62,51 +62,14 @@ namespace AmphetamineSerializer.Common
         /// </remarks>
         public override Action<Emit, IElement, TypeOfContent> Store { get; set; }
 
-        /// <summary>
-        /// If the GenericElement supports type that can be indexed, this is the index.
-        /// </summary>
-        public override IElement Index { get; set; }
+        public override Type LoadedType { get; set; }
 
-        /// <summary>
-        /// If it is well defined, this is the type of the element loaded.
-        /// </summary>
-        public override Type ElementType
-        {
-            get
-            {
-                if (elementType == null)
-                    elementType = RootType;
-                return elementType;
-            }
-            set
-            {
-                elementType = value;
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public override Type RootType
-        {
-            get
-            {
-                return rootType;
-            }
-
-            set
-            {
-                rootType = value;
-                ElementType = value;
-            }
-        }
-
-        protected override Action<Emit, IElement, TypeOfContent> InternalStore(IElement index)
+        protected override void InternalLoad(Emit g, TypeOfContent content)
         {
             throw new NotImplementedException();
         }
 
-        protected override Action<Emit, TypeOfContent> InternalLoad(IElement index)
+        protected override void InternalStore(Emit g, TypeOfContent content)
         {
             throw new NotImplementedException();
         }

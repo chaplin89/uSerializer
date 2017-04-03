@@ -51,27 +51,6 @@ namespace AmphetamineSerializer.Common.Element
         /// The constant.
         /// </summary>
         public ConstantType Constant { get; set; }
-
-        /// <summary>
-        /// Emit instructions to load the value in the stack.
-        /// </summary>
-        /// <exception cref="NotSupportedException">If the content is requested by address</exception>
-        /// <exception cref="InvalidOperationException">If the method for emitting the constant was not found.</exception>
-        public override Action<Emit, TypeOfContent> Load
-        {
-            get
-            {
-                return (g, content) =>
-                {
-                    if (content == TypeOfContent.Address)
-                        throw new NotSupportedException("Requested the address of a constant value.");
-
-                    if (method == null)
-                        throw new InvalidOperationException("Unrecognized type");
-                    method.Invoke(g, new object[] { Constant });
-                };
-            }
-        }
         
         /// <summary>
         /// The index for a constant value does not make sense.
@@ -83,34 +62,29 @@ namespace AmphetamineSerializer.Common.Element
             get { return null; }
             set { throw new InvalidOperationException("Can't set an index for a constant value."); }
         }
-
-        /// <summary>
-        /// Return the type of the element.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">If the set accessor is invoked.</exception>
-        public override Type ElementType
-        {
-            get { return RootType; }
-            set { throw new InvalidOperationException("Element type for a constant value is fixed."); }
-        }
-
+        
         /// <summary>
         /// 
         /// </summary>
-        public override Type RootType
+        public override Type LoadedType
         {
             get { return typeof(ValueType); }
             set { throw new InvalidOperationException("RootType for constant type is fixed."); }
         }
-
-        protected override Action<Emit, IElement, TypeOfContent> InternalStore(IElement index)
+        
+        protected override void InternalStore(Emit g, TypeOfContent content)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException("This element is constant.");
         }
 
-        protected override Action<Emit, TypeOfContent> InternalLoad(IElement index)
+        protected override void InternalLoad(Emit g, TypeOfContent content)
         {
-            throw new NotImplementedException();
+            if (content == TypeOfContent.Address)
+                throw new NotSupportedException("Requested the address of a constant value.");
+
+            if (method == null)
+                throw new InvalidOperationException("Unrecognized type");
+            method.Invoke(g, new object[] { Constant });
         }
     }
 }

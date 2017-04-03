@@ -1,5 +1,6 @@
 ﻿using Sigil.NonGeneric;
 using System;
+using System.Collections.Generic;
 
 namespace AmphetamineSerializer.Common
 {
@@ -9,6 +10,22 @@ namespace AmphetamineSerializer.Common
     /// </summary>
     public interface IElement
     {
+        /// <summary>
+        /// An IElement can be a very complex composition of nested arrays.
+        /// While enumerating all the nodes in its graph, this contain all the nodes
+        /// back to its root. 
+        /// </summary>
+        IElement Next { get; }
+
+        IElement Previous { get; }
+
+        bool IsIndexable { get; }
+
+        IElement Index { get; }
+
+
+        Action<Emit, TypeOfContent> LoadArrayLenght();
+
         /// <summary>
         /// Action for emitting instructions for loading an element into the stack.
         /// </summary>
@@ -27,37 +44,8 @@ namespace AmphetamineSerializer.Common
         Action<Emit, IElement, TypeOfContent> Store { get; }
 
         /// <summary>
-        /// If the element support indexing, this emit the action for accessing the element
-        /// at a given index.
+        /// Type of the object loaded when called Load.
         /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        Action<Emit, TypeOfContent> this[IElement index] { get; }
-
-        /// <summary>
-        /// If the element support indexing, this is the element for accessing the index.
-        /// </summary>
-        IElement Index { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        bool SupportIndexing { get; }
-
-        /// <summary>
-        /// This is the type accessed when Index is null.
-        /// </summary>
-        Type RootType { get; set; }
-
-        /// <summary>
-        /// Type of the element that can be accessed using the current Index.
-        /// </summary>
-        /// <remarks>
-        /// The element can be a trivial type (link an int or a float) or can be a very complex one 
-        /// (like nested jagged arrays or matrixes). This field keep track of what is the type loaded with 
-        /// the current Index.
-        /// If this is a scalar type or Index is null, this is simply the type of the element.
-        /// </remarks>
-        Type ElementType { get; set; }
+        Type LoadedType { get; set; }
     }
 }

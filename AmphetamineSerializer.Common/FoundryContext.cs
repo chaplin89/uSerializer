@@ -132,7 +132,7 @@ namespace AmphetamineSerializer.Common
         public Type NormalizedType {
             get
             {
-                Type normalizedType = Element.RootType;
+                Type normalizedType = Element.LoadedType;
 
                 if (normalizedType.IsEnum)
                     normalizedType = normalizedType.GetEnumUnderlyingType();

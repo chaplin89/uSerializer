@@ -8,11 +8,10 @@ namespace AmphetamineSerializer.Common.Element
     /// </summary>
     public class ArgumentElement : BaseElement
     {
-        Type rootType;
-        Type elementType;
+        Type loadedType;
 
         /// <summary>
-        /// Build a wrapper aroung an argument index.
+        /// Build a wrapper around an argument index.
         /// </summary>
         /// <param name="argumentIndex">Index of the argument.</param>
         public ArgumentElement(ushort argumentIndex)
@@ -24,88 +23,27 @@ namespace AmphetamineSerializer.Common.Element
         /// Index of the argument
         /// </summary>
         public ushort ArgumentIndex { get; set; }
-
-        /// <summary>
-        /// Type of the argument element.
-        /// </summary>
-        /// <remarks>Should be set manually because there is no way to deduce it.</remarks>
-        public override Type ElementType
-        {
-            get
-            {
-                if (elementType == null)
-                    elementType = RootType;
-                return elementType;
-            }
-            set
-            {
-                elementType = value;
-            }
-        }
-
-        /// <summary>
-        /// <see cref="IElement.Index"/>
-        /// </summary>
-        public override IElement Index { get; set; }
-
+        
         /// <summary>
         /// 
         /// </summary>
-        public override Type RootType
+        public override Type LoadedType
         {
-            get
-            {
-                return rootType;
-            }
-
-            set
-            {
-                elementType = value;
-                rootType = value;
-            }
+            get { return loadedType; }
+            set { loadedType = value; }
+        }
+        
+        protected override void InternalLoad(Emit emit, TypeOfContent value)
+        {
+            if (value == TypeOfContent.Value)
+                emit.LoadArgument(ArgumentIndex);
+            else
+                emit.LoadArgumentAddress(ArgumentIndex);
         }
 
-        protected override Action<Emit, IElement, TypeOfContent> InternalStore(IElement index)
+        protected override void InternalStore(Emit emit, TypeOfContent content)
         {
-            return (g, value, content) =>
-            {
-                if (rootType.IsArray && index != null)
-                {
-                    g.LoadArgument(ArgumentIndex);
-                    index.Load(g, TypeOfContent.Value);
-                }
-
-                value.Load(g, content);
-
-                if (rootType.IsArray && Index != null)
-                    g.StoreElement(ElementType);
-                else
-                    g.StoreArgument(ArgumentIndex);
-            };
-        }
-
-        protected override Action<Emit, TypeOfContent> InternalLoad(IElement index)
-        {
-            return (g, content) =>
-            {
-                if (rootType.IsArray && Index != null)
-                {
-                    g.LoadArgument(ArgumentIndex);
-                    Index.Load(g, TypeOfContent.Value);
-
-                    if (content == TypeOfContent.Value)
-                        g.LoadElement(ElementType);
-                    else
-                        g.LoadElementAddress(ElementType);
-                }
-                else
-                {
-                    if (content == TypeOfContent.Value)
-                        g.LoadArgument(ArgumentIndex);
-                    else
-                        g.LoadArgumentAddress(ArgumentIndex);
-                }
-            };
+            emit.StoreArgument(ArgumentIndex);
         }
     }
 }
