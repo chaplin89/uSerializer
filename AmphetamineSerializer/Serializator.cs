@@ -25,8 +25,8 @@ namespace AmphetamineSerializer
 
         private object additionalContext;
         IChainManager chain = new ChainManager()
-                                  .SetNext(new CustomSerializerFinder())
-                                  .SetNext(new CustomBuilderFinder())
+                                  // .SetNext(new CustomSerializerFinder())
+                                  // .SetNext(new CustomBuilderFinder())
                                   .SetNext(new DefaultHandlerFinder())
                                   .SetNext(new CacheManager());
 

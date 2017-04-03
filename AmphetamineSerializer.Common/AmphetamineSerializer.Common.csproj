@@ -71,7 +71,6 @@
     <Compile Include="Attribute\SerializationAttribute.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="SigilFunctionProvider.cs" />
-    <Compile Include="StatusSaver.cs" />
     <Compile Include="InvariantCaller.cs" />
     <Compile Include="TypeExtension.cs" />
   </ItemGroup>

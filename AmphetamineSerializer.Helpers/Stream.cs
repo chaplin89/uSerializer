@@ -168,7 +168,7 @@ namespace AmphetamineSerializer.Helpers
                 //         Role = ParameterRole.MandatoryForward
                 //     }
                 // });
-                // caller.EmitInvoke(ctx.G);
+                caller.EmitInvoke(ctx.G);
                 ctx.G.LoadArgument(1); // argument i --> stack
                 ctx.Element.Load(ctx.G, TypeOfContent.Value);
                 ctx.G.CallVirtual(typeHandlerMap[ctx.Element.LoadedType]);
