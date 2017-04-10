@@ -85,16 +85,11 @@ namespace AmphetamineSerializer
             {
                 AdditionalContext = additionalContext,
                 DelegateType = delegateType,
-                RequestType = TypeOfRequest.Method
+                RequestType = TypeOfRequest.Delegate
             };
 
             var response = chain.Process(request) as SerializationBuildResponse;
-            if (response.ResponseType == TypeOfRequest.Method)
-                return response.Response.Method.CreateDelegate(delegateType, response.Instance);
-            else if (response.ResponseType == TypeOfRequest.Delegate)
-                return response.Response.Delegate;
-            else
-                throw new InvalidOperationException("Wrong response, unable to use the builded method.");
+            return response.Response.Delegate;
         }
 
         public Serializator(object additionalContext = null)

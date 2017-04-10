@@ -62,7 +62,6 @@ namespace AmphetamineSerializer.Chain.Nodes
             
             return new SerializationBuildResponse()
             {
-                ResponseType = TypeOfRequest.Delegate,
                 Response = method,
                 Instance = instance
             };

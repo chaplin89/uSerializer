@@ -176,10 +176,7 @@ namespace AmphetamineSerializer
                     Provider = ctx.Provider,
                     G = ctx.G
                 };
-
-                if (ctx.Element.LoadedType.Name == "Test1[]")
-                    Debugger.Break();
-
+                
                 // TODO: THERE AREN'T REALLY ANY GOOD REASON FOR MAKING AssemblyFoundry PART OF THE CHAIN.
                 //       THIS IS ONLY WASTING SPACE ON THE STACK.
                 //       AssemblyFoundry SHOULD SEND A REQUEST AND IF THE RESPONSE IS NULL, IT SHOULD TRY TO HANDLE

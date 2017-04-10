@@ -44,18 +44,15 @@ namespace AmphetamineSerializer.Helpers
             {typeof(long).MakeByRefType(),   typeof(BinaryReader).GetMethod("ReadInt64")},
             {typeof(char).MakeByRefType(),   typeof(BinaryReader).GetMethod("ReadChar")},
         };
-
-        InvariantCaller caller = new InvariantCaller();
-
+        
         static StreamDeserializationCtx()
         {
             // Not all methods were found
-            Debug.Assert(typeHandlerMap.Where(x => x.Value == null).Count() == 0);
+            Debug.Assert(!typeHandlerMap.Where(x => x.Value == null).Any());
         }
 
         public StreamDeserializationCtx(FoundryContext ctx) : base(ctx)
         {
-            caller.SetInput(ctx.InputParameters);
         }
 
         protected override BuildedFunction InternalMake()
@@ -142,34 +139,17 @@ namespace AmphetamineSerializer.Helpers
         {
             if (ctx.ManageLifeCycle)
             {
+                //Read from stream
                 var store = (GenericElement)((g, _) =>
                 {
-                    caller.SetOutput(new ParameterDescriptor[]
-                    {
-                        new ParameterDescriptor()
-                        {
-                            Index = 0,
-                            Parameter = typeof(BinaryReader),
-                            Role = ParameterRole.MandatoryForward
-                        }
-                    });
-                    caller.EmitInvoke(g);
+                    ctx.G.LoadArgument(1);
                     g.CallVirtual(typeHandlerMap[ctx.Element.LoadedType]);
                 });
             }
             else
             {
-                // caller.SetOutput(new ParameterDescriptor[]
-                // {
-                //     new ParameterDescriptor()
-                //     {
-                //         Index = 0,
-                //         Parameter = typeof(BinaryWriter),
-                //         Role = ParameterRole.MandatoryForward
-                //     }
-                // });
-                caller.EmitInvoke(ctx.G);
-                ctx.G.LoadArgument(1); // argument i --> stack
+                //Write into stream
+                ctx.G.LoadArgument(1);
                 ctx.Element.Load(ctx.G, TypeOfContent.Value);
                 ctx.G.CallVirtual(typeHandlerMap[ctx.Element.LoadedType]);
             }
