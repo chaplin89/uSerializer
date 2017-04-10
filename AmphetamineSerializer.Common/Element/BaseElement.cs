@@ -90,6 +90,7 @@ namespace AmphetamineSerializer.Common.Element
             var arrayElement = (BaseElement)this[index];
             arrayElement.previous = this;
             next = arrayElement;
+            arrayElement.loadedType = loadedType.GetElementType();
             return next;
         }
 
@@ -124,15 +125,15 @@ namespace AmphetamineSerializer.Common.Element
         {
             get
             {
-                if (previous == null)
+                if (!IsIndexable)
                     throw new InvalidOperationException("This element is not contained inside an array.");
 
                 GenericElement lenghtElement = new GenericElement(typeof(uint));
 
                 lenghtElement.Load = (g, value) =>
                 {
-                    previous.Load(g, TypeOfContent.Value);
-                    g.LoadLength(previous.LoadedType);
+                    Load(g, TypeOfContent.Value);
+                    g.LoadLength(LoadedType.GetElementType());
                 };
                 return lenghtElement;
             }

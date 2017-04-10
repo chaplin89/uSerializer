@@ -167,6 +167,7 @@ namespace AmphetamineSerializer
                     ManageArray(ctx);
                     var index = (LocalElement)ctx.LoopCtx.Peek().Index;
 
+                    linkedList.RemoveFirst();
                     linkedList.AddFirst(ctx.Element.EnterArray(index));
                     continue;
                 }
@@ -211,7 +212,7 @@ namespace AmphetamineSerializer
                         ctx.G.Call(response.Response.Delegate.Method, null);
                 }
 
-                if (ctx.Element.LoadedType.IsArray)
+                if (ctx.LoopCtx.Count > 0)
                     AddLoopEpilogue(ctx);
 
                 linkedList.RemoveFirst();

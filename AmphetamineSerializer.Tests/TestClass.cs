@@ -34,7 +34,7 @@ namespace AmphetamineSerializer.Tests
         [ASIndex(5)] public byte        Test_Field5;
         [ASIndex(6)] public string      Test_Field6;
         
-        //[ASIndex(7)] public uint[]      Test_Field7;
+        [ASIndex(7)] public uint[]      Test_Field7;
         //[ASIndex(8)] public int[]       Test_Field8;
         //[ASIndex(9)] public ushort[]    Test_Field9;
         //[ASIndex(10)] public short[]    Test_Field10;
