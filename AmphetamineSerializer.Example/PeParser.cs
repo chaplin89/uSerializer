@@ -5,7 +5,7 @@ namespace AmphetamineSerializer.Example
 {
     public class PeParser
     {
-        public static void Parse(string path = @"C: \Users\Marco\Desktop\devenv.exe")
+        public static void Parse(string path = @"C:\Users\Marco\Desktop\devenv.exe")
         {
             var dosHeader                   = new DosHeader();
             var ntHeader                    = new NtHeader();
