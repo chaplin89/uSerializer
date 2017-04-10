@@ -57,10 +57,11 @@ namespace AmphetamineSerializer
         {
             Type normalizedType;
 
-            ArgumentElement instance = new ArgumentElement(0) { LoadedType = ctx.ObjectType };
+            ArgumentElement instance;
 
             if (ctx.ManageLifeCycle)
             {
+                instance = new ArgumentElement(0) { LoadedType = ctx.ObjectType.GetElementType() };
                 normalizedType = ctx.ObjectType.GetElementType();
                 var ctor = normalizedType.GetConstructor(new Type[] { });
 
@@ -69,10 +70,11 @@ namespace AmphetamineSerializer
 
                 var load = (GenericElement)((g, _) => g.NewObject(normalizedType));
 
-                instance.Store(ctx.G, load, TypeOfContent.Value);
+                instance.Store(ctx.G, load, TypeOfContent.Address);
             }
             else
             {
+                instance = new ArgumentElement(0) { LoadedType = ctx.ObjectType };
                 normalizedType = ctx.ObjectType;
             }
 
@@ -178,7 +180,8 @@ namespace AmphetamineSerializer
                     AdditionalContext = ctx.AdditionalContext,
                     DelegateType = ctx.Manipulator.MakeDelegateType(ctx.NormalizedType, ctx.InputParameters),
                     Provider = ctx.Provider,
-                    G = ctx.G
+                    G = ctx.G,
+                    RequestType = TypeOfRequest.Everything
                 };
 
                 // TODO: THERE AREN'T REALLY ANY GOOD REASON FOR MAKING AssemblyFoundry PART OF THE CHAIN.
@@ -196,7 +199,7 @@ namespace AmphetamineSerializer
                 //    handling the request. We don't need to do anything else.
                 // 2) Giving back a method that we have to call.
                 //    If that is the case, we should rearrange the input and call the method.
-                if (response.Response.Status != BuildedFunctionStatus.NoMethodsAvailable)
+                if (response.Response.Status != BuildedFunctionStatus.ContextModified)
                 {
                     HandleType(ctx);
 
@@ -303,7 +306,7 @@ namespace AmphetamineSerializer
 
                 var response = ctx.Chain.Process(request) as SerializationBuildResponse;
 
-                if (response.Response.Status != BuildedFunctionStatus.NoMethodsAvailable)
+                if (response.Response.Status != BuildedFunctionStatus.ContextModified)
                 {
                     currentLoopContext.Size.Load(ctx.G, TypeOfContent.Value);
 
@@ -337,7 +340,7 @@ namespace AmphetamineSerializer
                 var response = ctx.Chain.Process(request) as SerializationBuildResponse;
                 ctx.Element = currentElement;
 
-                if (response.Response.Status != BuildedFunctionStatus.NoMethodsAvailable)
+                if (response.Response.Status != BuildedFunctionStatus.ContextModified)
                 {
                     // this.DecodeUInt(ref size, buffer, ref position);
                     currentLoopContext.Size.Load(ctx.G, TypeOfContent.Address);

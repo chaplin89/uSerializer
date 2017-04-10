@@ -55,18 +55,16 @@ namespace AmphetamineSerializer.Common.Element
             {
                 return (g, value, content) =>
                 {
-                    if (Index != null)
-                    {
+                    if (content == TypeOfContent.Address || Index != null)
                         InternalLoad(g, TypeOfContent.Value);
-                        Index.Load(g, TypeOfContent.Value);
-                    }
 
-                    value.Load(g, content);
+                    Index?.Load(g, TypeOfContent.Value);
+                    value.Load(g, TypeOfContent.Value);
 
                     if (Index != null)
                         g.StoreElement(LoadedType);
                     else
-                        InternalStore(g, TypeOfContent.Value);
+                        InternalStore(g, content);
                 };
             }
             set

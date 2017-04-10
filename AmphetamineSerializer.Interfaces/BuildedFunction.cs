@@ -12,7 +12,7 @@ namespace AmphetamineSerializer.Common
         /// <summary>
         /// Initial status.
         /// </summary>
-        NoMethodsAvailable,
+        ContextModified,
 
         /// <summary>
         /// Emit was created and it is still editable so no MethodInfo is available.

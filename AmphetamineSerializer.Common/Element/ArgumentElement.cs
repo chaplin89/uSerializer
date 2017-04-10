@@ -21,7 +21,7 @@ namespace AmphetamineSerializer.Common.Element
         /// Index of the argument
         /// </summary>
         public ushort ArgumentIndex { get; set; }
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -30,7 +30,7 @@ namespace AmphetamineSerializer.Common.Element
             get { return loadedType; }
             set { loadedType = value; }
         }
-        
+
         protected override void InternalLoad(Emit emit, TypeOfContent value)
         {
             if (value == TypeOfContent.Value)
@@ -41,7 +41,10 @@ namespace AmphetamineSerializer.Common.Element
 
         protected override void InternalStore(Emit emit, TypeOfContent content)
         {
-            emit.StoreArgument(ArgumentIndex);
+            if (content == TypeOfContent.Address)
+                emit.StoreIndirect(loadedType);
+            else
+                emit.StoreArgument(ArgumentIndex);
         }
     }
 }

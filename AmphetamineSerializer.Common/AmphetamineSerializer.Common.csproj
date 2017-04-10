@@ -54,7 +54,6 @@
     <Compile Include="Chain\SerializationBuildRequest.cs" />
     <Compile Include="Chain\SerializationBuildResponse.cs" />
     <Compile Include="Chain\TypeOfRequest.cs" />
-    <Compile Include="Chain\TypeOfResponse.cs" />
     <Compile Include="Element\ArgumentElement.cs" />
     <Compile Include="Element\BaseElement.cs" />
     <Compile Include="Element\ConstantElement.cs" />

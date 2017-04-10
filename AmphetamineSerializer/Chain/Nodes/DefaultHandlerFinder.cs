@@ -45,6 +45,12 @@ namespace AmphetamineSerializer.Chain.Nodes
                 if (method == null)
                     continue;
 
+                if (request.RequestType == TypeOfRequest.Delegate)
+                {
+                    method.Delegate = method.Method.CreateDelegate(request.DelegateType);
+                    method.Method = null;
+                }
+
                 return new SerializationBuildResponse()
                 {
                     Response = method

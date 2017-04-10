@@ -67,7 +67,7 @@ namespace AmphetamineSerializer.Helpers
             else
                 return null;
 
-            method = new BuildedFunction() { Status = BuildedFunctionStatus.NoMethodsAvailable };
+            method = new BuildedFunction() { Status = BuildedFunctionStatus.ContextModified };
             return method;
         }
 
@@ -123,8 +123,7 @@ namespace AmphetamineSerializer.Helpers
             ctx.Element.Load(ctx.G, TypeOfContent.Value);
             ctx.G.CallVirtual(typeof(Encoding).GetMethod("GetBytes", new Type[] { typeof(string) }));
             ctx.G.CallVirtual(typeHandlerMap[typeof(byte[])]);
-
-            return new BuildedFunction() { Status = BuildedFunctionStatus.NoMethodsAvailable };
+            return new BuildedFunction() { Status = BuildedFunctionStatus.ContextModified };
         }
 
         [SerializationHandler(typeof(byte))]
