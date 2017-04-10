@@ -3,10 +3,11 @@ using Sigil.NonGeneric;
 
 namespace AmphetamineSerializer.Common.Element
 {
-    public abstract class BaseElement : IElement
+    public abstract class BaseElement : IElement, ICloneable
     {
-        private BaseElement next;
-        private BaseElement previous;
+        protected Type loadedType;
+        private IElement next;
+        private IElement previous;
 
         public virtual IElement Index { get; set; }
 
@@ -38,11 +39,15 @@ namespace AmphetamineSerializer.Common.Element
             }
             set
             {
-                throw new NotSupportedException("Can't set Load action.");
+                throw new NotSupportedException("This element doesn't support setting the load action.");
             }
         }
 
-        public abstract Type LoadedType { get; set; }
+        public virtual Type LoadedType
+        {
+            get { return loadedType; }
+            set { loadedType = value; }
+        }
 
         public virtual Action<Emit, IElement, TypeOfContent> Store
         {
@@ -66,10 +71,10 @@ namespace AmphetamineSerializer.Common.Element
             }
             set
             {
-                throw new NotSupportedException("This element doesn't support Store action.");
+                throw new NotSupportedException("This element doesn't support setting the Store action.");
             }
         }
-        
+
         public virtual bool IsIndexable
         {
             get { return LoadedType.IsArray; }
@@ -78,33 +83,64 @@ namespace AmphetamineSerializer.Common.Element
         public IElement Next { get { return next; } }
 
         public IElement Previous { get { return previous; } }
-        
-        public void EnterArray(IElement index)
-        {
-            if (Index == null)
-            {
-                Index = index;
-            }
-            else
-            {
-                var indexElement = Index;
 
-                // Index = (GenericElement)((g, _) =>
-                // {
-                //     indexElement.Load(g, TypeOfContent.Value);
-                //     g.LoadElementAddress(ElementType);
-                //     Index.Load(g, TypeOfContent.Value);
-                // });
-            };
+
+        public IElement EnterArray(IElement index)
+        {
+            var arrayElement = (BaseElement)this[index];
+            arrayElement.previous = this;
+            next = arrayElement;
+            return next;
         }
 
-        public Action<Emit, TypeOfContent> LoadArrayLenght()
+        public IElement this[IElement newIndex]
         {
-            return (g, value) =>
+            get
             {
-                previous.InternalLoad(g, TypeOfContent.Value);
-                g.LoadLength(previous.LoadedType);
-            };
+                if (!IsIndexable)
+                    throw new NotSupportedException("This element does not support indexing.");
+
+                var newElement = (BaseElement)Clone();
+
+                if (Index != null)
+                {
+                    newElement.Index = (GenericElement)((g, _) =>
+                    {
+                        Index.Load(g, TypeOfContent.Value);
+                        g.LoadElementAddress(LoadedType);
+                        newIndex.Load(g, TypeOfContent.Value);
+                    });
+                }
+                else
+                {
+                    newElement.Index = newIndex;
+                }
+
+                return newElement;
+            }
+        }
+
+        public IElement Lenght
+        {
+            get
+            {
+                if (previous == null)
+                    throw new InvalidOperationException("This element is not contained inside an array.");
+
+                GenericElement lenghtElement = new GenericElement(typeof(uint));
+
+                lenghtElement.Load = (g, value) =>
+                {
+                    previous.Load(g, TypeOfContent.Value);
+                    g.LoadLength(previous.LoadedType);
+                };
+                return lenghtElement;
+            }
+        }
+
+        public virtual object Clone()
+        {
+            return MemberwiseClone();
         }
     }
 }

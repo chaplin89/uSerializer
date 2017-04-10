@@ -45,8 +45,9 @@ namespace AmphetamineSerializer.Common
         /// <summary>
         /// Initialize the object with null action.
         /// </summary>
-        public GenericElement()
+        public GenericElement(Type loadedType)
         {
+            base.loadedType = loadedType;
         }
 
         /// <summary>
@@ -58,9 +59,7 @@ namespace AmphetamineSerializer.Common
         /// Action for emitting instructions that store in the element a value taken from the stack.
         /// </remarks>
         public override Action<Emit, IElement, TypeOfContent> Store { get; set; }
-
-        public override Type LoadedType { get; set; }
-
+        
         protected override void InternalLoad(Emit g, TypeOfContent content)
         {
             throw new NotImplementedException();

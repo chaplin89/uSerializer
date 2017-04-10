@@ -27,7 +27,7 @@ namespace AmphetamineSerializer.Common
         /// <returns></returns>
         public static FoundryContext MakeContext(Type delegateType, 
                                                  object additionalContext,
-                                                 BaseElement element, 
+                                                 IElement element, 
                                                  SigilFunctionProvider provider,
                                                  Emit g)
         {
@@ -41,7 +41,7 @@ namespace AmphetamineSerializer.Common
             };
         }
 
-        public BaseElement Element;
+        public IElement Element;
 
         /// <summary>
         /// 

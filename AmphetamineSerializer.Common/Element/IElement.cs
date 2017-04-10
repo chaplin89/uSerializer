@@ -24,7 +24,7 @@ namespace AmphetamineSerializer.Common
         IElement Index { get; }
 
 
-        Action<Emit, TypeOfContent> LoadArrayLenght();
+        IElement Lenght { get; }
 
         /// <summary>
         /// Action for emitting instructions for loading an element into the stack.
@@ -42,6 +42,8 @@ namespace AmphetamineSerializer.Common
         /// 3. TypeOfContent, tell if the value to store should be loaded by value or by address.
         /// </remarks>
         Action<Emit, IElement, TypeOfContent> Store { get; }
+
+        IElement EnterArray(IElement index);
 
         /// <summary>
         /// Type of the object loaded when called Load.

@@ -22,7 +22,7 @@ namespace AmphetamineSerializer.Common
         /// <summary>
         /// Size of the array.
         /// </summary>
-        public BaseElement Size { get; set; }
+        public IElement Size { get; set; }
 
         /// <summary>
         /// Label that point to the end of the loop,
@@ -35,12 +35,6 @@ namespace AmphetamineSerializer.Common
         /// </summary>
         public Label Body { get; set; }
         
-        /// <summary>
-        /// If it's not null, CurrentItemFieldInfo is assumed to be
-        /// an array, and the loopManager won't try to set the
-        /// </summary>
-        public int? StoreAtPosition { get; set; }
-
         /// <summary>
         /// 
         /// </summary>

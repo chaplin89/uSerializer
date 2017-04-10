@@ -20,24 +20,18 @@ namespace AmphetamineSerializer.Common
         {
             Instance = instance;
             Field = field;
+            loadedType = Field.FieldType;
         }
-
-        /// <summary>
-        /// Build this object with null instance/field.
-        /// </summary>
-        public FieldElement()
-        {
-        }
-
+        
         /// <summary>
         /// Object instance.
         /// </summary>
-        public IElement Instance { get; set; }
+        public IElement Instance { get; private set; }
 
         /// <summary>
         /// Field information.
         /// </summary>
-        public FieldInfo Field { get; set; }
+        public FieldInfo Field { get; private set; }
 
         /// <summary>
         /// Access the ASIndexAttribute of the field.
@@ -87,12 +81,6 @@ namespace AmphetamineSerializer.Common
                 g.LoadField(Field);
             else
                 g.LoadFieldAddress(Field);
-        }
-
-        public override Type LoadedType
-        {
-            get { return Field?.FieldType; }
-            set { throw new InvalidOperationException("RootType for FieldElement type is fixed."); }
         }
     }
 }

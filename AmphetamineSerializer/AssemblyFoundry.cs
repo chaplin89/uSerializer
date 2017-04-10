@@ -57,7 +57,7 @@ namespace AmphetamineSerializer
         {
             Type normalizedType;
 
-            ArgumentElement instance = new ArgumentElement(0) {LoadedType = ctx.ObjectType };
+            ArgumentElement instance = new ArgumentElement(0) { LoadedType = ctx.ObjectType };
 
             if (ctx.ManageLifeCycle)
             {
@@ -150,7 +150,7 @@ namespace AmphetamineSerializer
         {
             var linkedList = new LinkedList<IElement>(fields);
 
-            while(linkedList.Count > 0)
+            while (linkedList.Count > 0)
             {
                 ctx.Element = (FieldElement)linkedList.First.Value;
 
@@ -165,6 +165,9 @@ namespace AmphetamineSerializer
                 if (ctx.Element.IsIndexable)
                 {
                     ManageArray(ctx);
+                    var index = (LocalElement)ctx.LoopCtx.Peek().Index;
+
+                    linkedList.AddFirst(ctx.Element.EnterArray(index));
                     continue;
                 }
 
@@ -176,7 +179,7 @@ namespace AmphetamineSerializer
                     Provider = ctx.Provider,
                     G = ctx.G
                 };
-                
+
                 // TODO: THERE AREN'T REALLY ANY GOOD REASON FOR MAKING AssemblyFoundry PART OF THE CHAIN.
                 //       THIS IS ONLY WASTING SPACE ON THE STACK.
                 //       AssemblyFoundry SHOULD SEND A REQUEST AND IF THE RESPONSE IS NULL, IT SHOULD TRY TO HANDLE
@@ -217,20 +220,6 @@ namespace AmphetamineSerializer
 
         private void ManageArray(FoundryContext ctx)
         {
-            var currentLoopContext = new LoopContext(ctx.G.DeclareLocal(typeof(int)));
-
-            ctx.Element.LoadedType = ctx.Element.LoadedType.GetElementType();
-
-            if (ctx.ObjectType.IsByRef && ((FieldElement)ctx.Element).Attribute.ArrayFixedSize != -1)
-            {
-                if (ctx.Element.Index != null)
-                    throw new NotSupportedException("Fixed size arrays for multi-dimensional array is not supported.");
-
-                int size = ((FieldElement)ctx.Element).Attribute.ArrayFixedSize;
-                currentLoopContext.Size = (ConstantElement<int>)size;
-            }
-
-            ctx.LoopCtx.Push(currentLoopContext);
             AddLoopPreamble(ctx);
         }
         #endregion
@@ -268,23 +257,38 @@ namespace AmphetamineSerializer
         {
             Contract.Ensures(ctx != null);
 
-            var currentLoopContext = ctx.LoopCtx.Peek();
+            LoopContext currentLoopContext = new LoopContext(ctx.G.DeclareLocal(typeof(uint)));
+            ctx.LoopCtx.Push(currentLoopContext);
+
             currentLoopContext.Body = ctx.G.DefineLabel($"Body_{ctx.Element.GetHashCode()}");
             currentLoopContext.CheckOutOfBound = ctx.G.DefineLabel($"OutOfBound_{ctx.Element.GetHashCode()}");
+
+            var fieldElement = ctx.Element as FieldElement;
 
             Type indexType = ((FieldElement)ctx.Element).Attribute?.SizeType;
             if (indexType == null)
                 indexType = typeof(uint);
 
+            if (ctx.ManageLifeCycle)
+            {
+                if (fieldElement.Attribute.ArrayFixedSize != -1)
+                {
+                    if (ctx.Element.Index != null)
+                        throw new NotSupportedException("Fixed size arrays for multi-dimensional array is not supported.");
+
+                    int size = fieldElement.Attribute.ArrayFixedSize;
+                    currentLoopContext.Size = (ConstantElement<int>)size;
+                }
+            }
+            else
+            {
+                currentLoopContext.Size = ctx.Element.Lenght;
+            }
+
             // Write in stream
             if (!ctx.ManageLifeCycle)
             {
                 var currentElement = ctx.Element;
-
-                currentLoopContext.Size = (LocalElement)ctx.G.DeclareLocal(typeof(uint));
-                var lenght = (GenericElement)ctx.Element.LoadArrayLenght();
-
-                currentLoopContext.Size.Store(ctx.G, lenght, TypeOfContent.Value);
 
                 // Write the size of the array
                 var request = new SerializationBuildRequest()
@@ -360,8 +364,6 @@ namespace AmphetamineSerializer
 
             // Loop start
             ctx.G.MarkLabel(currentLoopContext.Body);
-
-            ctx.Element.EnterArray((LocalElement)currentLoopContext.Index);
         }
 
         /// <summary>

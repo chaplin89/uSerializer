@@ -47,7 +47,6 @@ namespace AmphetamineSerializer.Common.Element
         public override Type LoadedType
         {
             get { return LocalVariable?.LocalType; }
-            set { throw new InvalidOperationException("Can't set the RootType for LocalElement because it's fixed."); }
         }
 
         protected override void InternalStore(Emit g, TypeOfContent content)

@@ -8,8 +8,6 @@ namespace AmphetamineSerializer.Common.Element
     /// </summary>
     public class ArgumentElement : BaseElement
     {
-        Type loadedType;
-
         /// <summary>
         /// Build a wrapper around an argument index.
         /// </summary>
