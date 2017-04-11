@@ -12,24 +12,16 @@ namespace AmphetamineSerializer.Common.Element
         /// Build a wrapper around an argument index.
         /// </summary>
         /// <param name="argumentIndex">Index of the argument.</param>
-        public ArgumentElement(ushort argumentIndex)
+        public ArgumentElement(ushort argumentIndex, Type argumentType)
         {
             ArgumentIndex = argumentIndex;
+            loadedType = argumentType;
         }
 
         /// <summary>
         /// Index of the argument
         /// </summary>
         public ushort ArgumentIndex { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public override Type LoadedType
-        {
-            get { return loadedType; }
-            set { loadedType = value; }
-        }
 
         protected override void InternalLoad(Emit emit, TypeOfContent value)
         {

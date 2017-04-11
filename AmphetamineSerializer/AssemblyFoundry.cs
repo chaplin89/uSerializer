@@ -61,7 +61,7 @@ namespace AmphetamineSerializer
 
             if (ctx.ManageLifeCycle)
             {
-                instance = new ArgumentElement(0) { LoadedType = ctx.ObjectType.GetElementType() };
+                instance = new ArgumentElement(0, ctx.ObjectType);
                 normalizedType = ctx.ObjectType.GetElementType();
                 var ctor = normalizedType.GetConstructor(new Type[] { });
 
@@ -70,11 +70,11 @@ namespace AmphetamineSerializer
 
                 var load = (GenericElement)((g, _) => g.NewObject(normalizedType));
 
-                instance.Store(ctx.G, load, TypeOfContent.Address);
+                instance.Store(ctx.G, load, TypeOfContent.Value);
             }
             else
             {
-                instance = new ArgumentElement(0) { LoadedType = ctx.ObjectType };
+                instance = new ArgumentElement(0, ctx.ObjectType);
                 normalizedType = ctx.ObjectType;
             }
 
