@@ -24,6 +24,10 @@ namespace AmphetamineSerializer.Common.Element
                     if (Index != null)
                     {
                         InternalLoad(g, TypeOfContent.Value);
+
+                        if (loadedType.IsByRef)
+                            g.LoadIndirect(loadedType.GetElementType());
+
                         Index.Load(g, TypeOfContent.Value);
 
                         if (content == TypeOfContent.Value)
@@ -33,7 +37,16 @@ namespace AmphetamineSerializer.Common.Element
                     }
                     else
                     {
-                        InternalLoad(g, content);
+                        if (loadedType.IsByRef )
+                        {
+                            InternalLoad(g, TypeOfContent.Value);
+                            if (content == TypeOfContent.Value)
+                                g.LoadIndirect(loadedType.GetElementType());                            
+                        }
+                        else
+                        {
+                            InternalLoad(g, content);
+                        }
                     }
                 };
             }

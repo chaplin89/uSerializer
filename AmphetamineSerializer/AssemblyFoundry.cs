@@ -325,7 +325,6 @@ namespace AmphetamineSerializer
             // Case #2: The Size variable was already initialized by someone else; Use it.
             else if (currentLoopContext.Size == null)
             {
-                var currentElement = ctx.Element;
                 currentLoopContext.Size = new LocalElement(ctx.G.DeclareLocal(indexType));
 
                 var request = new SerializationBuildRequest()
@@ -338,7 +337,6 @@ namespace AmphetamineSerializer
                 };
 
                 var response = ctx.Chain.Process(request) as SerializationBuildResponse;
-                ctx.Element = currentElement;
 
                 if (response.Response.Status != BuildedFunctionStatus.ContextModified)
                 {
@@ -354,7 +352,7 @@ namespace AmphetamineSerializer
                 var newArray = (GenericElement)((g, _) =>
                 {
                     currentLoopContext.Size.Load(g, TypeOfContent.Value);
-                    ctx.G.NewArray(ctx.Element.LoadedType);
+                    ctx.G.NewArray(ctx.Element.LoadedType.GetElementType());
                 });
 
                 ctx.Element.Store(ctx.G, newArray, TypeOfContent.Value);

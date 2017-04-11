@@ -34,6 +34,7 @@ namespace AmphetamineSerializer.Common.Element
         public LocalElement(Local local)
         {
             LocalVariable = local;
+            loadedType = local.LocalType;
         }
 
         /// <summary>
@@ -41,14 +42,6 @@ namespace AmphetamineSerializer.Common.Element
         /// </summary>
         public Local LocalVariable { get; set; }
         
-        /// <summary>
-        /// <see cref="IElement.LoadedType"/>
-        /// </summary>
-        public override Type LoadedType
-        {
-            get { return LocalVariable?.LocalType; }
-        }
-
         protected override void InternalStore(Emit g, TypeOfContent content)
         {
             g.StoreLocal(LocalVariable);
