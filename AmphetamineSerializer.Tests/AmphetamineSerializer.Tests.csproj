@@ -67,10 +67,25 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Serialization.feature.cs">
+    <Compile Include="SerializationFull.feature.cs">
+      <DependentUpon>SerializationFull.feature</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>Serialization.feature</DependentUpon>
+    </Compile>
+    <Compile Include="SerializationJagged.feature.cs">
+      <DependentUpon>SerializationJagged.feature</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Serialization1D.feature.cs">
+      <DependentUpon>Serialization1D.feature</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="SerializationTrivial.feature.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SerializationTrivial.feature</DependentUpon>
     </Compile>
     <Compile Include="SerializationHelpers.cs" />
     <Compile Include="SerializationSteps.cs" />
@@ -79,9 +94,21 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
-    <None Include="Serialization.feature">
+    <None Include="SerializationFull.feature">
       <Generator>SpecFlowSingleFileGenerator</Generator>
-      <LastGenOutput>Serialization.feature.cs</LastGenOutput>
+      <LastGenOutput>SerializationFull.feature.cs</LastGenOutput>
+    </None>
+    <None Include="SerializationJagged.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>SerializationJagged.feature.cs</LastGenOutput>
+    </None>
+    <None Include="Serialization1D.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>Serialization1D.feature.cs</LastGenOutput>
+    </None>
+    <None Include="SerializationTrivial.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>SerializationTrivial.feature.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>
