@@ -67,22 +67,22 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="SerializationFull.feature.cs">
+    <Compile Include="Scenarios\SerializationFull.feature.cs">
       <DependentUpon>SerializationFull.feature</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="SerializationJagged.feature.cs">
+    <Compile Include="Scenarios\SerializationJagged.feature.cs">
       <DependentUpon>SerializationJagged.feature</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Serialization1D.feature.cs">
+    <Compile Include="Scenarios\Serialization1D.feature.cs">
       <DependentUpon>Serialization1D.feature</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="SerializationTrivial.feature.cs">
+    <Compile Include="Scenarios\SerializationTrivial.feature.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>SerializationTrivial.feature</DependentUpon>
@@ -94,19 +94,19 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
-    <None Include="SerializationFull.feature">
+    <None Include="Scenarios\SerializationFull.feature">
       <Generator>SpecFlowSingleFileGenerator</Generator>
       <LastGenOutput>SerializationFull.feature.cs</LastGenOutput>
     </None>
-    <None Include="SerializationJagged.feature">
+    <None Include="Scenarios\SerializationJagged.feature">
       <Generator>SpecFlowSingleFileGenerator</Generator>
       <LastGenOutput>SerializationJagged.feature.cs</LastGenOutput>
     </None>
-    <None Include="Serialization1D.feature">
+    <None Include="Scenarios\Serialization1D.feature">
       <Generator>SpecFlowSingleFileGenerator</Generator>
       <LastGenOutput>Serialization1D.feature.cs</LastGenOutput>
     </None>
-    <None Include="SerializationTrivial.feature">
+    <None Include="Scenarios\SerializationTrivial.feature">
       <Generator>SpecFlowSingleFileGenerator</Generator>
       <LastGenOutput>SerializationTrivial.feature.cs</LastGenOutput>
     </None>
