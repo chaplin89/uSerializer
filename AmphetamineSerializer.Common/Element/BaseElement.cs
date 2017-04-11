@@ -37,11 +37,11 @@ namespace AmphetamineSerializer.Common.Element
                     }
                     else
                     {
-                        if (loadedType.IsByRef )
+                        if (loadedType.IsByRef)
                         {
                             InternalLoad(g, TypeOfContent.Value);
                             if (content == TypeOfContent.Value)
-                                g.LoadIndirect(loadedType.GetElementType());                            
+                                g.LoadIndirect(loadedType.GetElementType());
                         }
                         else
                         {
@@ -80,7 +80,7 @@ namespace AmphetamineSerializer.Common.Element
                     value.Load(g, content);
 
                     if (Index != null)
-                    { 
+                    {
                         g.StoreElement(LoadedType);
                     }
                     else
@@ -100,7 +100,10 @@ namespace AmphetamineSerializer.Common.Element
 
         public virtual bool IsIndexable
         {
-            get { return LoadedType.IsArray; }
+            get
+            {
+                return LoadedType.IsArray;
+            }
         }
 
         public IElement Next { get { return next; } }
@@ -131,7 +134,7 @@ namespace AmphetamineSerializer.Common.Element
                     newElement.Index = (GenericElement)((g, _) =>
                     {
                         Index.Load(g, TypeOfContent.Value);
-                        g.LoadElementAddress(LoadedType);
+                        g.LoadElement(LoadedType);
                         newIndex.Load(g, TypeOfContent.Value);
                     });
                 }

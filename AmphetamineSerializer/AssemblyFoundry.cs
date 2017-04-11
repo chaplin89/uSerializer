@@ -1,13 +1,12 @@
 ﻿using AmphetamineSerializer.Chain;
+using AmphetamineSerializer.Chain.Nodes;
+using AmphetamineSerializer.Common;
+using AmphetamineSerializer.Common.Element;
+using Sigil;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using AmphetamineSerializer.Common;
-using Sigil;
-using AmphetamineSerializer.Chain.Nodes;
-using AmphetamineSerializer.Common.Element;
 using System.Diagnostics.Contracts;
-using System.Diagnostics;
+using System.Linq;
 
 namespace AmphetamineSerializer
 {

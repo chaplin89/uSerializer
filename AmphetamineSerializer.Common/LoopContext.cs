@@ -7,7 +7,7 @@ namespace AmphetamineSerializer.Common
     /// <summary>
     /// Manage a context for a loop
     /// </summary>
-    public class LoopContext : IDisposable
+    public class LoopContext
     {
         public LoopContext(Local index)
         {
@@ -34,13 +34,5 @@ namespace AmphetamineSerializer.Common
         /// Label that point at the body of the loop.
         /// </summary>
         public Label Body { get; set; }
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
     }
 }
