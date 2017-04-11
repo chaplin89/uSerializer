@@ -139,11 +139,13 @@ namespace AmphetamineSerializer.Helpers
             if (ctx.ManageLifeCycle)
             {
                 //Read from stream
-                var store = (GenericElement)((g, _) =>
+                var readFromStream = (GenericElement)((g, _) =>
                 {
                     ctx.G.LoadArgument(1);
-                    g.CallVirtual(typeHandlerMap[ctx.Element.LoadedType]);
+                    g.CallVirtual(typeHandlerMap[ctx.Element.LoadedType.MakeByRefType()]);
                 });
+
+                ctx.Element.Store(ctx.G, readFromStream, TypeOfContent.Value);
             }
             else
             {
