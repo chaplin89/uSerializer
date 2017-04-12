@@ -46,6 +46,7 @@ namespace AmphetamineSerializer.Common
             }
         }
 
+
         public override Action<Emit, TypeOfContent> Load
         {
             get

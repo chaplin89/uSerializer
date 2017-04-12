@@ -53,12 +53,12 @@ namespace AmphetamineSerializer.Common
         /// <summary>
         /// Action for emitting instructions to load the element in the stack.
         /// </summary>
-        public override Action<Emit, TypeOfContent> Load { get; set; }
+        public new Action<Emit, TypeOfContent> Load { get; set; }
 
         /// <summary>
         /// Action for emitting instructions that store in the element a value taken from the stack.
         /// </remarks>
-        public override Action<Emit, IElement, TypeOfContent> Store { get; set; }
+        public new Action<Emit, IElement, TypeOfContent> Store { get; set; }
         
         protected override void InternalLoad(Emit g, TypeOfContent content)
         {
