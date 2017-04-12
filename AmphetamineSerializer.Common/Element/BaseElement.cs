@@ -9,8 +9,11 @@ namespace AmphetamineSerializer.Common.Element
         private IElement next;
         private IElement previous;
 
+        /// <summary>
+        /// Current index for accessing this element.
+        /// </summary>
         public virtual IElement Index { get; set; }
-
+        
         protected abstract void InternalStore(Emit g, TypeOfContent content);
 
         protected abstract void InternalLoad(Emit g, TypeOfContent content);
@@ -109,8 +112,7 @@ namespace AmphetamineSerializer.Common.Element
         public IElement Next { get { return next; } }
 
         public IElement Previous { get { return previous; } }
-
-
+        
         public IElement EnterArray(IElement index)
         {
             var arrayElement = (BaseElement)this[index];

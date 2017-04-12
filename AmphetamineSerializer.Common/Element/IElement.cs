@@ -11,19 +11,35 @@ namespace AmphetamineSerializer.Common
     public interface IElement
     {
         /// <summary>
-        /// An IElement can be a very complex composition of nested arrays.
-        /// While enumerating all the nodes in its graph, this contain all the nodes
-        /// back to its root. 
+        /// Next IElement in the chain.
         /// </summary>
+        /// <remarks>
+        /// An IElement can be obtained applying multiple indexes to another IElement.
+        /// Every time an index is applied, the consequence is that another node is added
+        /// to the chain in order to keep track of the derivation of the element back to
+        /// its root.
+        /// </remarks>
         IElement Next { get; }
 
+        /// <summary>
+        /// Previous IElement in the chain.
+        /// </summary>
+        /// <seealso cref="IElement.Next"/>
         IElement Previous { get; }
 
+        /// <summary>
+        /// Specify if the current element can be indexed.
+        /// </summary>
         bool IsIndexable { get; }
 
+        /// <summary>
+        /// Current index used while loading this element.
+        /// </summary>
         IElement Index { get; }
 
-
+        /// <summary>
+        /// If this element is an array, this IElement allow to load its lenght.
+        /// </summary>
         IElement Lenght { get; }
 
         /// <summary>
@@ -43,6 +59,11 @@ namespace AmphetamineSerializer.Common
         /// </remarks>
         Action<Emit, IElement, TypeOfContent> Store { get; }
 
+        /// <summary>
+        /// Make another node in the chain applying an index to this IElement.
+        /// </summary>
+        /// <param name="index">Index to apply</param>
+        /// <returns>The new IElement</returns>
         IElement EnterArray(IElement index);
 
         /// <summary>
