@@ -61,6 +61,9 @@ namespace AmphetamineSerializer.Common
                 Input = inputTypes,
                 Return = returnValue
             };
+
+            AlreadyBuildedMethods.Add(inputTypes[0], bf);
+
             methods.Push(bf);
             return bf.Emiter;
         }
