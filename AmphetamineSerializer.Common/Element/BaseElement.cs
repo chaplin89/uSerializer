@@ -115,6 +115,9 @@ namespace AmphetamineSerializer.Common.Element
         
         public IElement EnterArray(IElement index)
         {
+            if (!IsIndexable)
+                throw new NotSupportedException("This element does not support indexing.");
+
             var arrayElement = (BaseElement)this[index];
             arrayElement.previous = this;
             next = arrayElement;
