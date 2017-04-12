@@ -17,7 +17,7 @@ namespace AmphetamineSerializer.Common
         /// <summary>
         /// This is the index.
         /// </summary>
-        public Local Index { get; set; }
+        public LocalElement Index { get; set; }
         
         /// <summary>
         /// Size of the array.

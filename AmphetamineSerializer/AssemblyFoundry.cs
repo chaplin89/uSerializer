@@ -58,7 +58,7 @@ namespace AmphetamineSerializer
 
             ArgumentElement instance;
 
-            if (ctx.ManageLifeCycle)
+            if (ctx.WriteIntoObject)
             {
                 instance = new ArgumentElement(0, ctx.ObjectType);
                 normalizedType = ctx.ObjectType.GetElementType();
@@ -100,7 +100,7 @@ namespace AmphetamineSerializer
                 labels[i] = ctx.G.DefineLabel($"Version_{i}");
 
             Type requestType = versionField.LoadedType;
-            if (ctx.ManageLifeCycle)
+            if (ctx.WriteIntoObject)
                 requestType = requestType.MakeByRefType();
 
             var request = new SerializationBuildRequest()
@@ -117,7 +117,7 @@ namespace AmphetamineSerializer
 
             if (targetMethod != null)
             {
-                if (ctx.ManageLifeCycle)
+                if (ctx.WriteIntoObject)
                     versionField.Load(ctx.G, TypeOfContent.Address);
                 else
                     versionField.Load(ctx.G, TypeOfContent.Value);
@@ -164,9 +164,8 @@ namespace AmphetamineSerializer
                     throw new InvalidOperationException("Incomplete types are not allowed.");
 
                 if (ctx.Element.IsIndexable)
-                {
-                    ManageArray(ctx);
-                    var index = (LocalElement)ctx.LoopCtx.Peek().Index;
+                {                    
+                    var index = AddLoopPreamble(ctx).Index;
 
                     linkedList.RemoveFirst();
                     linkedList.AddFirst(ctx.Element.EnterArray(index));
@@ -183,10 +182,6 @@ namespace AmphetamineSerializer
                     RequestType = TypeOfRequest.Everything
                 };
 
-                // TODO: THERE AREN'T REALLY ANY GOOD REASON FOR MAKING AssemblyFoundry PART OF THE CHAIN.
-                //       THIS IS ONLY WASTING SPACE ON THE STACK.
-                //       AssemblyFoundry SHOULD SEND A REQUEST AND IF THE RESPONSE IS NULL, IT SHOULD TRY TO HANDLE
-                //       THE REQUEST BY ITSELF PUTTING THE REQUEST IN A LIFO QUEUE.
                 response = ctx.Chain.Process(request) as SerializationBuildResponse;
 
                 if (response == null)
@@ -220,11 +215,6 @@ namespace AmphetamineSerializer
                 linkedList.RemoveFirst();
             }
         }
-
-        private void ManageArray(FoundryContext ctx)
-        {
-            AddLoopPreamble(ctx);
-        }
         #endregion
 
         #region Type management
@@ -244,6 +234,7 @@ namespace AmphetamineSerializer
         }
         #endregion
 
+        #region Loop
         /// <summary>
         /// Generate a loop preamble:
         /// 1. Initialize the index
@@ -256,7 +247,7 @@ namespace AmphetamineSerializer
         ///     Index = 0;
         ///     (Initialize the array);
         /// </remarks>
-        public void AddLoopPreamble(FoundryContext ctx)
+        public LoopContext AddLoopPreamble(FoundryContext ctx)
         {
             Contract.Ensures(ctx != null);
 
@@ -272,7 +263,7 @@ namespace AmphetamineSerializer
             if (indexType == null)
                 indexType = typeof(uint);
 
-            if (ctx.ManageLifeCycle)
+            if (ctx.WriteIntoObject)
             {
                 if (fieldElement.Attribute.ArrayFixedSize != -1)
                 {
@@ -289,7 +280,7 @@ namespace AmphetamineSerializer
             }
 
             // Write in stream
-            if (!ctx.ManageLifeCycle)
+            if (!ctx.WriteIntoObject)
             {
                 var currentElement = ctx.Element;
 
@@ -345,7 +336,7 @@ namespace AmphetamineSerializer
                 }
             }
 
-            if (ctx.ManageLifeCycle)
+            if (ctx.WriteIntoObject)
             {
                 // ObjectInstance.CurrentItemFieldInfo = new CurrentItemUnderlyingType[Size];
                 var newArray = (GenericElement)((g, _) =>
@@ -365,6 +356,8 @@ namespace AmphetamineSerializer
 
             // Loop start
             ctx.G.MarkLabel(currentLoopContext.Body);
+
+            return currentLoopContext;
         }
 
         /// <summary>
@@ -408,5 +401,6 @@ namespace AmphetamineSerializer
                 ctx.G.BranchIfLess(currentLoopContext.Body);
             }
         }
+        #endregion
     }
 }

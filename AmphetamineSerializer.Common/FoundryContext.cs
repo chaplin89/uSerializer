@@ -117,7 +117,7 @@ namespace AmphetamineSerializer.Common
         /// The inner part of the builder, in fact, does not know anything about Serialization or 
         /// Deserialization because it's only a way to iterate over an object graph and call some methods.
         /// </remarks>
-        public bool ManageLifeCycle
+        public bool WriteIntoObject
         {
             get
             {
@@ -137,7 +137,7 @@ namespace AmphetamineSerializer.Common
                 if (normalizedType.IsEnum)
                     normalizedType = normalizedType.GetEnumUnderlyingType();
 
-                if (ManageLifeCycle)
+                if (WriteIntoObject)
                     normalizedType = normalizedType.MakeByRefType();
 
                 return normalizedType;

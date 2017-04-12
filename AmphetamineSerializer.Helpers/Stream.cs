@@ -74,7 +74,7 @@ namespace AmphetamineSerializer.Helpers
         [SerializationHandler(typeof(string))]
         public void HandleString(FoundryContext ctx)
         {
-            if (ctx.ManageLifeCycle)
+            if (ctx.WriteIntoObject)
                 DecodeString(ctx);
             else
                 EncodeString(ctx);
@@ -136,7 +136,7 @@ namespace AmphetamineSerializer.Helpers
         [SerializationHandler(typeof(float))]
         public void HandlePrimitive(FoundryContext ctx)
         {
-            if (ctx.ManageLifeCycle)
+            if (ctx.WriteIntoObject)
             {
                 //Read from stream
                 var readFromStream = (GenericElement)((g, _) =>
