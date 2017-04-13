@@ -67,7 +67,7 @@ namespace AmphetamineSerializer
                 if (ctor == null)
                     throw new NotSupportedException($"The type {normalizedType.Name} does not have a parameterless constructor.");
 
-                var load = (GenericElement)((g, _) => g.NewObject(normalizedType));
+                var load = new GenericElement(((g, _) => g.NewObject(normalizedType)), null);
 
                 instance.Store(ctx.G, load, TypeOfContent.Value);
             }
@@ -339,11 +339,11 @@ namespace AmphetamineSerializer
             if (ctx.WriteIntoObject)
             {
                 // ObjectInstance.CurrentItemFieldInfo = new CurrentItemUnderlyingType[Size];
-                var newArray = (GenericElement)((g, _) =>
+                var newArray = new GenericElement(((g, _) =>
                 {
                     currentLoopContext.Size.Load(g, TypeOfContent.Value);
                     ctx.G.NewArray(ctx.Element.LoadedType.GetElementType());
-                });
+                }), null);
 
                 ctx.Element.Store(ctx.G, newArray, TypeOfContent.Value);
             }

@@ -90,7 +90,7 @@ namespace AmphetamineSerializer.Helpers
         /// <param name="ctx"></param>
         public void DecodeString(FoundryContext ctx)
         {
-            var valueToLoad = (GenericElement)((g, _) =>
+            var valueToLoad = new GenericElement(((g, _) =>
             {
                 // Put the decoded string in the stack.
                 g.Call(typeof(Encoding).GetProperty("ASCII").GetMethod);
@@ -99,7 +99,7 @@ namespace AmphetamineSerializer.Helpers
                 g.CallVirtual(typeHandlerMap[typeof(int).MakeByRefType()]);
                 g.CallVirtual(typeHandlerMap[typeof(byte[]).MakeByRefType()]);
                 g.CallVirtual(typeof(Encoding).GetMethod("GetString", new Type[] { typeof(byte[]) }));
-            });
+            }), null);
 
             ctx.Element.Store(ctx.G, valueToLoad, TypeOfContent.Value);
         }
@@ -139,11 +139,11 @@ namespace AmphetamineSerializer.Helpers
             if (ctx.WriteIntoObject)
             {
                 //Read from stream
-                var readFromStream = (GenericElement)((g, _) =>
+                var readFromStream = new GenericElement(((g, _) =>
                 {
                     ctx.G.LoadArgument(1);
                     g.CallVirtual(typeHandlerMap[ctx.Element.LoadedType.MakeByRefType()]);
-                });
+                }), null);
 
                 ctx.Element.Store(ctx.G, readFromStream, TypeOfContent.Value);
             }

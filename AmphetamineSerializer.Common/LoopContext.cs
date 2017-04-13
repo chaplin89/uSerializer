@@ -11,7 +11,7 @@ namespace AmphetamineSerializer.Common
     {
         public LoopContext(Local index)
         {
-            Index = index;
+            Index = new LocalElement(index);
         }
 
         /// <summary>
