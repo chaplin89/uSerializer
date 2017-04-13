@@ -3,6 +3,7 @@
 
 It's a binary serializator that is made to ease the interoperation between managed and native code.
 It makes porting an existing C/C++ structure to managed code very easy. Most of the time, all you need to do is to copy the structure and decorate its fields.
+
 **This is WIP, definitely not suitable for production**
 
 ## Features
