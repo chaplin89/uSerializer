@@ -136,12 +136,12 @@ namespace AmphetamineSerializer.Common.Element
 
                 if (Index != null)
                 {
-                    newElement.Index = (GenericElement)((g, _) =>
+                    newElement.Index = new GenericElement(((g, _) =>
                     {
                         Index.Load(g, TypeOfContent.Value);
                         g.LoadElement(LoadedType);
                         newIndex.Load(g, TypeOfContent.Value);
-                    });
+                    }), null);
                 }
                 else
                 {
