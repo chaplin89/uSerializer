@@ -54,4 +54,31 @@ serializatior.Deserialize(ref myClass, stream);
 ## Extension
 [WIP]
 ## Benchmark
-[WIP]
+
+Here follo the output of the benchmark inside AmphetamineSerializer.
+Not much care has been put into trying to generate optimized code, it's not excluded that those results may vary considerably.
+
+```
+Number of iterations: 1000
+
+++++++++++
+Starting TestTrivialTypes
+Mean time BinaryFormatter:  0,0118763
+Mean time Amphetamine: 0,0010431
+Mean time XmlSerializer: 0,0127014
+++++++++++
+
+++++++++++
+Starting Test1DArray
+Mean time BinaryFormatter:  0,0276328
+Mean time Amphetamine: 0,00260779999999999
+Mean time XmlSerializer: 0,0224132
+++++++++++
+
+++++++++++
+Starting TestJaggedArray
+Mean time BinaryFormatter:  0,0628334999999999
+Mean time Amphetamine: 0,00628240000000002
+Mean time XmlSerializer: 0,0520390000000001
+++++++++++
+```
