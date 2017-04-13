@@ -116,6 +116,10 @@
       <Project>{e2e1d44c-d506-4d37-aac9-a96f65d3d348}</Project>
       <Name>AmphetamineSerializer.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\AmphetamineSerializer.Interfaces\AmphetamineSerializer.Interfaces.csproj">
+      <Project>{5eb81743-bf16-4c46-b74e-2c846281af2b}</Project>
+      <Name>AmphetamineSerializer.Interfaces</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AmphetamineSerializer\AmphetamineSerializer.csproj">
       <Project>{4d388985-26f2-4ec4-9926-2ba2e926651c}</Project>
       <Name>AmphetamineSerializer</Name>
