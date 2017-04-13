@@ -31,6 +31,7 @@
     </DocumentationFile>
     <RegisterForComInterop>false</RegisterForComInterop>
     <RunCodeAnalysis>true</RunCodeAnalysis>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -55,6 +56,7 @@
     <Compile Include="Chain\Nodes\CustomBuilderFinder.cs" />
     <Compile Include="Chain\Nodes\CustomSerializerFinder.cs" />
     <Compile Include="Chain\Nodes\DefaultHandlerFinder.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="LenghtBoundSerializator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AssemblyFoundry.cs" />

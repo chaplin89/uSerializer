@@ -9,7 +9,7 @@ namespace AmphetamineSerializer
     /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class LenghtBoundSerializator<T> : Serializator<T>
+    public class LengthBoundSerializator<T> : Serializator<T>
     {
         private object additionalContext;
         IChainManager chain = new ChainManager()
@@ -66,7 +66,7 @@ namespace AmphetamineSerializer
             stream.BaseStream.Position = finalPosition + 4;
         }
 
-        public LenghtBoundSerializator(object additionalContext = null)
+        public LengthBoundSerializator(object additionalContext = null)
         {
             this.additionalContext = additionalContext;
         }

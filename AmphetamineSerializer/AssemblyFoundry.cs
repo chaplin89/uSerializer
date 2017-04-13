@@ -282,8 +282,6 @@ namespace AmphetamineSerializer
             // Write in stream
             if (!ctx.WriteIntoObject)
             {
-                var currentElement = ctx.Element;
-
                 // Write the size of the array
                 var request = new SerializationBuildRequest()
                 {

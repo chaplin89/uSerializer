@@ -7,12 +7,12 @@ namespace AmphetamineSerializer
     /// <summary>
     /// 
     /// </summary>
-    public class TWPacketsStream : IDisposable
+    public class PacketsStream : IDisposable
     {
         Stream stream;
         byte[] fourByteArray = new byte[4];
 
-        public TWPacketsStream(Stream stream)
+        public PacketsStream(Stream stream)
         {
             this.stream = stream;
         }
