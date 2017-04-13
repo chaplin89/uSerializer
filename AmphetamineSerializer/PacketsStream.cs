@@ -128,8 +128,13 @@ namespace AmphetamineSerializer
 
         public void Dispose()
         {
-            stream.Dispose();
+            Dispose(true);
             GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool unused)
+        {
+            stream.Dispose();
         }
     }
 }
