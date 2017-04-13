@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define RUN_ONLY
+using System;
 using System.Collections.Generic;
 using Sigil.NonGeneric;
 using System.Reflection;
