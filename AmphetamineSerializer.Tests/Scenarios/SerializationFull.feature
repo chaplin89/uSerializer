@@ -1,4 +1,5 @@
-﻿Feature: SerializationFull
+﻿@ignore 
+Feature: SerializationFull
 	Serialization and deserialization of the same class
 	in order to ensure that results are consistent.
 

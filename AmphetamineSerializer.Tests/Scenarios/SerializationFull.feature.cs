@@ -19,6 +19,7 @@ namespace AmphetamineSerializer.Tests.Scenarios
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [NUnit.Framework.TestFixtureAttribute()]
     [NUnit.Framework.DescriptionAttribute("SerializationFull")]
+    [NUnit.Framework.IgnoreAttribute("Ignored feature")]
     public partial class SerializationFullFeature
     {
         
@@ -32,7 +33,8 @@ namespace AmphetamineSerializer.Tests.Scenarios
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
             TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "SerializationFull", "\tSerialization and deserialization of the same class\r\n\tin order to ensure that re" +
-                    "sults are consistent.", ProgrammingLanguage.CSharp, ((string[])(null)));
+                    "sults are consistent.", ProgrammingLanguage.CSharp, new string[] {
+                        "ignore"});
             testRunner.OnFeatureStart(featureInfo);
         }
         
@@ -71,15 +73,15 @@ namespace AmphetamineSerializer.Tests.Scenarios
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Serializing and deserializing complex nested types produce the same result", new string[] {
                         "mytag"});
-#line 6
-this.ScenarioSetup(scenarioInfo);
 #line 7
- testRunner.Given("The instance Instance1 of type TestFull filled with random data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+this.ScenarioSetup(scenarioInfo);
 #line 8
- testRunner.And("I serialize the instance Instance1 in Stream1", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+ testRunner.Given("The instance Instance1 of type TestFull filled with random data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line 9
- testRunner.When("I deserialize the instance Instance2 from Stream1", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+ testRunner.And("I serialize the instance Instance1 in Stream1", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line 10
+ testRunner.When("I deserialize the instance Instance2 from Stream1", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line 11
  testRunner.Then("Instance1 and Instance2 are identical", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             this.ScenarioCleanup();
