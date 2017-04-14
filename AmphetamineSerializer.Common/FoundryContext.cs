@@ -25,9 +25,9 @@ namespace AmphetamineSerializer.Common
         /// <param name="delegateType"></param>
         /// <param name="additionalContext"></param>
         /// <returns></returns>
-        public static FoundryContext MakeContext(Type delegateType, 
+        public static FoundryContext MakeContext(Type delegateType,
                                                  object additionalContext,
-                                                 IElement element, 
+                                                 IElement element,
                                                  SigilFunctionProvider provider,
                                                  Emit g)
         {
@@ -42,6 +42,7 @@ namespace AmphetamineSerializer.Common
         }
 
         public IElement Element;
+        private Emit g;
 
         /// <summary>
         /// 
@@ -93,7 +94,15 @@ namespace AmphetamineSerializer.Common
         /// <summary>
         /// Generator.
         /// </summary>
-        public Emit G { get;set;}
+        public Emit G
+        {
+            get { return g; }
+            set
+            {
+                g = value;
+                VariablePool = new VariablePool(g);
+            }
+        }
 
         /// <summary>
         /// Types in input to the method that will be forwarded to the
@@ -129,7 +138,8 @@ namespace AmphetamineSerializer.Common
         /// <summary>
         ///  
         /// </summary>
-        public Type NormalizedType {
+        public Type NormalizedType
+        {
             get
             {
                 Type normalizedType = Element.LoadedType;
@@ -143,5 +153,7 @@ namespace AmphetamineSerializer.Common
                 return normalizedType;
             }
         }
+
+        public VariablePool VariablePool { get; set; }
     }
 }

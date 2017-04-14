@@ -11,13 +11,6 @@ namespace AmphetamineSerializer
     /// <typeparam name="T"></typeparam>
     public class LengthBoundSerializator<T> : Serializator<T>
     {
-        private object additionalContext;
-        IChainManager chain = new ChainManager()
-                                  .SetNext(new CustomSerializerFinder())
-                                  .SetNext(new CustomBuilderFinder())
-                                  .SetNext(new DefaultHandlerFinder())
-                                  .SetNext(new CacheManager());
-
         /// <summary>
         ///
         /// </summary>
@@ -66,9 +59,8 @@ namespace AmphetamineSerializer
             stream.BaseStream.Position = finalPosition + 4;
         }
 
-        public LengthBoundSerializator(object additionalContext = null)
+        public LengthBoundSerializator()
         {
-            this.additionalContext = additionalContext;
         }
     }
 }

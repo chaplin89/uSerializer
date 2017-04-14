@@ -62,6 +62,7 @@
     <Compile Include="AssemblyFoundry.cs" />
     <Compile Include="Serializator.cs" />
     <Compile Include="PacketsStream.cs" />
+    <Compile Include="VariablePool.cs" />
     <Compile Include="VersionHelper.cs" />
   </ItemGroup>
   <ItemGroup>

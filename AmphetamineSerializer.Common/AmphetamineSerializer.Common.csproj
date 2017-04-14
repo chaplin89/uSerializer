@@ -73,6 +73,7 @@
     <Compile Include="Options.cs" />
     <Compile Include="SigilFunctionProvider.cs" />
     <Compile Include="TypeExtension.cs" />
+    <Compile Include="VariablePool.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AmphetamineSerializer.Interfaces\AmphetamineSerializer.Interfaces.csproj">

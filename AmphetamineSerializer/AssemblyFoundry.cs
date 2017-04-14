@@ -154,7 +154,6 @@ namespace AmphetamineSerializer
             while (linkedList.Count > 0)
             {
                 ctx.Element = (FieldElement)linkedList.First.Value;
-
                 SerializationBuildResponse response = null;
 
                 // todo:
@@ -250,8 +249,8 @@ namespace AmphetamineSerializer
         public LoopContext AddLoopPreamble(FoundryContext ctx)
         {
             Contract.Ensures(ctx != null);
-
-            LoopContext currentLoopContext = new LoopContext(ctx.G.DeclareLocal(typeof(uint)));
+            
+            var currentLoopContext = new LoopContext(ctx.VariablePool.GetNewVariable(typeof(uint)));
             ctx.LoopCtx.Push(currentLoopContext);
 
             currentLoopContext.Body = ctx.G.DefineLabel($"Body_{ctx.Element.GetHashCode()}");
@@ -397,6 +396,7 @@ namespace AmphetamineSerializer
                 }
 
                 ctx.G.BranchIfLess(currentLoopContext.Body);
+                ctx.VariablePool.ReleaseVariable(currentLoopContext.Index);
             }
         }
         #endregion

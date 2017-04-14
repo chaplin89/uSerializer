@@ -9,9 +9,9 @@ namespace AmphetamineSerializer.Common
     /// </summary>
     public class LoopContext
     {
-        public LoopContext(Local index)
+        public LoopContext(LocalElement index)
         {
-            Index = new LocalElement(index);
+            Index = index;
         }
 
         /// <summary>

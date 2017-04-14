@@ -1,5 +1,4 @@
-﻿using System;
-using Sigil.NonGeneric;
+﻿using Sigil.NonGeneric;
 using Sigil;
 
 namespace AmphetamineSerializer.Common.Element
@@ -42,11 +41,21 @@ namespace AmphetamineSerializer.Common.Element
         /// </summary>
         public Local LocalVariable { get; set; }
         
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="content"></param>
         protected override void InternalStore(Emit g, TypeOfContent content)
         {
             g.StoreLocal(LocalVariable);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="content"></param>
         protected override void InternalLoad(Emit g, TypeOfContent content)
         {
             if (content == TypeOfContent.Value)
