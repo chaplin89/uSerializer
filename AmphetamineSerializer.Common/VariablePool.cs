@@ -52,7 +52,7 @@ namespace AmphetamineSerializer
         public void ReleaseVariable(LocalElement element)
         {
             currentPool[element.LoadedType].Where(_1 => _1.Variable == element)
-                                           .Single().IsFree = false;
+                                           .Single().IsFree = true;
         }
     }
 }

@@ -21,7 +21,7 @@ namespace AmphetamineSerializer.PerformanceTests
 
         static void Main(string[] args)
         {
-            Console.WriteLine($"Number of iterations: {1000}");
+            Console.WriteLine($"Number of iterations: {totalIterations}");
             Console.WriteLine();
             TestSerialization<TestTrivialTypes>();
             TestSerialization<Test1DArray>();
