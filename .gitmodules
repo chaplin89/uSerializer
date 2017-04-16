@@ -1,3 +1,4 @@
 [submodule "Sigil"]
 	path = Sigil
 	url = https://github.com/chaplin89/Sigil.git
+	branch = Experiments

@@ -312,7 +312,7 @@ namespace AmphetamineSerializer
             // Case #2: The Size variable was already initialized by someone else; Use it.
             else if (currentLoopContext.Size == null)
             {
-                currentLoopContext.Size = new LocalElement(ctx.G.DeclareLocal(indexType));
+                currentLoopContext.Size = ctx.VariablePool.GetNewVariable(indexType);
 
                 var request = new SerializationBuildRequest()
                 {
@@ -397,6 +397,9 @@ namespace AmphetamineSerializer
 
                 ctx.G.BranchIfLess(currentLoopContext.Body);
                 ctx.VariablePool.ReleaseVariable(currentLoopContext.Index);
+
+                if (currentLoopContext.Size is LocalElement)
+                    ctx.VariablePool.ReleaseVariable(currentLoopContext.Size as LocalElement);
             }
         }
         #endregion
