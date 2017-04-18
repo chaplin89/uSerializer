@@ -115,7 +115,7 @@ namespace AmphetamineSerializer
             var response = ctx.Chain.Process(request) as SerializationBuildResponse;
             var targetMethod = response.Response;
 
-            if (targetMethod != null)
+            if (targetMethod.Status != BuildedFunctionStatus.ContextModified)
             {
                 if (ctx.WriteIntoObject)
                     versionField.Load(ctx.G, TypeOfContent.Address);

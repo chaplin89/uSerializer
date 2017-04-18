@@ -68,6 +68,11 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Scenarios\SerializationFullVersion.feature.cs">
+      <DependentUpon>SerializationFullVersion.feature</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Scenarios\SerializationFull.feature.cs">
       <DependentUpon>SerializationFull.feature</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -95,6 +100,10 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <None Include="Scenarios\SerializationFullVersion.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>SerializationFullVersion.feature.cs</LastGenOutput>
+    </None>
     <None Include="Scenarios\SerializationFull.feature">
       <Generator>SpecFlowSingleFileGenerator</Generator>
       <LastGenOutput>SerializationFull.feature.cs</LastGenOutput>

@@ -41,33 +41,28 @@ namespace AmphetamineSerializer
             int? maxExplicitlyManagedVersion = null;
             int? minExplicitlyManagedVersion = null;
 
-            if (GetFields(null, rootType).Where(x => x.Attribute.VersionBegin != -1).Any())
+            var vBegin = GetFields(null, rootType)
+                            .Where(x => x.Attribute.VersionBegin != -1)
+                            .Select(x => x.Attribute.VersionBegin).Distinct();
+
+            var vEnd = GetFields(null, rootType)
+                            .Where(x => x.Attribute.VersionEnd != -1)
+                            .Select(x => x.Attribute.VersionEnd).Distinct();
+            
+            if (vBegin.Any() || vEnd.Any())
             {
-                minExplicitlyManagedVersion = GetFields(null, rootType)
-                                                .Where(x => x.Attribute.VersionBegin != -1)
-                                                .Select(x => x.Attribute.VersionBegin)
-                                                .Min();
+                minExplicitlyManagedVersion = vBegin.Concat(vEnd).Min();
+                maxExplicitlyManagedVersion = vBegin.Concat(vBegin).Max();
             }
 
-            if (GetFields(null, rootType).Where(x => x.Attribute.VersionEnd != -1).Any())
-            {
-                maxExplicitlyManagedVersion = GetFields(null, rootType)
-                                                .Where(x => x.Attribute.VersionBegin != -1)
-                                                .Select(x => x.Attribute.VersionBegin)
-                                                .Max();
-            }
-
-            if (maxExplicitlyManagedVersion == null && minExplicitlyManagedVersion != null)
-                maxExplicitlyManagedVersion = minExplicitlyManagedVersion;
-            else if (maxExplicitlyManagedVersion != null && minExplicitlyManagedVersion == null)
-                minExplicitlyManagedVersion = maxExplicitlyManagedVersion;
-
-            Debug.Assert(maxExplicitlyManagedVersion.HasValue == minExplicitlyManagedVersion.HasValue);
-
+            //TODO: check for nonsense interval
+            
             if (maxExplicitlyManagedVersion.HasValue)
-                return (IEnumerable<object>)Enumerable.Range(minExplicitlyManagedVersion.Value, (maxExplicitlyManagedVersion.Value - minExplicitlyManagedVersion.Value) + 1);
+                return Enumerable
+                        .Range(minExplicitlyManagedVersion.Value, (maxExplicitlyManagedVersion.Value - minExplicitlyManagedVersion.Value) + 1)
+                        .Cast<object>();
             else
-                return (IEnumerable<object>)Enumerable.Empty<int>();
+                return Enumerable.Empty<object>();
         }
 
         /// <summary>
