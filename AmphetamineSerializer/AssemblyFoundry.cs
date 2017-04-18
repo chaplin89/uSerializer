@@ -88,7 +88,7 @@ namespace AmphetamineSerializer
             return ctx.Provider.GetMethod();
         }
 
-        private void ManageVersions(FoundryContext ctx, IElement instance, int[] versions, Type normalizedType)
+        private void ManageVersions(FoundryContext ctx, IElement instance, object[] versions, Type normalizedType)
         {
             Label[] labels = new Label[versions.Length];
             var versionField = VersionHelper.GetAllFields(instance, normalizedType).First();
@@ -124,20 +124,26 @@ namespace AmphetamineSerializer
 
                 ctx.Manipulator.ForwardParameters(ctx.InputParameters, targetMethod, versionField.Attribute);
             }
-
-            // Enter switch case
-            versionField.Load(ctx.G, TypeOfContent.Value);
-            ctx.G.LoadConstant(versions[0]);
-            ctx.G.Subtract();
-            ctx.G.Switch(labels);
-
-            for (int i = 0; i < versions.Length; i++)
+            
+            if (versionField.Field.FieldType == typeof(int))
             {
-                var fields = VersionHelper.GetVersionSnapshot(instance, normalizedType, versions[i])
-                                          .Where(x => x.Field.Name.ToLowerInvariant() != "version");
-                ctx.G.MarkLabel(labels[i]);
-                BuildFromFields(ctx, fields);
-                ctx.G.Return();
+                versionField.Load(ctx.G, TypeOfContent.Value);
+                ctx.G.LoadConstant((int)versions[0]);
+                ctx.G.Subtract();
+                ctx.G.Switch(labels);
+
+                for (int i = 0; i < versions.Length; i++)
+                {
+                    var fields = VersionHelper.GetVersionSnapshot(instance, normalizedType, versions[i])
+                                              .Where(x => x.Field.Name.ToLowerInvariant() != "version");
+                    ctx.G.MarkLabel(labels[i]);
+                    BuildFromFields(ctx, fields);
+                    ctx.G.Return();
+                }
+            }
+            else
+            {
+                // Manage object version
             }
         }
 
@@ -163,7 +169,7 @@ namespace AmphetamineSerializer
                     throw new InvalidOperationException("Incomplete types are not allowed.");
 
                 if (ctx.Element.IsIndexable)
-                {                    
+                {
                     var index = AddLoopPreamble(ctx).Index;
 
                     linkedList.RemoveFirst();
@@ -249,7 +255,7 @@ namespace AmphetamineSerializer
         public LoopContext AddLoopPreamble(FoundryContext ctx)
         {
             Contract.Ensures(ctx != null);
-            
+
             var currentLoopContext = new LoopContext(ctx.VariablePool.GetNewVariable(typeof(uint)));
             ctx.LoopCtx.Push(currentLoopContext);
 

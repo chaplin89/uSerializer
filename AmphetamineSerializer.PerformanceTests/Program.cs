@@ -26,6 +26,7 @@ namespace AmphetamineSerializer.PerformanceTests
             TestSerialization<TestTrivialTypes>();
             TestSerialization<Test1DArray>();
             TestSerialization<TestJaggedArray>();
+            TestSerialization<TestFull>();
             Console.ReadKey();
         }
 

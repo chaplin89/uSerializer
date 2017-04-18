@@ -40,6 +40,8 @@ namespace AmphetamineSerializer.Common.Attributes
         /// </summary>
         public int VersionEnd { get; set; }
 
+        public object Version { get; set; }
+
         /// <summary>
         /// If the type is an array, this property specify the size of the array.
         /// If this property is not set, the deserializator generally will assume that the array
