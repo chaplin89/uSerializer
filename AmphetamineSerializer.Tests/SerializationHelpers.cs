@@ -1,8 +1,10 @@
 ﻿using NUnit.Framework;
 using Ploeh.AutoFixture;
+using Ploeh.AutoFixture.Kernel;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using TechTalk.SpecFlow;
+using System;
 
 namespace AmphetamineSerializer.Tests
 {
@@ -14,16 +16,8 @@ namespace AmphetamineSerializer.Tests
         void EnsureAreEqualImpl(string inst1, string inst2);
     }
 
-    internal class SerializationHelpers<ClassType> : ISerializationHelpers
+    internal abstract class SerializationHelpersBase<ClassType> : ISerializationHelpers
     {
-        public void GenerateRandomImpl(string instance)
-        {
-            Fixture fixture = new Fixture();
-            ClassType test = fixture.Create<ClassType>();
-
-            ScenarioContext.Current.Add(instance, test);
-        }
-
         public void SerializeIntoImpl(string objectInstance, string streamInstance)
         {
             var serializator = new Serializator<ClassType>();
@@ -78,5 +72,31 @@ namespace AmphetamineSerializer.Tests
             }
         }
 
+        public abstract void GenerateRandomImpl(string instance);
+    }
+
+    internal class SerializationVersionHelpers : SerializationHelpersBase<TestFullVersion>
+    {
+        public override void GenerateRandomImpl(string instance)
+        {
+            TestFullVersion fv = new TestFullVersion();
+            Fixture fixture = new Fixture();
+
+            fv.Version = 102;
+            fv.Test_102 = fixture.Create<Contained_102>();
+
+            ScenarioContext.Current.Add(instance, fv);
+        }
+    }
+
+    internal class SerializationHelpers<ClassType> : SerializationHelpersBase<ClassType>
+    {
+        public override void GenerateRandomImpl(string instance)
+        {
+            Fixture fixture = new Fixture();
+            ClassType test = fixture.Create<ClassType>();
+
+            ScenarioContext.Current.Add(instance, test);
+        }
     }
 }

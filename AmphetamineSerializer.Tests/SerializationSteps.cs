@@ -26,7 +26,12 @@ namespace AmphetamineSerializer.SystemTests
                                 .Single();
             Assert.NotNull(type);
 
-            var closedType = typeof(SerializationHelpers<>).MakeGenericType(type);
+            Type closedType = null;
+            if (typeName != "TestFullVersion")
+                closedType = typeof(SerializationHelpers<>).MakeGenericType(type);
+            else
+                closedType = typeof(SerializationVersionHelpers);
+
             helpers = (ISerializationHelpers)Activator.CreateInstance(closedType);
             helpers.GenerateRandomImpl(instance);
         }

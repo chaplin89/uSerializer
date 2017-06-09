@@ -98,32 +98,49 @@ namespace AmphetamineSerializer.Tests
     [Serializable]
     public class TestFullVersion
     {
-        [ASIndex(00)] public int                               Version;
-        [ASIndex(01, VersionBegin=100)] public int             Test_Field1;
-        [ASIndex(02, VersionBegin=100)] public ushort          Test_Field2;
-        [ASIndex(03, VersionBegin=100)] public short           Test_Field3;
-        [ASIndex(04, VersionBegin=100)] public sbyte           Test_Field4;
-        [ASIndex(05, VersionBegin=100)] public byte            Test_Field5;
-        [ASIndex(06, VersionBegin=100)] public string          Test_Field6;
+        [ASIndex(00)] public int           Version;
 
-        [ASIndex(07, VersionBegin=101)] public uint    []      Test_Field7;
-        [ASIndex(08, VersionBegin=101)] public int     []      Test_Field8;
-        [ASIndex(09, VersionBegin=101)] public ushort  []      Test_Field9;
-        [ASIndex(10, VersionBegin=101)] public short   []      Test_Field10;
-        [ASIndex(11, VersionBegin=101)] public sbyte   []      Test_Field11;
-        [ASIndex(12, VersionBegin=101)] public byte    []      Test_Field12;
-        [ASIndex(13, VersionBegin=101)] public string  []      Test_Field13;
-        
-        [ASIndex(14, VersionBegin=102)] public uint    [][]    Test_Field14;
-        [ASIndex(15, VersionBegin=102)] public int     [][]    Test_Field15;
-        [ASIndex(16, VersionBegin=102)] public ushort  [][]    Test_Field16;
-        [ASIndex(17, VersionBegin=102)] public short   [][]    Test_Field17;
-        [ASIndex(18, VersionBegin=102)] public sbyte   [][]    Test_Field18;
-        [ASIndex(19, VersionBegin=102)] public byte    [][]    Test_Field19;
-        [ASIndex(20, VersionBegin=102)] public string  [][]    Test_Field20;
+        [ASIndex(02)] public float Test_100;
+        [ASIndex(03)] public double Test_101;
+        [ASIndex(04)] public Contained_102 Test_102;
 
-        [ASIndex(21)] public TestJaggedArray           Test_Field21;
-        [ASIndex(22)] public TestJaggedArray   []      Test_Field22;
-        [ASIndex(23)] public TestJaggedArray   [][]    Test_Field23;
+        // [ASIndex(21)] public TestJaggedArray           Test_Field21;
+        // [ASIndex(22)] public TestJaggedArray   []      Test_Field22;
+        // [ASIndex(23)] public TestJaggedArray   [][]    Test_Field23;
+    }
+
+    [Serializable]
+    public class Contained_100
+    {
+        [ASIndex(01)] public int             Test_Field1;
+        [ASIndex(02)] public ushort          Test_Field2;
+        [ASIndex(03)] public short           Test_Field3;
+        [ASIndex(04)] public sbyte           Test_Field4;
+        [ASIndex(05)] public byte            Test_Field5;
+        [ASIndex(06)] public string          Test_Field6;
+    }
+    
+    [Serializable]
+    public class Contained_101
+    {
+        [ASIndex(01)] public uint    []      Test_Field7;
+        [ASIndex(02)] public int     []      Test_Field8;
+        [ASIndex(03)] public ushort  []      Test_Field9;
+        [ASIndex(04)] public short   []      Test_Field10;
+        [ASIndex(05)] public sbyte   []      Test_Field11;
+        [ASIndex(06)] public byte    []      Test_Field12;
+        [ASIndex(07)] public string  []      Test_Field13;
+    }
+
+    [Serializable]
+    public class Contained_102
+    {
+        [ASIndex(01)] public uint    [][]    Test_Field14;
+        [ASIndex(02)] public int     [][]    Test_Field15;
+        [ASIndex(03)] public ushort  [][]    Test_Field16;
+        [ASIndex(04)] public short   [][]    Test_Field17;
+        [ASIndex(05)] public sbyte   [][]    Test_Field18;
+        [ASIndex(06)] public byte    [][]    Test_Field19;
+        [ASIndex(07)] public string  [][]    Test_Field20;
     }
 }

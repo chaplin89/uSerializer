@@ -82,9 +82,11 @@ namespace AmphetamineSerializer
             if (versions.Length > 1)
                 ManageVersions(ctx, instance, versions, normalizedType);
             else
+            { 
                 BuildFromFields(ctx, VersionHelper.GetAllFields(instance, normalizedType));
+                ctx.G.Return();
+            }
 
-            ctx.G.Return();
             return ctx.Provider.GetMethod();
         }
 
