@@ -56,11 +56,10 @@ namespace AmphetamineSerializer
         {
             Type normalizedType;
 
-            ArgumentElement instance;
+            ArgumentElement instance = new ArgumentElement(0, ctx.ObjectType);
 
             if (ctx.WriteIntoObject)
             {
-                instance = new ArgumentElement(0, ctx.ObjectType);
                 normalizedType = ctx.ObjectType.GetElementType();
                 var ctor = normalizedType.GetConstructor(new Type[] { });
 
@@ -73,7 +72,6 @@ namespace AmphetamineSerializer
             }
             else
             {
-                instance = new ArgumentElement(0, ctx.ObjectType);
                 normalizedType = ctx.ObjectType;
             }
 
@@ -82,7 +80,7 @@ namespace AmphetamineSerializer
             if (versions.Length > 1)
                 ManageVersions(ctx, instance, versions, normalizedType);
             else
-            { 
+            {
                 BuildFromFields(ctx, VersionHelper.GetAllFields(instance, normalizedType));
                 ctx.G.Return();
             }
@@ -126,7 +124,7 @@ namespace AmphetamineSerializer
 
                 ctx.Manipulator.ForwardParameters(ctx.InputParameters, targetMethod, versionField.Attribute);
             }
-            
+
             if (versionField.Field.FieldType == typeof(int))
             {
                 versionField.Load(ctx.G, TypeOfContent.Value);
@@ -143,9 +141,8 @@ namespace AmphetamineSerializer
                     ctx.G.Return();
                 }
             }
-            else
+            else if(versionField.Field.FieldType.IsAssignableFrom(typeof(IEquatable<>)))
             {
-                // Manage object version
             }
         }
 

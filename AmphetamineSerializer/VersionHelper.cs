@@ -52,7 +52,7 @@ namespace AmphetamineSerializer
             if (vBegin.Any() || vEnd.Any())
             {
                 minExplicitlyManagedVersion = vBegin.Concat(vEnd).Min();
-                maxExplicitlyManagedVersion = vBegin.Concat(vBegin).Max();
+                maxExplicitlyManagedVersion = vBegin.Concat(vEnd).Max();
             }
 
             //TODO: check for nonsense interval
