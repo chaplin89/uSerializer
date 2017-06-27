@@ -32,7 +32,7 @@ namespace AmphetamineSerializer
             byte[] buffer = new byte[size];
             read = stream.Read(buffer, 0, size);
             if (read != size)
-                throw new Exception("Unexpected end of file");
+                throw new EndOfStreamException("Unexpected end of file");
 
             stream.Seek(4, SeekOrigin.Current);
             return buffer;

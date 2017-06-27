@@ -23,16 +23,17 @@ namespace AmphetamineSerializer
         /// <param name="ctx">Context</param>
         public AssemblyFoundry(FoundryContext ctx) : base(ctx)
         {
-            if (ctx.Provider != null && ctx.Provider.AlreadyBuildedMethods.ContainsKey(ctx.ObjectType))
-            {
-                method = ctx.Provider.AlreadyBuildedMethods[ctx.ObjectType];
-            }
+            bool objectContained = false;
+
+            if (ctx.Provider == null)
+                ctx.Provider = new SigilFunctionProvider($"{ctx.ObjectType.Name}_{Guid.NewGuid()}");
             else
-            {
-                if (ctx.Provider == null)
-                    ctx.Provider = new SigilFunctionProvider($"{ctx.ObjectType.Name}_{Guid.NewGuid()}");
+                objectContained = ctx.Provider.AlreadyBuildedMethods.ContainsKey(ctx.ObjectType);
+
+            if (objectContained)
+                method = ctx.Provider.AlreadyBuildedMethods[ctx.ObjectType];
+            else
                 ctx.G = ctx.Provider.AddMethod("Handle", ctx.InputParameters, typeof(void));
-            }
 
             if (ctx.Chain == null)
             {
@@ -54,8 +55,7 @@ namespace AmphetamineSerializer
         /// <returns>Builded method</returns>
         protected override BuildedFunction InternalMake()
         {
-            Type normalizedType;
-
+            Type normalizedType = ctx.ObjectType;
             ArgumentElement instance = new ArgumentElement(0, ctx.ObjectType);
 
             if (ctx.WriteIntoObject)
@@ -69,10 +69,6 @@ namespace AmphetamineSerializer
                 var load = new GenericElement(((g, _) => g.NewObject(normalizedType)), null);
 
                 instance.Store(ctx.G, load, TypeOfContent.Value);
-            }
-            else
-            {
-                normalizedType = ctx.ObjectType;
             }
 
             var versions = VersionHelper.GetExplicitlyManagedVersions(normalizedType).ToArray();
