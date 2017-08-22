@@ -56,30 +56,38 @@ serializatior.Deserialize(ref myClass, stream);
 [WIP]
 ## Benchmark
 
-Here follo the output of the benchmark inside AmphetamineSerializer.
+Here follow the output of the benchmark inside AmphetamineSerializer that show how AmpethamineSerializer performance compare to the performance of other serializators.
 Not much care has been put into trying to generate optimized code, it's not excluded that those results may vary considerably.
 
+(The less, the better)
 ```
 Number of iterations: 1000
 
 ++++++++++
 Starting TestTrivialTypes
-Mean time BinaryFormatter:  0,0118763
-Mean time Amphetamine: 0,0010431
-Mean time XmlSerializer: 0,0127014
+Mean time BinaryFormatter: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+Mean time Amphetamine:     XXXX
+Mean time XmlSerializer:   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ++++++++++
 
 ++++++++++
 Starting Test1DArray
-Mean time BinaryFormatter:  0,0276328
-Mean time Amphetamine: 0,00260779999999999
-Mean time XmlSerializer: 0,0224132
+Mean time BinaryFormatter: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+Mean time Amphetamine:     XXXX
+Mean time XmlSerializer:   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ++++++++++
 
 ++++++++++
 Starting TestJaggedArray
-Mean time BinaryFormatter:  0,0628334999999999
-Mean time Amphetamine: 0,00628240000000002
-Mean time XmlSerializer: 0,0520390000000001
+Mean time BinaryFormatter: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+Mean time Amphetamine:     XXXXX
+Mean time XmlSerializer:   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+++++++++++
+
+++++++++++
+Starting TestFull
+Mean time BinaryFormatter: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+Mean time Amphetamine:     XXXXXX
+Mean time XmlSerializer:   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ++++++++++
 ```
