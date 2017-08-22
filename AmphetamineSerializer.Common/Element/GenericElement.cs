@@ -1,6 +1,7 @@
 ﻿using AmphetamineSerializer.Common.Element;
 using Sigil.NonGeneric;
 using System;
+using AmphetamineSerializer.Common.Attributes;
 
 namespace AmphetamineSerializer.Common
 {
@@ -30,6 +31,7 @@ namespace AmphetamineSerializer.Common
         }
 
         #endregion
+
         Action<Emit, TypeOfContent> load;
         Action<Emit, IElement, TypeOfContent> store;
 
@@ -69,7 +71,9 @@ namespace AmphetamineSerializer.Common
             get { return store; }
             set { store = value; }
         }
-        
+
+        public override ASIndexAttribute Attribute { get; set; }
+
         protected override void InternalLoad(Emit g, TypeOfContent content)
         {
             throw new NotImplementedException();

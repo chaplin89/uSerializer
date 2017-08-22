@@ -1,6 +1,7 @@
 ﻿using System;
 using Sigil.NonGeneric;
 using System.Reflection;
+using AmphetamineSerializer.Common.Attributes;
 
 namespace AmphetamineSerializer.Common.Element
 {
@@ -71,7 +72,20 @@ namespace AmphetamineSerializer.Common.Element
             get { return typeof(ValueType); }
             set { throw new InvalidOperationException("RootType for constant type is fixed."); }
         }
-        
+
+        public override ASIndexAttribute Attribute
+        {
+            get
+            {
+                return null;
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         protected override void InternalStore(Emit g, TypeOfContent content)
         {
             throw new NotSupportedException("This element is constant.");

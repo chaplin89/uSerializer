@@ -1,4 +1,5 @@
-﻿using Sigil.NonGeneric;
+﻿using AmphetamineSerializer.Common.Attributes;
+using Sigil.NonGeneric;
 using System;
 using System.Collections.Generic;
 
@@ -70,5 +71,10 @@ namespace AmphetamineSerializer.Common
         /// Type of the object loaded when called Load.
         /// </summary>
         Type LoadedType { get; set; }
+
+        /// <summary>
+        /// Meta-information about this element.
+        /// </summary>
+        ASIndexAttribute Attribute { get; set; }
     }
 }

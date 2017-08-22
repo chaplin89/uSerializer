@@ -76,13 +76,48 @@ namespace AmphetamineSerializer.PerformanceTests
                     }
                 }
             }
-            double time1 = s1Performance.Aggregate((_1, _2) => _1 + _2) / totalIterations;
-            double time2 = s2Performance.Aggregate((_1, _2) => _1 + _2) / totalIterations;
-            double time3 = s3Performance.Aggregate((_1, _2) => _1 + _2) / totalIterations;
 
-            Console.WriteLine($"Mean time BinaryFormatter:  {time1}");
-            Console.WriteLine($"Mean time Amphetamine: {time2}");
-            Console.WriteLine($"Mean time XmlSerializer: {time3}");
+            double[] meanTime = new double[3];
+            double[] percentage = new double[3];
+            string[] messages = new string[]
+            {
+                "Mean time BinaryFormatter:",
+                "Mean time Amphetamine:",
+                "Mean time XmlSerializer:"
+            };
+
+            meanTime[0] = s1Performance.Aggregate((_1, _2) => _1 + _2) / totalIterations;
+            meanTime[1] = s2Performance.Aggregate((_1, _2) => _1 + _2) / totalIterations;
+            meanTime[2] = s3Performance.Aggregate((_1, _2) => _1 + _2) / totalIterations;
+
+            var min = meanTime.Min();
+
+            percentage[0] = meanTime[0] / min;
+            percentage[1] = meanTime[1] / min;
+            percentage[2] = meanTime[2] / min;
+
+            var beginPosition = messages.Select(x => x.Length).Max() + 1;
+            var endPosition = Console.BufferWidth;
+
+            var blockLenght = (endPosition - beginPosition) / percentage.Max();
+
+            List<string> bars = new List<string>();
+
+            foreach (var v in percentage)
+            {//█
+                bars.Add(new string('X', (int)Math.Floor(blockLenght * v)-3));
+            }
+
+            for (int i = 0; i < messages.Length; i++)
+            {
+                Console.Write(messages[i]);
+                Console.CursorLeft = beginPosition;
+                Console.WriteLine(bars[i]);
+            }
+
+            //Console.WriteLine($"Mean time BinaryFormatter:  {percentage[0]}");
+            //Console.WriteLine($"Mean time Amphetamine: {percentage[1]}");
+            //Console.WriteLine($"Mean time XmlSerializer: {percentage[2]}");
             Console.WriteLine(new string('+', 10));
             Console.WriteLine();
         }

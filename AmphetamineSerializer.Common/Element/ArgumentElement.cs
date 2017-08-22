@@ -1,4 +1,5 @@
 ﻿using System;
+using AmphetamineSerializer.Common.Attributes;
 using Sigil.NonGeneric;
 
 namespace AmphetamineSerializer.Common.Element
@@ -22,6 +23,19 @@ namespace AmphetamineSerializer.Common.Element
         /// Index of the argument
         /// </summary>
         public ushort ArgumentIndex { get; set; }
+
+        public override ASIndexAttribute Attribute
+        {
+            get
+            {
+                return null;
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         protected override void InternalLoad(Emit emit, TypeOfContent value)
         {

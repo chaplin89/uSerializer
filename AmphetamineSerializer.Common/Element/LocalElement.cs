@@ -1,5 +1,7 @@
 ﻿using Sigil.NonGeneric;
 using Sigil;
+using AmphetamineSerializer.Common.Attributes;
+using System;
 
 namespace AmphetamineSerializer.Common.Element
 {
@@ -40,7 +42,20 @@ namespace AmphetamineSerializer.Common.Element
         /// The local variable
         /// </summary>
         public Local LocalVariable { get; set; }
-        
+
+        public override ASIndexAttribute Attribute
+        {
+            get
+            {
+                return null;
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         /// <summary>
         /// 
         /// </summary>

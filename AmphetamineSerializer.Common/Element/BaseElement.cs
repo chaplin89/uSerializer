@@ -1,4 +1,5 @@
 ﻿using System;
+using AmphetamineSerializer.Common.Attributes;
 using Sigil.NonGeneric;
 
 namespace AmphetamineSerializer.Common.Element
@@ -13,7 +14,7 @@ namespace AmphetamineSerializer.Common.Element
         /// Current index for accessing this element.
         /// </summary>
         public virtual IElement Index { get; set; }
-        
+
         protected abstract void InternalStore(Emit g, TypeOfContent content);
 
         protected abstract void InternalLoad(Emit g, TypeOfContent content);
@@ -112,7 +113,7 @@ namespace AmphetamineSerializer.Common.Element
         public IElement Next { get { return next; } }
 
         public IElement Previous { get { return previous; } }
-        
+
         public IElement EnterArray(IElement index)
         {
             if (!IsIndexable)
@@ -169,6 +170,8 @@ namespace AmphetamineSerializer.Common.Element
                 return lenghtElement;
             }
         }
+
+        public abstract ASIndexAttribute Attribute { get; set; }
 
         public virtual object Clone()
         {

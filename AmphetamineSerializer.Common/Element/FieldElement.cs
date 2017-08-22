@@ -36,13 +36,17 @@ namespace AmphetamineSerializer.Common
         /// <summary>
         /// Access the ASIndexAttribute of the field.
         /// </summary>
-        public ASIndexAttribute Attribute
+        public override ASIndexAttribute Attribute
         {
             get
             {
                 if (Field == null)
                     return null;
                 return Field.GetCustomAttribute<ASIndexAttribute>();
+            }
+            set
+            {
+                throw new NotSupportedException();
             }
         }
 

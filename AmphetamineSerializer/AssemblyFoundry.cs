@@ -256,21 +256,19 @@ namespace AmphetamineSerializer
 
             currentLoopContext.Body = ctx.G.DefineLabel($"Body_{ctx.Element.GetHashCode()}");
             currentLoopContext.CheckOutOfBound = ctx.G.DefineLabel($"OutOfBound_{ctx.Element.GetHashCode()}");
-
-            var fieldElement = ctx.Element as FieldElement;
-
-            Type indexType = ((FieldElement)ctx.Element).Attribute?.SizeType;
+            
+            Type indexType = ctx.Element.Attribute?.SizeType;
             if (indexType == null)
                 indexType = typeof(uint);
 
             if (ctx.WriteIntoObject)
             {
-                if (fieldElement.Attribute.ArrayFixedSize != -1)
+                if (ctx.Element.Attribute?.ArrayFixedSize != -1)
                 {
                     if (ctx.Element.Index != null)
                         throw new NotSupportedException("Fixed size arrays for multi-dimensional array is not supported.");
 
-                    int size = fieldElement.Attribute.ArrayFixedSize;
+                    int size = ctx.Element.Attribute.ArrayFixedSize;
                     currentLoopContext.Size = (ConstantElement<int>)size;
                 }
             }
