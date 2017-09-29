@@ -60,6 +60,8 @@ Here follow the output of the benchmark inside AmphetamineSerializer that show h
 Not much care has been put into trying to generate optimized code, it's not excluded that those results may vary considerably.
 
 (The less, the better)
+
+**NOTE**: this test only serialization on a MemoryStream. Of course, this does not take into account a lot of things.
 ```
 Number of iterations: 1000
 
