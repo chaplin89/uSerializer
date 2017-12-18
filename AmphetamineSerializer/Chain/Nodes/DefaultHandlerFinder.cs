@@ -32,11 +32,11 @@ namespace AmphetamineSerializer.Chain.Nodes
         {
             var request = genericRequest as SerializationBuildRequest;
 
-            FoundryContext ctx = FoundryContext.MakeContext(request.DelegateType,
-                                                            request.AdditionalContext,
-                                                            request.Element,
-                                                            request.Provider,
-                                                            request.G);
+            var ctx = new FoundryContext(request.DelegateType,
+                                         request.AdditionalContext,
+                                         request.Element,
+                                         request.Provider,
+                                         request.G);
 
             foreach (var item in defaultHelpers)
             {

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Sigil.NonGeneric;
 using System.Diagnostics;
-using AmphetamineSerializer.Common.Element;
 using AmphetamineSerializer.Interfaces;
 
 namespace AmphetamineSerializer.Common
@@ -14,39 +13,34 @@ namespace AmphetamineSerializer.Common
     public class FoundryContext
     {
         private ILAbstraction manipulator;
-
-        private FoundryContext()
-        {
-            LoopCtx = new Stack<LoopContext>();
-        }
+        private Emit g;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="delegateType"></param>
         /// <param name="additionalContext"></param>
-        /// <returns></returns>
-        public static FoundryContext MakeContext(Type delegateType,
-                                                 object additionalContext,
-                                                 IElement element,
-                                                 SigilFunctionProvider provider,
-                                                 Emit g)
+        /// <param name="element"></param>
+        /// <param name="provider"></param>
+        /// <param name="g"></param>
+        public FoundryContext(Type delegateType,
+                              object additionalContext,
+                              IElement element,
+                              SigilFunctionProvider provider,
+                              Emit g)
         {
-            return new FoundryContext()
-            {
-                InputParameters = delegateType.GetMethod("Invoke").GetParameters().Select(x => x.ParameterType).ToArray(),
-                AdditionalContext = additionalContext,
-                Element = element,
-                Provider = provider,
-                G = g
-            };
+            LoopCtx = new Stack<LoopContext>();
+            InputParameters = delegateType.GetMethod("Invoke").GetParameters().Select(x => x.ParameterType).ToArray();
+            AdditionalContext = additionalContext;
+            Element = element;
+            Provider = provider;
+            G = g;
         }
 
         public IElement Element;
-        private Emit g;
 
         /// <summary>
-        /// 
+        /// Manage the contexs of loops.
         /// </summary>
         public Stack<LoopContext> LoopCtx { get; set; }
 
@@ -118,16 +112,16 @@ namespace AmphetamineSerializer.Common
 
         /// <summary>
         /// Indicate wether the builder is managing the life-cycle of the elements.
-        /// For the moment, this means:
-        /// 1) true if the input is passed ByRef
-        /// 2) false vice-versa
         /// </summary>
         /// <remarks>
+        /// This means:
+        ///     1) true if the input is passed ByRef
+        ///     2) false vice-versa
         /// This is the only thing that differentiate a Serialization from a Deserialization.
         /// The inner part of the builder, in fact, does not know anything about Serialization or 
         /// Deserialization because it's only a way to iterate over an object graph and call some methods.
         /// </remarks>
-        public bool WriteIntoObject
+        public bool IsDeserializing
         {
             get
             {
@@ -148,13 +142,16 @@ namespace AmphetamineSerializer.Common
                 if (normalizedType.IsEnum)
                     normalizedType = normalizedType.GetEnumUnderlyingType();
 
-                if (WriteIntoObject)
+                if (IsDeserializing)
                     normalizedType = normalizedType.MakeByRefType();
 
                 return normalizedType;
             }
         }
 
+        /// <summary>
+        /// Local variable pool for the current function.
+        /// </summary>
         public VariablePool VariablePool { get; set; }
     }
 }

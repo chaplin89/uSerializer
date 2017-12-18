@@ -21,6 +21,7 @@ namespace AmphetamineSerializer.Chain
         /// <summary>
         /// Name of the module that processed the request.
         /// </summary>
+        /// <remarks>Used for debug purpouse only.</remarks>
         public string ProcessedBy { get; set; }
     }
 }

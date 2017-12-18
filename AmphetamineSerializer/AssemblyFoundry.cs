@@ -60,7 +60,7 @@ namespace AmphetamineSerializer
             Type normalizedType = ctx.ObjectType;
             ArgumentElement instance = new ArgumentElement(0, ctx.ObjectType);
 
-            if (ctx.WriteIntoObject)
+            if (ctx.IsDeserializing)
             {
                 normalizedType = ctx.ObjectType.GetElementType();
                 var ctor = normalizedType.GetConstructor(new Type[] { });
@@ -98,7 +98,7 @@ namespace AmphetamineSerializer
                 labels[i] = ctx.G.DefineLabel($"Version_{i}");
 
             Type requestType = versionField.LoadedType;
-            if (ctx.WriteIntoObject)
+            if (ctx.IsDeserializing)
                 requestType = requestType.MakeByRefType();
 
             var request = new SerializationBuildRequest()
@@ -115,7 +115,7 @@ namespace AmphetamineSerializer
 
             if (targetMethod.Status != BuildedFunctionStatus.ContextModified)
             {
-                if (ctx.WriteIntoObject)
+                if (ctx.IsDeserializing)
                     versionField.Load(ctx.G, TypeOfContent.Address);
                 else
                     versionField.Load(ctx.G, TypeOfContent.Value);
@@ -263,7 +263,7 @@ namespace AmphetamineSerializer
             if (indexType == null)
                 indexType = typeof(uint);
 
-            if (ctx.WriteIntoObject)
+            if (ctx.IsDeserializing)
             {
                 if (ctx.Element.Attribute?.ArrayFixedSize != -1)
                 {
@@ -280,7 +280,7 @@ namespace AmphetamineSerializer
             }
 
             // Write in stream
-            if (!ctx.WriteIntoObject)
+            if (!ctx.IsDeserializing)
             {
                 // Write the size of the array
                 var request = new SerializationBuildRequest()
@@ -334,7 +334,7 @@ namespace AmphetamineSerializer
                 }
             }
 
-            if (ctx.WriteIntoObject)
+            if (ctx.IsDeserializing)
             {
                 // ObjectInstance.CurrentItemFieldInfo = new CurrentItemUnderlyingType[Size];
                 var newArray = new GenericElement(((g, _) =>
