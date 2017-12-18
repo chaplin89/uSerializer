@@ -11,7 +11,7 @@ namespace AmphetamineSerializer.Chain
         /// <summary>
         /// Response to the request.
         /// </summary>
-        public BuildedFunction Response { get; set; }
+        public BuildedFunction Function { get; set; }
         
         /// <summary>
         /// If the method is not static, this is the instance.

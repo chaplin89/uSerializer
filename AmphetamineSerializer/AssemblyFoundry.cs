@@ -111,7 +111,7 @@ namespace AmphetamineSerializer
             };
 
             var response = ctx.Chain.Process(request) as SerializationBuildResponse;
-            var targetMethod = response.Response;
+            var targetMethod = response.Function;
 
             if (targetMethod.Status != BuildedFunctionStatus.ContextModified)
             {
@@ -195,20 +195,20 @@ namespace AmphetamineSerializer
                 //    handling the request. We don't need to do anything else.
                 // 2) Giving back a method that we have to call.
                 //    If that is the case, we should rearrange the input and call the method.
-                if (response.Response.Status != BuildedFunctionStatus.ContextModified)
+                if (response.Function.Status != BuildedFunctionStatus.ContextModified)
                 {
                     HandleType(ctx);
 
                     bool callEmiter =
-                        response.Response.Status == BuildedFunctionStatus.FunctionFinalizedTypeNotFinalized ||
-                        response.Response.Status == BuildedFunctionStatus.FunctionNotFinalized;
+                        response.Function.Status == BuildedFunctionStatus.FunctionFinalizedTypeNotFinalized ||
+                        response.Function.Status == BuildedFunctionStatus.FunctionNotFinalized;
 
                     if (callEmiter)
-                        ctx.G.Call(response.Response.Emiter, null);
+                        ctx.G.Call(response.Function.Emiter, null);
                     else if (method != null)
-                        ctx.G.Call(response.Response.Method, null);
+                        ctx.G.Call(response.Function.Method, null);
                     else
-                        ctx.G.Call(response.Response.Delegate.Method, null);
+                        ctx.G.Call(response.Function.Delegate.Method, null);
                 }
 
                 if (ctx.LoopCtx.Count > 0)
@@ -294,16 +294,16 @@ namespace AmphetamineSerializer
 
                 var response = ctx.Chain.Process(request) as SerializationBuildResponse;
 
-                if (response.Response.Status != BuildedFunctionStatus.ContextModified)
+                if (response.Function.Status != BuildedFunctionStatus.ContextModified)
                 {
                     currentLoopContext.Size.Load(ctx.G, TypeOfContent.Value);
 
-                    if (response.Response.Status == BuildedFunctionStatus.TypeFinalized)
-                        ctx.Manipulator.ForwardParameters(ctx.InputParameters, response.Response);
+                    if (response.Function.Status == BuildedFunctionStatus.TypeFinalized)
+                        ctx.Manipulator.ForwardParameters(ctx.InputParameters, response.Function);
                     else
                     {
                         ctx.Manipulator.ForwardParameters(ctx.InputParameters, null);
-                        ctx.G.Call(response.Response.Emiter);
+                        ctx.G.Call(response.Function.Emiter);
                     }
                 }
             }
@@ -326,11 +326,11 @@ namespace AmphetamineSerializer
 
                 var response = ctx.Chain.Process(request) as SerializationBuildResponse;
 
-                if (response.Response.Status != BuildedFunctionStatus.ContextModified)
+                if (response.Function.Status != BuildedFunctionStatus.ContextModified)
                 {
                     // this.DecodeUInt(ref size, buffer, ref position);
                     currentLoopContext.Size.Load(ctx.G, TypeOfContent.Address);
-                    ctx.Manipulator.ForwardParameters(ctx.InputParameters, response.Response);
+                    ctx.Manipulator.ForwardParameters(ctx.InputParameters, response.Function);
                 }
             }
 

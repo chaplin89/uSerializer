@@ -6,23 +6,40 @@ using System.Linq;
 
 namespace AmphetamineSerializer
 {
-    class VariableStatus
-    {
-        internal LocalElement Variable;
-        internal bool IsFree;
-    }
-
+    /// <summary>
+    /// Manage a pool of variables in the stack.
+    /// </summary>
+    /// <remarks>
+    /// Keep track of local variables used inside a function.
+    /// When a variable is not used anymore, can be recycled in order to 
+    /// avoid flooding the stack with unused variables.
+    /// </remarks>
     public class VariablePool
     {
-        private Emit g;
-        Dictionary<Type, List<VariableStatus>> currentPool;
+        class VariableStatus
+        {
+            internal LocalElement Variable;
+            internal bool IsFree;
+        }
 
+        private Emit g;
+        private Dictionary<Type, List<VariableStatus>> currentPool;
+
+        /// <summary>
+        /// Buld the pool.
+        /// </summary>
+        /// <param name="emiter">Emiter.</param>
         public VariablePool(Emit emiter)
         {
             g = emiter;
             currentPool = new Dictionary<Type, List<VariableStatus>>();
         }
 
+        /// <summary>
+        /// Allocate a new variable or return an unused variable.
+        /// </summary>
+        /// <param name="variableType">Type of the variable to allocate.</param>
+        /// <returns>Element that represent the variable.</returns>
         public LocalElement GetNewVariable(Type variableType)
         {
             List<VariableStatus> currentList = null;
@@ -49,6 +66,10 @@ namespace AmphetamineSerializer
             return currentVariable.Variable;
         }
 
+        /// <summary>
+        /// Mark a variable as "not used" so that can be re-used subsequently.
+        /// </summary>
+        /// <param name="element">Element that represent the variable to release.</param>
         public void ReleaseVariable(LocalElement element)
         {
             currentPool[element.LoadedType].Where(_1 => _1.Variable == element)

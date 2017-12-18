@@ -10,43 +10,30 @@ namespace AmphetamineSerializer
     /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class Serializator<T> : ISerializator
+    public class Serializator<T> : ISerializator<T>
     {
-        protected delegate void DeserializeBytes(ref T obj, byte[] buffer, ref uint position);
-
         protected delegate void SerializeBinaryWriter(T obj, BinaryWriter stream);
-
         protected delegate void DeserializeBinaryReader(ref T obj, BinaryReader stream);
-
-        protected DeserializeBytes deserializeFromBytes;
+        
         protected DeserializeBinaryReader deserializeFromStream;
         protected SerializeBinaryWriter serializeFromStream;
 
         private object additionalContext;
         IChainManager chain = new ChainManager()
-                                  // .SetNext(new CustomSerializerFinder())
-                                  // .SetNext(new CustomBuilderFinder())
+                                  //.SetNext(new CustomSerializerFinder())
+                                  //.SetNext(new CustomBuilderFinder())
                                   .SetNext(new DefaultHandlerFinder())
                                   .SetNext(new CacheManager());
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="buffer"></param>
-        /// <param name="position"></param>
-        public virtual void Deserialize(ref T obj, byte[] buffer, ref uint position)
+        
+        public Serializator(object additionalContext = null)
         {
-            if (deserializeFromBytes == null)
-                deserializeFromBytes = (DeserializeBytes)MakeRequest(typeof(DeserializeBytes));
-
-            deserializeFromBytes(ref obj, buffer, ref position);
+            this.additionalContext = additionalContext;
         }
 
         public virtual void Deserialize(ref T obj, BinaryReader stream)
         {
             if (deserializeFromStream == null)
-                deserializeFromStream = (DeserializeBinaryReader)MakeRequest(typeof(DeserializeBinaryReader));
+                deserializeFromStream = (DeserializeBinaryReader)Build(typeof(DeserializeBinaryReader));
 
             deserializeFromStream(ref obj, stream);
         }
@@ -54,16 +41,9 @@ namespace AmphetamineSerializer
         public virtual void Serialize(T obj, BinaryWriter stream)
         {
             if (serializeFromStream == null)
-                serializeFromStream = (SerializeBinaryWriter)MakeRequest(typeof(SerializeBinaryWriter));
+                serializeFromStream = (SerializeBinaryWriter)Build(typeof(SerializeBinaryWriter));
 
             serializeFromStream(obj, stream);
-        }
-
-        public void Deserialize(ref object obj, byte[] buffer, ref uint position)
-        {
-            T tempObj = (T)obj;
-            Deserialize(ref obj, buffer, ref position);
-            obj = tempObj;
         }
 
         public void Serialize(object obj, BinaryWriter stream)
@@ -73,12 +53,12 @@ namespace AmphetamineSerializer
 
         public void Deserialize(ref object obj, BinaryReader stream)
         {
-            T tempObj = (T)obj;
-            Deserialize(ref tempObj, stream);
-            obj = tempObj;
+            T request = (T)obj;
+            Deserialize(ref request, stream);
+            obj = request;
         }
 
-        private Delegate MakeRequest(Type delegateType)
+        private Delegate Build(Type delegateType)
         {
             var request = new SerializationBuildRequest()
             {
@@ -88,12 +68,7 @@ namespace AmphetamineSerializer
             };
 
             var response = chain.Process(request) as SerializationBuildResponse;
-            return response.Response.Delegate;
-        }
-
-        public Serializator(object additionalContext = null)
-        {
-            this.additionalContext = additionalContext;
+            return response.Function.Delegate;
         }
     }
 }

@@ -53,7 +53,7 @@ namespace AmphetamineSerializer.Chain.Nodes
 
                 return new SerializationBuildResponse()
                 {
-                    Response = method
+                    Function = method
                 };
             }
             return null;
