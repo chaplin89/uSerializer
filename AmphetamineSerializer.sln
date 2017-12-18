@@ -35,6 +35,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmphetamineSerializer.Perfo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmphetamineSerializer.Model", "AmphetamineSerializer.Model\AmphetamineSerializer.Model.csproj", "{27AC1F54-50B4-4299-A425-BA841A918543}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{81F76B8C-A9F9-4F46-9BD3-C9043FAEAF83}"
+	ProjectSection(SolutionItems) = preProject
+		Charts\1_Trivial.png = Charts\1_Trivial.png
+		Charts\2_1DArray.png = Charts\2_1DArray.png
+		Charts\3_Jagged.png = Charts\3_Jagged.png
+		Charts\4_Full.png = Charts\4_Full.png
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
