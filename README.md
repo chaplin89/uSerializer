@@ -62,38 +62,7 @@ Not much care has been put into trying to generate optimized code, it's not excl
 (The less, the better)
 
 **NOTE**: this test only serialization on a MemoryStream. Of course, this does not take into account a lot of things.
-```
-Number of iterations: 1000
-
-++++++++++
-Starting TestTrivialTypes
-Mean time BinaryFormatter:        XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-Mean time Amphetamine:            XX
-Mean time XmlSerializer:          XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-Mean time DataContractSerializer: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-++++++++++
-
-++++++++++
-Starting Test1DArray
-Mean time BinaryFormatter:        XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-Mean time Amphetamine:            XXX
-Mean time XmlSerializer:          XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-Mean time DataContractSerializer: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-++++++++++
-
-++++++++++
-Starting TestJaggedArray
-Mean time BinaryFormatter:        XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-Mean time Amphetamine:            XXXX
-Mean time XmlSerializer:          XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-Mean time DataContractSerializer: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-++++++++++
-
-++++++++++
-Starting TestFull
-Mean time BinaryFormatter:        XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-Mean time Amphetamine:            XXXX
-Mean time XmlSerializer:          XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-Mean time DataContractSerializer: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-++++++++++
-```
+![Trivial](/Charts/1_Trivial.png)
+![1D](/Charts/2_1DArray.png)
+![Jagged](/Charts/3_Jagged.png)
+![Full](/Charts/4_Full.png)
