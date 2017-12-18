@@ -62,7 +62,7 @@ Not much care has been put into trying to generate optimized code, it's not excl
 (The less, the better)
 
 **NOTE**: this test only serialization on a MemoryStream. Of course, this does not take into account a lot of things.
-![Trivial](/Charts/1_Trivial.png)
-![1D](/Charts/2_1DArray.png)
-![Jagged](/Charts/3_Jagged.png)
-![Full](/Charts/4_Full.png)
+   ![Trivial](/Charts/1_Trivial.png)
+   ![1D](/Charts/2_1DArray.png)
+   ![Jagged](/Charts/3_Jagged.png)
+   ![Full](/Charts/4_Full.png)
