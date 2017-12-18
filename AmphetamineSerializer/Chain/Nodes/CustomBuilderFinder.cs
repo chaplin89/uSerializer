@@ -7,7 +7,8 @@ using AmphetamineSerializer.Model.Attributes;
 namespace AmphetamineSerializer.Chain.Nodes
 {
     /// <summary>
-    /// Module that is capable of handling request for custom builders.
+    /// Manage the request for object that require custom building 
+    /// logic through attribute specification.
     /// </summary>
     public class CustomBuilderFinder : IChainElement
     {

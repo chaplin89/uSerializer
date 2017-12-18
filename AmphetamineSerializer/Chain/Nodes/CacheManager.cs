@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace AmphetamineSerializer.Chain.Nodes
 {
+    /// <summary>
+    /// Manage a general-purpouse cache for already builded serializators.
+    /// </summary>
     public class CacheManager : IChainElement
     {
         readonly Dictionary<Type, RequestHandler> managedRequests;

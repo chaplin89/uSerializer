@@ -238,6 +238,7 @@ namespace AmphetamineSerializer
 
         #region Loop
         /// <summary>
+        /// TODO: this should not be here -> FIX CA1822.
         /// Generate a loop preamble:
         /// 1. Initialize the index
         /// 2. Jump for checking if current index is out of bound
@@ -359,6 +360,7 @@ namespace AmphetamineSerializer
         }
 
         /// <summary>
+        /// TODO: this should not be here -> FIX CA1822.
         /// Generate a loop epilogue:
         /// 1. Increment index
         /// 2. Out of bound check, eventually jump to the body
