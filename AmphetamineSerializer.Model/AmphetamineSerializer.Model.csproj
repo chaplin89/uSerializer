@@ -4,17 +4,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{BCC10417-C8F1-4E9E-AB4A-1582327427EA}</ProjectGuid>
+    <ProjectGuid>{27AC1F54-50B4-4299-A425-BA841A918543}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AmphetamineSerializer.Helpers</RootNamespace>
-    <AssemblyName>AmphetamineSerializer.Helpers</AssemblyName>
+    <RootNamespace>AmphetamineSerializer.Model</RootNamespace>
+    <AssemblyName>AmphetamineSerializer.Model</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -25,8 +21,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -47,27 +41,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ByteArray.cs" />
-    <Compile Include="Stream.cs" />
+    <Compile Include="Attributes\BuildedWithAttribute.cs" />
+    <Compile Include="Attributes\DeserializedWithAttribute.cs" />
+    <Compile Include="Attributes\IndexAttribute.cs" />
+    <Compile Include="Attributes\SerializationAttribute.cs" />
+    <Compile Include="Attributes\TagAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\AmphetamineSerializer.Common\AmphetamineSerializer.Common.csproj">
-      <Project>{E2E1D44C-D506-4D37-AAC9-A96F65D3D348}</Project>
-      <Name>AmphetamineSerializer.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\AmphetamineSerializer.Interfaces\AmphetamineSerializer.Interfaces.csproj">
-      <Project>{5EB81743-BF16-4C46-B74E-2C846281AF2B}</Project>
-      <Name>AmphetamineSerializer.Interfaces</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\AmphetamineSerializer.Model\AmphetamineSerializer.Model.csproj">
-      <Project>{27AC1F54-50B4-4299-A425-BA841A918543}</Project>
-      <Name>AmphetamineSerializer.Model</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Sigil\Sigil NET45\Sigil NET45.csproj">
-      <Project>{CC8E294D-E06C-4420-A260-D515D89EC53A}</Project>
-      <Name>Sigil NET45</Name>
-    </ProjectReference>
+    <Compile Include="TypeOfContent.cs" />
+    <Compile Include="TypeOfRequest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -4,7 +4,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
-using AmphetamineSerializer.Common.Attributes;
+using AmphetamineSerializer.Model.Attributes;
 
 namespace AmphetamineSerializer.Chain.Nodes
 {

@@ -3,7 +3,7 @@ using AmphetamineSerializer.Interfaces;
 using System.Linq;
 using Sigil.NonGeneric;
 using AmphetamineSerializer.Common;
-using AmphetamineSerializer.Common.Attributes;
+using AmphetamineSerializer.Model.Attributes;
 using AmphetamineSerializer.Common.Element;
 
 namespace AmphetamineSerializer.Chain

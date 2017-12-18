@@ -78,6 +78,10 @@
       <Project>{5eb81743-bf16-4c46-b74e-2c846281af2b}</Project>
       <Name>AmphetamineSerializer.Interfaces</Name>
     </ProjectReference>
+    <ProjectReference Include="..\AmphetamineSerializer.Model\AmphetamineSerializer.Model.csproj">
+      <Project>{27AC1F54-50B4-4299-A425-BA841A918543}</Project>
+      <Name>AmphetamineSerializer.Model</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Sigil\Sigil NET45\Sigil NET45.csproj">
       <Project>{cc8e294d-e06c-4420-a260-d515d89ec53a}</Project>
       <Name>Sigil NET45</Name>

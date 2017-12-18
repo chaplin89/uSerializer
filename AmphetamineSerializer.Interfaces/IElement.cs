@@ -1,9 +1,9 @@
-﻿using AmphetamineSerializer.Common.Attributes;
+﻿using AmphetamineSerializer.Model;
+using AmphetamineSerializer.Model.Attributes;
 using Sigil.NonGeneric;
 using System;
-using System.Collections.Generic;
 
-namespace AmphetamineSerializer.Common
+namespace AmphetamineSerializer.Interfaces
 {
     /// <summary>
     /// Represent an abstract way for emitting instructions that load an elemenent in the stack

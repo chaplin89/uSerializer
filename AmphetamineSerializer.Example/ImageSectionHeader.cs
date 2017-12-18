@@ -1,5 +1,5 @@
 ﻿using AmphetamineSerializer.Common;
-using AmphetamineSerializer.Common.Attributes;
+using AmphetamineSerializer.Model.Attributes;
 using System.Text;
 
 namespace AmphetamineSerializer.Example

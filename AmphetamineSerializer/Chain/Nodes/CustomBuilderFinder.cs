@@ -1,9 +1,8 @@
-﻿using AmphetamineSerializer.Common;
-using AmphetamineSerializer.Interfaces;
+﻿using AmphetamineSerializer.Interfaces;
 using System;
 using System.Reflection;
 using System.Collections.Generic;
-using AmphetamineSerializer.Common.Attributes;
+using AmphetamineSerializer.Model.Attributes;
 
 namespace AmphetamineSerializer.Chain.Nodes
 {

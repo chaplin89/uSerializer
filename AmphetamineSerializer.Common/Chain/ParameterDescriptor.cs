@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using AmphetamineSerializer.Common.Attributes;
+using AmphetamineSerializer.Model.Attributes;
 using System;
 
 namespace AmphetamineSerializer.Chain

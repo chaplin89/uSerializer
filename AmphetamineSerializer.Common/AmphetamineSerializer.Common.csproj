@@ -47,15 +47,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Attribute\BuildedWithAttribute.cs" />
-    <Compile Include="Attribute\DeserializedWithAttribute.cs" />
-    <Compile Include="Attribute\TagAttribute.cs" />
     <Compile Include="BuilderBase.cs" />
     <Compile Include="Chain\ChainManager.cs" />
     <Compile Include="Chain\ParameterDescriptor.cs" />
     <Compile Include="Chain\SerializationBuildRequest.cs" />
     <Compile Include="Chain\SerializationBuildResponse.cs" />
-    <Compile Include="Chain\TypeOfRequest.cs" />
     <Compile Include="Element\ArgumentElement.cs" />
     <Compile Include="Element\BaseElement.cs" />
     <Compile Include="Element\ConstantElement.cs" />
@@ -63,13 +59,10 @@
     <Compile Include="Element\LocalElement.cs" />
     <Compile Include="FoundryContext.cs" />
     <Compile Include="FuzzyFunctionResolver.cs" />
-    <Compile Include="Attribute\IndexAttribute.cs" />
     <Compile Include="Element\GenericElement.cs" />
-    <Compile Include="Element\IElement.cs" />
     <Compile Include="ILAbstraction.cs" />
     <Compile Include="LoopContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Attribute\SerializationAttribute.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="SigilFunctionProvider.cs" />
     <Compile Include="TypeExtension.cs" />
@@ -77,8 +70,12 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AmphetamineSerializer.Interfaces\AmphetamineSerializer.Interfaces.csproj">
-      <Project>{5EB81743-BF16-4C46-B74E-2C846281AF2B}</Project>
+      <Project>{5eb81743-bf16-4c46-b74e-2c846281af2b}</Project>
       <Name>AmphetamineSerializer.Interfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AmphetamineSerializer.Model\AmphetamineSerializer.Model.csproj">
+      <Project>{27ac1f54-50b4-4299-a425-ba841a918543}</Project>
+      <Name>AmphetamineSerializer.Model</Name>
     </ProjectReference>
     <ProjectReference Include="..\Sigil\Sigil NET45\Sigil NET45.csproj">
       <Project>{cc8e294d-e06c-4420-a260-d515d89ec53a}</Project>

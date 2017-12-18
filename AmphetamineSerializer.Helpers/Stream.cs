@@ -1,6 +1,7 @@
 ﻿using AmphetamineSerializer.Chain;
 using AmphetamineSerializer.Common;
-using AmphetamineSerializer.Common.Attributes;
+using AmphetamineSerializer.Model;
+using AmphetamineSerializer.Model.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

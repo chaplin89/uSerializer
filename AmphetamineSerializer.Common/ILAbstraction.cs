@@ -7,26 +7,11 @@ using Sigil.NonGeneric;
 using Sigil;
 using AmphetamineSerializer.Common;
 using AmphetamineSerializer.Chain;
-using AmphetamineSerializer.Common.Attributes;
+using AmphetamineSerializer.Model.Attributes;
 using AmphetamineSerializer.Common.Element;
 
 namespace AmphetamineSerializer
 {
-    /// <summary>
-    /// Type of content to be loaded
-    /// </summary>
-    public enum TypeOfContent
-    {
-        /// <summary>
-        /// The value will be pushed
-        /// </summary>
-        Value,
-        /// <summary>
-        /// The address will be pushed
-        /// </summary>
-        Address
-    }
-
     /// <summary>
     /// Provide basic abstraction from IL.
     /// TODO: REMOVE THIS MESS!!

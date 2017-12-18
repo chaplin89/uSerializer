@@ -51,6 +51,7 @@
     <Compile Include="IBuilder.cs" />
     <Compile Include="IChainElement.cs" />
     <Compile Include="IChainManager.cs" />
+    <Compile Include="IElement.cs" />
     <Compile Include="IRequest.cs" />
     <Compile Include="IResponse.cs" />
     <Compile Include="ISerializator.cs" />
@@ -58,6 +59,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AmphetamineSerializer.Model\AmphetamineSerializer.Model.csproj">
+      <Project>{27ac1f54-50b4-4299-a425-ba841a918543}</Project>
+      <Name>AmphetamineSerializer.Model</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Sigil\Sigil NET45\Sigil NET45.csproj">
       <Project>{CC8E294D-E06C-4420-A260-D515D89EC53A}</Project>
       <Name>Sigil NET45</Name>

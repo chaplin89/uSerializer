@@ -33,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sigil NET45", "Sigil\Sigil 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmphetamineSerializer.PerformanceTests", "AmphetamineSerializer.PerformanceTests\AmphetamineSerializer.PerformanceTests.csproj", "{62D99F3C-53FA-4974-B490-00F47B2E4EA6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmphetamineSerializer.Model", "AmphetamineSerializer.Model\AmphetamineSerializer.Model.csproj", "{27AC1F54-50B4-4299-A425-BA841A918543}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -76,6 +78,10 @@ Global
 		{62D99F3C-53FA-4974-B490-00F47B2E4EA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62D99F3C-53FA-4974-B490-00F47B2E4EA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62D99F3C-53FA-4974-B490-00F47B2E4EA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27AC1F54-50B4-4299-A425-BA841A918543}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27AC1F54-50B4-4299-A425-BA841A918543}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27AC1F54-50B4-4299-A425-BA841A918543}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27AC1F54-50B4-4299-A425-BA841A918543}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

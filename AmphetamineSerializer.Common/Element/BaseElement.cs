@@ -1,6 +1,8 @@
 ﻿using System;
-using AmphetamineSerializer.Common.Attributes;
+using AmphetamineSerializer.Model.Attributes;
 using Sigil.NonGeneric;
+using AmphetamineSerializer.Interfaces;
+using AmphetamineSerializer.Model;
 
 namespace AmphetamineSerializer.Common.Element
 {

@@ -4,6 +4,7 @@ using System.Linq;
 using Sigil.NonGeneric;
 using System.Diagnostics;
 using AmphetamineSerializer.Common.Element;
+using AmphetamineSerializer.Interfaces;
 
 namespace AmphetamineSerializer.Common
 {
