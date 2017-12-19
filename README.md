@@ -102,6 +102,7 @@ Not much care has been put into trying to generate optimized code, it's not excl
 **NOTE**: the serialization is done on a MemoryStream.
 
 (The less, the better)
+
    ![Trivial](/Charts/1_Trivial.png)
    ![1D](/Charts/2_1DArray.png)
    ![Jagged](/Charts/3_Jagged.png)
