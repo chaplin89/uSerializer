@@ -83,6 +83,13 @@ Please note that the version field must come before any other field and due to s
 There are plans to support the version field to be a generic complex object.
 ## Extension
 [WIP]
+## ☑ TODO
+
+- [ ] Remove some obsolete code/clean some parts
+- [ ] Test coverage of the versioning part
+- [ ] Allow version to be a complex object
+- [ ] Improve the example in order to support serialization/deserialization of a full PE32/PE64 Header
+
 ## Benchmark
 
 Here follow the output of the benchmark inside AmphetamineSerializer that show how AmpethamineSerializer performance compare to the performance of other serializators.
