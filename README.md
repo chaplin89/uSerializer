@@ -83,21 +83,20 @@ Please note that the version field must come before any other field and due to s
 There are plans to support the version field to be a generic complex object.
 ## Extension
 [WIP]
-## ☑ TODO
-
+## TODO
 - [ ] Remove some obsolete code/clean some parts
 - [ ] Test coverage of the versioning part
 - [ ] Allow version to be a complex object
 - [ ] Improve the example in order to support serialization/deserialization of a full PE32/PE64 Header
-
+- [ ] Document all classes
 ## Benchmark
 
 Here follow the output of the benchmark inside AmphetamineSerializer that show how AmpethamineSerializer performance compare to the performance of other serializators.
 Not much care has been put into trying to generate optimized code, it's not excluded that those results may vary considerably.
 
-(The less, the better)
+**NOTE**: the serialization is done on a MemoryStream.
 
-**NOTE**: this test only serialization on a MemoryStream. Of course, this does not take into account a lot of things.
+(The less, the better)
    ![Trivial](/Charts/1_Trivial.png)
    ![1D](/Charts/2_1DArray.png)
    ![Jagged](/Charts/3_Jagged.png)
