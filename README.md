@@ -52,6 +52,7 @@ serializatior.Deserialize(ref myClass, stream);
 ```
 ### Versioning
 AmphetamineSerializer allow to define multiple version of the same structure.
+
 Say you have the version 1 of your sample, declared like this:
 ```csharp
 public class MyClass
@@ -61,7 +62,10 @@ public class MyClass
     [ASIndex(02)] public ushort          Test_Field2;
 }
 ```
-Then you change your packet to the version 2, in order to add the field Test_Field3 at the end. Of course if you simply add the field at the end there'll be a catch: the serializer will end up trying to serialize or deserialize the field regardless the version number. 
+Then you change your packet to the version 2, in order to add the field Test_Field3 at the end. 
+
+Of course if you simply add the field at the end there'll be a catch: the serializer will end up trying to serialize or deserialize the field regardless the version number. 
+
 In this case, you can define the structure like this:
 ```csharp
 public class MyClass
@@ -74,7 +78,9 @@ public class MyClass
 ```
 The first three field will be always serialized/deserialized, but the Test_Field3 field will be serialized only if the Version is 2.
 
-Please note that the version field must come before any other field and due to some limitation of the attributes in C#, it can be only numerical or string but at the moment only numbers are supported. There are plans to support the version field to be also a generic complex object.
+Please note that the version field must come before any other field and due to some limitation of the attributes in C#, it can be only numerical or string but at the moment only numbers are supported. 
+
+There are plans to support the version field to be a generic complex object.
 ## Extension
 [WIP]
 ## Benchmark
