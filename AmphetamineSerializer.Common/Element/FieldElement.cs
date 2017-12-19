@@ -24,7 +24,7 @@ namespace AmphetamineSerializer.Common
             Field = field;
             loadedType = Field.FieldType;
         }
-        
+
         /// <summary>
         /// Object instance.
         /// </summary>
@@ -53,28 +53,16 @@ namespace AmphetamineSerializer.Common
         }
 
 
-        public override Action<Emit, TypeOfContent> Load
+        public override void Load(Emit g, TypeOfContent content)
         {
-            get
-            {
-                return (g, content) =>
-                {
-                    Instance.Load(g, TypeOfContent.Value);
-                    base.Load(g, content);
-                };
-            }
+            Instance.Load(g, TypeOfContent.Value);
+            base.Load(g, content);
         }
 
-        public override Action<Emit, IElement, TypeOfContent> Store
+        public override void Store(Emit g, IElement value, TypeOfContent content)
         {
-            get
-            {
-                return (g, value, content) =>
-                {
-                    Instance.Load(g, TypeOfContent.Value);
-                    base.Store(g, value, content);
-                };
-            }
+            Instance.Load(g, TypeOfContent.Value);
+            base.Store(g, value, content);
         }
 
         protected override void InternalStore(Emit g, TypeOfContent content)

@@ -4,11 +4,14 @@ using AmphetamineSerializer.Common;
 using AmphetamineSerializer.Common.Element;
 using AmphetamineSerializer.Interfaces;
 using AmphetamineSerializer.Model;
+using AmphetamineSerializer.Model.Attributes;
 using Sigil;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace AmphetamineSerializer
 {
@@ -105,7 +108,7 @@ namespace AmphetamineSerializer
             {
                 Element = versionField,
                 AdditionalContext = ctx.AdditionalContext,
-                DelegateType = ctx.Manipulator.MakeDelegateType(requestType, ctx.InputParameters),
+                DelegateType = MakeDelegateType(requestType, ctx.InputParameters),
                 Provider = ctx.Provider,
                 G = ctx.G
             };
@@ -120,7 +123,7 @@ namespace AmphetamineSerializer
                 else
                     versionField.Load(ctx.G, TypeOfContent.Value);
 
-                ctx.Manipulator.ForwardParameters(ctx.InputParameters, targetMethod, versionField.Attribute);
+                ForwardParameters(ctx, targetMethod, versionField.Attribute);
             }
 
             if (versionField.Field.FieldType == typeof(int))
@@ -141,6 +144,67 @@ namespace AmphetamineSerializer
             }
             else if(versionField.Field.FieldType.IsAssignableFrom(typeof(IEquatable<>)))
             {
+            }
+        }
+
+        /// <summary>
+        /// Increment a local variable with a given step
+        /// </summary>
+        /// <param name="index">Variable to increment</param>
+        /// <param name="step">Step</param>
+        void IncrementLocalVariable(Local index, int step = 1)
+        {
+            // C# Translation:
+            //     index+=step;
+            ctx.G.LoadLocal(index); // index --> stack
+            if (step == 1)
+                ctx.G.LoadConstant(1); // 1 --> stack
+            else
+                ctx.G.LoadConstant(step); // step --> stack
+            ctx.G.Add(); // index + step --> stack
+            ctx.G.StoreLocal(index); // stack --> index
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ctx"></param>
+        public void ForwardParameters(FoundryContext ctx, BuildedFunction currentMethod, ASIndexAttribute attribute = null)
+        {
+            if (currentMethod != null && currentMethod.Status == BuildedFunctionStatus.TypeFinalized)
+            {
+                ParameterInfo[] parameters = currentMethod.Method.GetParameters();
+                bool[] foundParameter = new bool[parameters.Length - 1];
+
+                for (int i = 1; i < parameters.Length; ++i)
+                {
+                    for (ushort j = 1; j < ctx.InputParameters.Length; j++)
+                    {
+                        if (ctx.InputParameters[j] == parameters[i].ParameterType)
+                        {
+                            if (foundParameter[i - 1])
+                                throw new AmbiguousMatchException("Input arguments match more than one argument in the handler signature.");
+                            foundParameter[i - 1] = true;
+
+                            ctx.G.LoadArgument(j); // argument i --> stack
+                            break;
+                        }
+                    }
+                    if (!foundParameter[i - 1])
+                    {
+                        throw new InvalidOperationException("Unable to load all the parameters for the handler.");
+                    }
+                }
+
+                if (currentMethod.Method.IsStatic)
+                    ctx.G.Call(currentMethod.Method);                 // void func(ref obj,byte[], ref int)
+                else
+                    ctx.G.CallVirtual(currentMethod.Method);
+            }
+            else
+            {
+                for (ushort j = 1; j < ctx.InputParameters.Length; j++)
+                    ctx.G.LoadArgument(j); // argument i --> stack
             }
         }
 
@@ -178,7 +242,7 @@ namespace AmphetamineSerializer
                 {
                     Element = ctx.Element,
                     AdditionalContext = ctx.AdditionalContext,
-                    DelegateType = ctx.Manipulator.MakeDelegateType(ctx.NormalizedType, ctx.InputParameters),
+                    DelegateType = MakeDelegateType(ctx.NormalizedType, ctx.InputParameters),
                     Provider = ctx.Provider,
                     G = ctx.G,
                     RequestType = TypeOfRequest.Everything
@@ -232,7 +296,7 @@ namespace AmphetamineSerializer
             else
                 ctx.Element.Load(ctx.G, TypeOfContent.Value);
 
-            ctx.Manipulator.ForwardParameters(ctx.InputParameters, null, ((FieldElement)ctx.Element).Attribute);
+            ForwardParameters(ctx, null, ((FieldElement)ctx.Element).Attribute);
         }
         #endregion
 
@@ -287,7 +351,7 @@ namespace AmphetamineSerializer
                 var request = new SerializationBuildRequest()
                 {
                     Element = currentLoopContext.Size,
-                    DelegateType = ctx.Manipulator.MakeDelegateType(indexType, ctx.InputParameters),
+                    DelegateType = MakeDelegateType(indexType, ctx.InputParameters),
                     AdditionalContext = ctx.AdditionalContext,
                     Provider = ctx.Provider,
                     G = ctx.G
@@ -300,10 +364,10 @@ namespace AmphetamineSerializer
                     currentLoopContext.Size.Load(ctx.G, TypeOfContent.Value);
 
                     if (response.Function.Status == BuildedFunctionStatus.TypeFinalized)
-                        ctx.Manipulator.ForwardParameters(ctx.InputParameters, response.Function);
+                        ForwardParameters(ctx, response.Function);
                     else
                     {
-                        ctx.Manipulator.ForwardParameters(ctx.InputParameters, null);
+                        ForwardParameters(ctx, null);
                         ctx.G.Call(response.Function.Emiter);
                     }
                 }
@@ -319,7 +383,7 @@ namespace AmphetamineSerializer
                 var request = new SerializationBuildRequest()
                 {
                     Element = currentLoopContext.Size,
-                    DelegateType = ctx.Manipulator.MakeDelegateType(indexType.MakeByRefType(), ctx.InputParameters),
+                    DelegateType = MakeDelegateType(indexType.MakeByRefType(), ctx.InputParameters),
                     AdditionalContext = ctx.AdditionalContext,
                     Provider = ctx.Provider,
                     G = ctx.G
@@ -331,7 +395,7 @@ namespace AmphetamineSerializer
                 {
                     // this.DecodeUInt(ref size, buffer, ref position);
                     currentLoopContext.Size.Load(ctx.G, TypeOfContent.Address);
-                    ctx.Manipulator.ForwardParameters(ctx.InputParameters, response.Function);
+                    ForwardParameters(ctx, response.Function);
                 }
             }
 
@@ -359,6 +423,18 @@ namespace AmphetamineSerializer
             return currentLoopContext;
         }
 
+        private Type MakeDelegateType(Type objectType, Type[] inputTypes)
+        {
+            List<Type> arguments = new List<Type>(inputTypes.Length + 1);
+            arguments.Add(objectType);
+
+            for (int i = 1; i < inputTypes.Length; i++)
+                arguments.Add(inputTypes[i]);
+            arguments.Add(typeof(void));
+
+            return Expression.GetDelegateType(arguments.ToArray());
+        }
+
         /// <summary>
         /// TODO: this should not be here -> FIX CA1822.
         /// Generate a loop epilogue:
@@ -382,7 +458,7 @@ namespace AmphetamineSerializer
             {
                 var currentLoopContext = ctx.LoopCtx.Pop();
 
-                ctx.Manipulator.IncrementLocalVariable(currentLoopContext.Index);
+                IncrementLocalVariable(currentLoopContext.Index);
 
                 ctx.G.MarkLabel(currentLoopContext.CheckOutOfBound);
                 ctx.G.LoadLocal(currentLoopContext.Index);

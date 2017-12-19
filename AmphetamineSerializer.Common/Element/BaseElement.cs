@@ -21,44 +21,34 @@ namespace AmphetamineSerializer.Common.Element
 
         protected abstract void InternalLoad(Emit g, TypeOfContent content);
 
-        public virtual Action<Emit, TypeOfContent> Load
+        public virtual void Load(Emit g, TypeOfContent content)
         {
-            get
+            if (Index != null)
             {
-                return (g, content) =>
-                {
-                    if (Index != null)
-                    {
-                        InternalLoad(g, TypeOfContent.Value);
+                InternalLoad(g, TypeOfContent.Value);
 
-                        if (loadedType.IsByRef)
-                            g.LoadIndirect(loadedType.GetElementType());
+                if (loadedType.IsByRef)
+                    g.LoadIndirect(loadedType.GetElementType());
 
-                        Index.Load(g, TypeOfContent.Value);
+                Index.Load(g, TypeOfContent.Value);
 
-                        if (content == TypeOfContent.Value)
-                            g.LoadElement(LoadedType);
-                        else
-                            g.LoadElementAddress(LoadedType);
-                    }
-                    else
-                    {
-                        if (loadedType.IsByRef)
-                        {
-                            InternalLoad(g, TypeOfContent.Value);
-                            if (content == TypeOfContent.Value)
-                                g.LoadIndirect(loadedType.GetElementType());
-                        }
-                        else
-                        {
-                            InternalLoad(g, content);
-                        }
-                    }
-                };
+                if (content == TypeOfContent.Value)
+                    g.LoadElement(LoadedType);
+                else
+                    g.LoadElementAddress(LoadedType);
             }
-            set
+            else
             {
-                throw new NotSupportedException("This element doesn't support setting the load action.");
+                if (loadedType.IsByRef)
+                {
+                    InternalLoad(g, TypeOfContent.Value);
+                    if (content == TypeOfContent.Value)
+                        g.LoadIndirect(loadedType.GetElementType());
+                }
+                else
+                {
+                    InternalLoad(g, content);
+                }
             }
         }
 
@@ -68,39 +58,29 @@ namespace AmphetamineSerializer.Common.Element
             set { loadedType = value; }
         }
 
-        public virtual Action<Emit, IElement, TypeOfContent> Store
+        public virtual void Store(Emit g, IElement value, TypeOfContent content)
         {
-            get
+            if (Index != null || loadedType.IsByRef)
             {
-                return (g, value, content) =>
-                {
-                    if (Index != null || loadedType.IsByRef)
-                    {
-                        InternalLoad(g, TypeOfContent.Value);
+                InternalLoad(g, TypeOfContent.Value);
 
-                        if (Index != null && loadedType.IsByRef)
-                            g.LoadIndirect(loadedType.GetElementType());
-                    }
-
-                    Index?.Load(g, TypeOfContent.Value);
-                    value.Load(g, content);
-
-                    if (Index != null)
-                    {
-                        g.StoreElement(LoadedType);
-                    }
-                    else
-                    {
-                        if (loadedType.IsByRef)
-                            g.StoreIndirect(loadedType.GetElementType());
-                        else
-                            InternalStore(g, TypeOfContent.Value);
-                    }
-                };
+                if (Index != null && loadedType.IsByRef)
+                    g.LoadIndirect(loadedType.GetElementType());
             }
-            set
+
+            Index?.Load(g, TypeOfContent.Value);
+            value.Load(g, content);
+
+            if (Index != null)
             {
-                throw new NotSupportedException("This element doesn't support setting the Store action.");
+                g.StoreElement(LoadedType);
+            }
+            else
+            {
+                if (loadedType.IsByRef)
+                    g.StoreIndirect(loadedType.GetElementType());
+                else
+                    InternalStore(g, TypeOfContent.Value);
             }
         }
 
@@ -164,7 +144,7 @@ namespace AmphetamineSerializer.Common.Element
 
                 GenericElement lenghtElement = new GenericElement(typeof(uint));
 
-                lenghtElement.Load = (g, value) =>
+                lenghtElement.LoadAction = (g, value) =>
                 {
                     Load(g, TypeOfContent.Value);
                     g.LoadLength(LoadedType.GetElementType());

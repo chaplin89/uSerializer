@@ -12,7 +12,6 @@ namespace AmphetamineSerializer.Common
     /// </summary>
     public class FoundryContext
     {
-        private ILAbstraction manipulator;
         private Emit g;
 
         /// <summary>
@@ -54,19 +53,6 @@ namespace AmphetamineSerializer.Common
                 if (InputParameters != null)
                     return InputParameters.FirstOrDefault();
                 return null;
-            }
-        }
-
-        /// <summary>
-        /// Provide basic abstraction from IL.
-        /// </summary>
-        public ILAbstraction Manipulator
-        {
-            get
-            {
-                if (manipulator == null)
-                    manipulator = new ILAbstraction(G);
-                return manipulator;
             }
         }
 

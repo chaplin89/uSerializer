@@ -46,7 +46,7 @@ namespace AmphetamineSerializer.Interfaces
         /// <summary>
         /// Action for emitting instructions for loading an element into the stack.
         /// </summary>
-        Action<Emit, TypeOfContent> Load { get; }
+        void Load(Emit g, TypeOfContent content);
 
         /// <summary>
         /// Action for emitting instructions for storing the element from the stack.
@@ -58,7 +58,7 @@ namespace AmphetamineSerializer.Interfaces
         /// 2. IElement, represent the element that will be stored inside this element.
         /// 3. TypeOfContent, tell if the value to store should be loaded by value or by address.
         /// </remarks>
-        Action<Emit, IElement, TypeOfContent> Store { get; }
+        void Store(Emit g, IElement element, TypeOfContent content);
 
         /// <summary>
         /// Make another node in the chain applying an index to this IElement.

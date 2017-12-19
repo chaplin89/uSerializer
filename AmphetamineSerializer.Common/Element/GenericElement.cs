@@ -34,8 +34,8 @@ namespace AmphetamineSerializer.Common
 
         #endregion
 
-        Action<Emit, TypeOfContent> load;
-        Action<Emit, IElement, TypeOfContent> store;
+        public Action<Emit, TypeOfContent> LoadAction { get; set; }
+        public Action<Emit, IElement, TypeOfContent> StoreAction { get; set; }
 
         /// <summary>
         /// Initialize the object with actions.
@@ -44,8 +44,8 @@ namespace AmphetamineSerializer.Common
         /// <param name="storeAction">Action that store a value in the element</param>
         public GenericElement(Action<Emit, TypeOfContent> loadAction, Action<Emit, IElement, TypeOfContent> storeAction)
         {
-            load = loadAction;
-            store = storeAction;
+            LoadAction = loadAction;
+            StoreAction = storeAction;
         }
 
         /// <summary>
@@ -55,23 +55,21 @@ namespace AmphetamineSerializer.Common
         {
             base.loadedType = loadedType;
         }
-
+        
         /// <summary>
         /// Action for emitting instructions to load the element in the stack.
         /// </summary>
-        public override Action<Emit, TypeOfContent> Load
+        public override void Load(Emit g, TypeOfContent content)
         {
-            get { return load; }
-            set { load = value; }
+            LoadAction(g, content);
         }
 
         /// <summary>
         /// Action for emitting instructions that store in the element a value taken from the stack.
         /// </remarks>
-        public override Action<Emit, IElement, TypeOfContent> Store
+        public override void Store(Emit g, IElement element, TypeOfContent content)
         {
-            get { return store; }
-            set { store = value; }
+            StoreAction(g,element,content);
         }
 
         public override ASIndexAttribute Attribute { get; set; }
