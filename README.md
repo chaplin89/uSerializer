@@ -78,7 +78,7 @@ public class MyClass
 ```
 The first three field will be always serialized/deserialized, but the Test_Field3 field will be serialized only if the Version is 2.
 
-Please note that the version field must come before any other field and due to some limitation of the attributes in C#, it can be only numerical or string but at the moment only numbers are supported. 
+Please note that the version field must come before any other field and due to some limitation of the attributes in C#, it can be only a  numerical or a string type but at the moment only numbers are supported. 
 
 There are plans to support the version field to be a generic complex object.
 ## Extension
