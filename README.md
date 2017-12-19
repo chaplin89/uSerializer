@@ -61,7 +61,7 @@ public class MyClass
     [ASIndex(02)] public ushort          Test_Field2;
 }
 ```
-Then you change your packet to the version 2, in order to add the field Test_Field3 at the end. Of course if you simply add the field at the end there'll be a catch: the serializer ends up trying to serialize or deserialize the field also if the versione is 1. 
+Then you change your packet to the version 2, in order to add the field Test_Field3 at the end. Of course if you simply add the field at the end there'll be a catch: the serializer will end up trying to serialize or deserialize the field regardless the version number. 
 In this case, you can define the structure like this:
 ```csharp
 public class MyClass
