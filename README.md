@@ -93,6 +93,7 @@ There are plans to support the version field to be a generic complex object.
 - [ ] Improve the example in order to support serialization/deserialization of a full PE32/PE64 Header
 - [ ] Document all classes
 - [ ] Allow an array to have its lenght in any other field
+- [ ] Provide a better support for plugin-like features
 ## Benchmark
 
 Here follow the output of the benchmark inside AmphetamineSerializer that show how AmpethamineSerializer performance compare to the performance of other serializators.
