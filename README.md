@@ -7,6 +7,15 @@ It makes porting an existing C/C++ structure to managed code very easy. Most of 
 
 **This is WIP, definitely not suitable for production**
 
+## Table of contents
+  * [Features](#features)
+  * [How to use](#how-to-use)
+     * [Serialization example](#serialization-example)
+     * [Deserialization example](#deserialization-example)
+  * [Versioning](#versioning)
+  * [TODO](#todo-not-in-any-specific-order)
+  * [Benchmark](#benchmark)
+
 ## Features
 * **Performance** It's capable of generating ad-hoc assemblies for serialization. This will provide an overall good performance.
 * **Control** It allows a very precise control on the binary format that the serializator supports.
@@ -51,49 +60,59 @@ var serializator = new Serializator<MyClass>();
 serializatior.Deserialize(ref myClass, stream);
 ```
 ### Versioning
-[WIP]
+AmphetamineSerializer allow to define multiple version of the same structure.
+
+Say you have the version 1 of your sample, declared like this:
+```csharp
+public class MyClass
+{
+    [ASIndex(00)] public uint            Version;
+    [ASIndex(01)] public int             Test_Field1;
+    [ASIndex(02)] public ushort          Test_Field2;
+}
+```
+Then you change your packet to the version 2, in order to add the field Test_Field3 at the end. 
+
+Of course if you simply add the field at the end there'll be a catch: the serializer will end up trying to serialize or deserialize the field regardless the version number. 
+
+In this case, you can define the structure like this:
+```csharp
+public class MyClass
+{
+    [ASIndex(00)] public uint              Version;
+    [ASIndex(01)] public int               Test_Field1;
+    [ASIndex(02)] public ushort            Test_Field2;
+    [ASIndex(02, Version=2)] public ushort Test_Field3;
+}
+```
+The first three field will be always serialized/deserialized, but the Test_Field3 field will be serialized only if the Version is 2.
+
+Please note that the version field must come before any other field and due to some limitation of the attributes in C#, it can be only a  numerical or a string type but at the moment only numbers are supported. 
+
+There are plans to support the version field to be a generic complex object.
 ## Extension
 [WIP]
+## TODO (not in any specific order)
+- [ ] Remove some obsolete code/clean some parts
+- [ ] Provide a better abstraction for the IL generation part
+- [ ] Compile to multiple .NET Framework
+- [ ] Create a NuGet package
+- [ ] Test coverage of the versioning part
+- [ ] Allow version to be a complex object
+- [ ] Improve the example in order to support serialization/deserialization of a full PE32/PE64 Header
+- [ ] Document all classes
+- [ ] Allow an array to have its lenght in any other field
+- [ ] Provide a better support for plugin-like features
 ## Benchmark
 
 Here follow the output of the benchmark inside AmphetamineSerializer that show how AmpethamineSerializer performance compare to the performance of other serializators.
 Not much care has been put into trying to generate optimized code, it's not excluded that those results may vary considerably.
 
+**NOTE**: the serialization is done on a MemoryStream.
+
 (The less, the better)
 
-**NOTE**: this test only serialization on a MemoryStream. Of course, this does not take into account a lot of things.
-```
-Number of iterations: 1000
-
-++++++++++
-Starting TestTrivialTypes
-Mean time BinaryFormatter:        XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-Mean time Amphetamine:            XX
-Mean time XmlSerializer:          XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-Mean time DataContractSerializer: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-++++++++++
-
-++++++++++
-Starting Test1DArray
-Mean time BinaryFormatter:        XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-Mean time Amphetamine:            XXX
-Mean time XmlSerializer:          XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-Mean time DataContractSerializer: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-++++++++++
-
-++++++++++
-Starting TestJaggedArray
-Mean time BinaryFormatter:        XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-Mean time Amphetamine:            XXXX
-Mean time XmlSerializer:          XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-Mean time DataContractSerializer: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-++++++++++
-
-++++++++++
-Starting TestFull
-Mean time BinaryFormatter:        XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-Mean time Amphetamine:            XXXX
-Mean time XmlSerializer:          XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-Mean time DataContractSerializer: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-++++++++++
-```
+   ![Trivial](/Charts/1_Trivial.png)
+   ![1D](/Charts/2_1DArray.png)
+   ![Jagged](/Charts/3_Jagged.png)
+   ![Full](/Charts/4_Full.png)
