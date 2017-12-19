@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2009
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmphetamineSerializer", "AmphetamineSerializer\AmphetamineSerializer.csproj", "{4D388985-26F2-4EC4-9926-2BA2E926651C}"
 EndProject
@@ -34,14 +34,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmphetamineSerializer.PerformanceTests", "AmphetamineSerializer.PerformanceTests\AmphetamineSerializer.PerformanceTests.csproj", "{62D99F3C-53FA-4974-B490-00F47B2E4EA6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmphetamineSerializer.Model", "AmphetamineSerializer.Model\AmphetamineSerializer.Model.csproj", "{27AC1F54-50B4-4299-A425-BA841A918543}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{81F76B8C-A9F9-4F46-9BD3-C9043FAEAF83}"
-	ProjectSection(SolutionItems) = preProject
-		Charts\1_Trivial.png = Charts\1_Trivial.png
-		Charts\2_1DArray.png = Charts\2_1DArray.png
-		Charts\3_Jagged.png = Charts\3_Jagged.png
-		Charts\4_Full.png = Charts\4_Full.png
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -99,5 +91,8 @@ Global
 		{8B252003-1909-4EA3-8BD9-2D20341F9143} = {43CF4B42-79A9-4D1E-849A-16897E5B5EC0}
 		{1FE8362E-A099-4739-9B1F-12ADCF10BA02} = {43CF4B42-79A9-4D1E-849A-16897E5B5EC0}
 		{CC8E294D-E06C-4420-A260-D515D89EC53A} = {43CF4B42-79A9-4D1E-849A-16897E5B5EC0}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EFD7D43B-3EDF-4B06-9894-23EA0E2AFA9E}
 	EndGlobalSection
 EndGlobal
