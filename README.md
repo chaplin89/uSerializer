@@ -7,6 +7,15 @@ It makes porting an existing C/C++ structure to managed code very easy. Most of 
 
 **This is WIP, definitely not suitable for production**
 
+## Table of contents
+  * [Features](#features)
+  * [How to use](#how-to-use)
+     * [Serialization example](#serialization-example)
+     * [Deserialization example](#deserialization-example)
+  * [Versioning](#versioning)
+  * [TODO](#todo-not-in-any-specific-order)
+  * [Benchmark](#benchmark)
+
 ## Features
 * **Performance** It's capable of generating ad-hoc assemblies for serialization. This will provide an overall good performance.
 * **Control** It allows a very precise control on the binary format that the serializator supports.
