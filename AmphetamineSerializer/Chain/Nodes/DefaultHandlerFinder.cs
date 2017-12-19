@@ -3,6 +3,7 @@ using AmphetamineSerializer.Helpers;
 using AmphetamineSerializer.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AmphetamineSerializer.Chain.Nodes
 {
@@ -20,7 +21,8 @@ namespace AmphetamineSerializer.Chain.Nodes
         {
             managedRequests = new Dictionary<Type, RequestHandler>()
             {
-                { typeof(SerializationBuildRequest), HandleBuildRequest}
+                { typeof(ElementBuildRequest), HandleBuildRequest},
+                { typeof(DelegateBuildRequest), HandleDelegateRequest }
             };
         }
 
@@ -30,9 +32,9 @@ namespace AmphetamineSerializer.Chain.Nodes
 
         public IResponse HandleBuildRequest(IRequest genericRequest)
         {
-            var request = genericRequest as SerializationBuildRequest;
+            var request = genericRequest as ElementBuildRequest;
 
-            var ctx = new FoundryContext(request.DelegateType,
+            var ctx = new FoundryContext(request.InputTypes,
                                          request.AdditionalContext,
                                          request.Element,
                                          request.Provider,
@@ -45,18 +47,30 @@ namespace AmphetamineSerializer.Chain.Nodes
                 if (method == null)
                     continue;
 
-                if (request.RequestType == TypeOfRequest.Delegate)
-                {
-                    method.Delegate = method.Method.CreateDelegate(request.DelegateType);
-                    method.Method = null;
-                }
-
                 return new SerializationBuildResponse()
                 {
                     Function = method
                 };
             }
             return null;
+        }
+
+        private IResponse HandleDelegateRequest(IRequest genericRequest)
+        {
+            var request = genericRequest as DelegateBuildRequest;
+
+            var elementRequest = new ElementBuildRequest()
+            {
+                AdditionalContext = request.AdditionalContext,
+                InputTypes = request.DelegateType.GetMethod("Invoke").GetParameters().Select(x => x.ParameterType).ToArray()
+            };
+
+            var response = HandleBuildRequest(elementRequest) as SerializationBuildResponse;
+
+            response.Function.Delegate = response.Function.Method.CreateDelegate(request.DelegateType);
+            response.Function.Method = null;
+
+            return response;
         }
     }
 }

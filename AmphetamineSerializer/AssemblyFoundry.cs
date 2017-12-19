@@ -104,11 +104,11 @@ namespace AmphetamineSerializer
             if (ctx.IsDeserializing)
                 requestType = requestType.MakeByRefType();
 
-            var request = new SerializationBuildRequest()
+            var request = new ElementBuildRequest()
             {
                 Element = versionField,
                 AdditionalContext = ctx.AdditionalContext,
-                DelegateType = MakeDelegateType(requestType, ctx.InputParameters),
+                InputTypes = GetInputTypes(ctx, requestType),
                 Provider = ctx.Provider,
                 G = ctx.G
             };
@@ -145,6 +145,19 @@ namespace AmphetamineSerializer
             else if(versionField.Field.FieldType.IsAssignableFrom(typeof(IEquatable<>)))
             {
             }
+        }
+
+        private Type[] GetInputTypes(FoundryContext ctx, Type overrideRootType = null)
+        {
+            if (overrideRootType != null)
+            {
+                Type[] finalTypes = new Type[ctx.InputParameters.Length];
+                Array.Copy(ctx.InputParameters, finalTypes, ctx.InputParameters.Length);
+                finalTypes[0] = overrideRootType;
+                return finalTypes;
+            }
+
+            return ctx.InputParameters;
         }
 
         /// <summary>
@@ -220,7 +233,7 @@ namespace AmphetamineSerializer
 
             while (linkedList.Count > 0)
             {
-                ctx.Element = (FieldElement)linkedList.First.Value;
+                ctx.Element = linkedList.First.Value;
                 SerializationBuildResponse response = null;
 
                 // todo:
@@ -238,14 +251,13 @@ namespace AmphetamineSerializer
                     continue;
                 }
 
-                var request = new SerializationBuildRequest()
+                var request = new ElementBuildRequest()
                 {
                     Element = ctx.Element,
                     AdditionalContext = ctx.AdditionalContext,
-                    DelegateType = MakeDelegateType(ctx.NormalizedType, ctx.InputParameters),
+                    InputTypes = GetInputTypes(ctx, ctx.NormalizedType),
                     Provider = ctx.Provider,
                     G = ctx.G,
-                    RequestType = TypeOfRequest.Everything
                 };
 
                 response = ctx.Chain.Process(request) as SerializationBuildResponse;
@@ -348,10 +360,10 @@ namespace AmphetamineSerializer
             if (!ctx.IsDeserializing)
             {
                 // Write the size of the array
-                var request = new SerializationBuildRequest()
+                var request = new ElementBuildRequest()
                 {
                     Element = currentLoopContext.Size,
-                    DelegateType = MakeDelegateType(indexType, ctx.InputParameters),
+                    InputTypes = GetInputTypes(ctx, indexType),
                     AdditionalContext = ctx.AdditionalContext,
                     Provider = ctx.Provider,
                     G = ctx.G
@@ -380,10 +392,10 @@ namespace AmphetamineSerializer
             {
                 currentLoopContext.Size = ctx.VariablePool.GetNewVariable(indexType);
 
-                var request = new SerializationBuildRequest()
+                var request = new ElementBuildRequest()
                 {
                     Element = currentLoopContext.Size,
-                    DelegateType = MakeDelegateType(indexType.MakeByRefType(), ctx.InputParameters),
+                    InputTypes = GetInputTypes(ctx, indexType.MakeByRefType()),
                     AdditionalContext = ctx.AdditionalContext,
                     Provider = ctx.Provider,
                     G = ctx.G

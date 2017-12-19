@@ -3,6 +3,7 @@ using System;
 using System.Reflection;
 using System.Collections.Generic;
 using AmphetamineSerializer.Model.Attributes;
+using System.Linq;
 
 namespace AmphetamineSerializer.Chain.Nodes
 {
@@ -18,7 +19,7 @@ namespace AmphetamineSerializer.Chain.Nodes
         {
             managedRequestes = new Dictionary<Type, RequestHandler>()
             {
-                { typeof(SerializationBuildRequest), HandleSerializationBuild}
+                { typeof(DelegateBuildRequest), HandleSerializationBuild}
             };
         }
 
@@ -26,12 +27,14 @@ namespace AmphetamineSerializer.Chain.Nodes
 
         public IResponse HandleSerializationBuild(IRequest request)
         {
-            var localRequest = request as SerializationBuildRequest;
+            var localRequest = request as DelegateBuildRequest;
+            var inputTypes = localRequest.DelegateType.GetMethod("Invoke").GetParameters().Select(_ => _.ParameterType).ToArray();
+
             Type normalizedType;
-            if (localRequest.RootType.IsByRef)
-                normalizedType = localRequest.RootType.GetElementType();
+            if (inputTypes.First().IsByRef)
+                normalizedType = inputTypes.First().GetElementType();
             else
-                normalizedType = localRequest.RootType;
+                normalizedType = inputTypes.First();
 
             var attribute = normalizedType.GetCustomAttribute<BuildedWithAttribute>(false);
 

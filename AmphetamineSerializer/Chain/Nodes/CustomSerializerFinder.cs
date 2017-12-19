@@ -1,10 +1,10 @@
 ﻿using AmphetamineSerializer.Common;
 using AmphetamineSerializer.Interfaces;
+using AmphetamineSerializer.Model.Attributes;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Collections.Generic;
-using AmphetamineSerializer.Model.Attributes;
 
 namespace AmphetamineSerializer.Chain.Nodes
 {
@@ -16,7 +16,7 @@ namespace AmphetamineSerializer.Chain.Nodes
         {
             managedRequestes = new Dictionary<Type, RequestHandler>()
             {
-                { typeof(SerializationBuildRequest), HandleBuildRequest }
+                { typeof(ElementBuildRequest), HandleBuildRequest }
             };
         }
 
@@ -34,26 +34,25 @@ namespace AmphetamineSerializer.Chain.Nodes
         /// <returns></returns>
         public IResponse HandleBuildRequest(IRequest request)
         {
-            var localRequest = request as SerializationBuildRequest;
+            var localRequest = request as ElementBuildRequest;
+            Type rootType = localRequest.InputTypes.First();
             SerializedWithAttribute attribute;
-            if (localRequest.RootType.IsByRef)
-                attribute = localRequest.RootType.GetElementType().GetCustomAttribute<SerializedWithAttribute>(false);
+            if (rootType.IsByRef)
+                attribute = rootType.GetCustomAttribute<SerializedWithAttribute>(false);
             else
-                attribute = localRequest.RootType.GetCustomAttribute<SerializedWithAttribute>(false);
+                attribute = rootType.GetCustomAttribute<SerializedWithAttribute>(false);
 
             var resolver = new FuzzyFunctionResolver();
-            var dlgMi = localRequest.DelegateType.GetMethod("Invoke");
 
             if (attribute == null)
                 return null;
 
             var instance = Activator.CreateInstance(attribute.SerializatorType, localRequest.AdditionalContext);
             resolver.Register(attribute.SerializatorType);
-            var inputType = dlgMi.GetParameters().Select(x => x.ParameterType).ToArray();
 
             var method = new BuildedFunction()
             {
-                Method = resolver.ResolveFromSignature(localRequest.RootType, inputType, dlgMi.ReturnType),
+                Method = resolver.ResolveFromSignature(rootType, localRequest.InputTypes, typeof(void)),
                 Status = BuildedFunctionStatus.TypeFinalized
             };
 

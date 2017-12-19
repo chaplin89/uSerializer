@@ -60,11 +60,10 @@ namespace AmphetamineSerializer
 
         private Delegate Build(Type delegateType)
         {
-            var request = new SerializationBuildRequest()
+            var request = new DelegateBuildRequest()
             {
                 AdditionalContext = additionalContext,
-                DelegateType = delegateType,
-                RequestType = TypeOfRequest.Delegate
+                DelegateType = delegateType
             };
 
             var response = chain.Process(request) as SerializationBuildResponse;

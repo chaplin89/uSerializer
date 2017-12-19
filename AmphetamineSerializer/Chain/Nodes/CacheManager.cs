@@ -15,7 +15,8 @@ namespace AmphetamineSerializer.Chain.Nodes
         {
             managedRequests = new Dictionary<Type, RequestHandler>()
             {
-                { typeof(SerializationBuildRequest), HandleSerializationBuild }
+                { typeof(ElementBuildRequest), HandleSerializationBuild },
+                { typeof(DelegateBuildRequest), HandleSerializationBuild }
             };
         }
 

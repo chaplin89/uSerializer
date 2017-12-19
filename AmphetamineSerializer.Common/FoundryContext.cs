@@ -17,19 +17,19 @@ namespace AmphetamineSerializer.Common
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="delegateType"></param>
+        /// <param name="inputParameters"></param>
         /// <param name="additionalContext"></param>
         /// <param name="element"></param>
         /// <param name="provider"></param>
         /// <param name="g"></param>
-        public FoundryContext(Type delegateType,
+        public FoundryContext(Type[] inputParameters,
                               object additionalContext,
                               IElement element,
                               SigilFunctionProvider provider,
                               Emit g)
         {
             LoopCtx = new Stack<LoopContext>();
-            InputParameters = delegateType.GetMethod("Invoke").GetParameters().Select(x => x.ParameterType).ToArray();
+            InputParameters = inputParameters;
             AdditionalContext = additionalContext;
             Element = element;
             Provider = provider;
