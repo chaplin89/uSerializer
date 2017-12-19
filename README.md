@@ -83,8 +83,12 @@ Please note that the version field must come before any other field and due to s
 There are plans to support the version field to be a generic complex object.
 ## Extension
 [WIP]
-## TODO
+## TODO (not in any specific order)
 - [ ] Remove some obsolete code/clean some parts
+- [ ] Provide a better abstraction for the IL generation part
+- [ ] Compile to multiple .NET Framework
+- [ ] Create a NuGet package
+- [ ] Support the attributes
 - [ ] Test coverage of the versioning part
 - [ ] Allow version to be a complex object
 - [ ] Improve the example in order to support serialization/deserialization of a full PE32/PE64 Header
