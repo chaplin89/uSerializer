@@ -279,14 +279,12 @@ namespace AmphetamineSerializer
                 {
                     HandleType(ctx);
 
-                    bool callEmiter =
-                        response.Status == BuildedFunctionStatus.FunctionFinalizedTypeNotFinalized ||
-                        response.Status == BuildedFunctionStatus.FunctionNotFinalized;
-
-                    if (callEmiter)
+                    if (response.Status != BuildedFunctionStatus.TypeFinalized)
                         ctx.G.Call(response.Emiter, null);
                     else if (method != null)
                         ctx.G.Call(response.Method, null);
+                    //else
+                    //    throw new InvalidOperationException("Unable to call builded method.");
                 }
 
                 if (ctx.LoopCtx.Count > 0)

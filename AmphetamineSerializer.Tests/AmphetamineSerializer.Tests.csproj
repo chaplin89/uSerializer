@@ -55,6 +55,12 @@
       <HintPath>..\packages\SpecFlow.2.2.0-preview20161020\lib\net45\TechTalk.SpecFlow.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="ZeroFormatter, Version=1.6.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ZeroFormatter.1.6.4\lib\net45\ZeroFormatter.dll</HintPath>
+    </Reference>
+    <Reference Include="ZeroFormatter.Interfaces, Version=1.6.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ZeroFormatter.Interfaces.1.6.4\lib\net45\ZeroFormatter.Interfaces.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -97,6 +103,7 @@
     <Compile Include="SerializationHelpers.cs" />
     <Compile Include="SerializationSteps.cs" />
     <Compile Include="TestClass.cs" />
+    <Compile Include="ZeroFormattableTestClasses.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
