@@ -72,7 +72,7 @@ namespace AmphetamineSerializer.Common
             StoreAction(g,element,content);
         }
 
-        public override ASIndexAttribute Attribute { get; set; }
+        public override ASIndexAttribute Attribute { get; }
 
         protected override void InternalLoad(Emit g, TypeOfContent content)
         {

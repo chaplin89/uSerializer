@@ -53,8 +53,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Chain\Nodes\CacheManager.cs" />
-    <Compile Include="Chain\Nodes\CustomBuilderFinder.cs" />
-    <Compile Include="Chain\Nodes\CustomSerializerFinder.cs" />
     <Compile Include="Chain\Nodes\DefaultHandlerFinder.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="LenghtBoundSerializator.cs" />

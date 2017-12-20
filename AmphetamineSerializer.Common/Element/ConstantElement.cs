@@ -81,11 +81,6 @@ namespace AmphetamineSerializer.Common.Element
             {
                 return null;
             }
-
-            set
-            {
-                throw new NotImplementedException();
-            }
         }
 
         protected override void InternalStore(Emit g, TypeOfContent content)

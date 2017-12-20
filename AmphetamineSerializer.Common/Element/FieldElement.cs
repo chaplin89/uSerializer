@@ -46,10 +46,6 @@ namespace AmphetamineSerializer.Common
                     return null;
                 return Field.GetCustomAttribute<ASIndexAttribute>();
             }
-            set
-            {
-                throw new NotSupportedException();
-            }
         }
 
 

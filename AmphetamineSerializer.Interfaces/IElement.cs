@@ -75,6 +75,6 @@ namespace AmphetamineSerializer.Interfaces
         /// <summary>
         /// Meta-information about this element.
         /// </summary>
-        ASIndexAttribute Attribute { get; set; }
+        ASIndexAttribute Attribute { get; }
     }
 }

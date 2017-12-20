@@ -153,7 +153,7 @@ namespace AmphetamineSerializer.Common.Element
             }
         }
 
-        public abstract ASIndexAttribute Attribute { get; set; }
+        public abstract ASIndexAttribute Attribute { get; }
 
         public virtual object Clone()
         {

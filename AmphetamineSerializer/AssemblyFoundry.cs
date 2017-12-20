@@ -4,7 +4,6 @@ using AmphetamineSerializer.Common;
 using AmphetamineSerializer.Common.Element;
 using AmphetamineSerializer.Interfaces;
 using AmphetamineSerializer.Model;
-using AmphetamineSerializer.Model.Attributes;
 using Sigil;
 using System;
 using System.Collections.Generic;
@@ -44,14 +43,7 @@ namespace AmphetamineSerializer
                 ctx.G = ctx.Provider.AddMethod("Handle", ctx.InputParameters, typeof(void));
 
             if (ctx.Chain == null)
-            {
-                var manager = new ChainManager()
-                                  .SetNext(new CustomSerializerFinder())
-                                  .SetNext(new CustomBuilderFinder())
-                                  .SetNext(new DefaultHandlerFinder());
-
-                ctx.Chain = manager;
-            }
+                ctx.Chain = new ChainManager().SetNext(new DefaultHandlerFinder());
         }
         #endregion
 

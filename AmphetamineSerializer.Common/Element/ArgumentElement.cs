@@ -30,12 +30,7 @@ namespace AmphetamineSerializer.Common.Element
             get
             {
                 return null;
-            }
-
-            set
-            {
-                throw new NotImplementedException();
-            }
+            }            
         }
 
         protected override void InternalLoad(Emit emit, TypeOfContent value)

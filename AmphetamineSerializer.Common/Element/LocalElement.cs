@@ -50,11 +50,6 @@ namespace AmphetamineSerializer.Common.Element
             {
                 return null;
             }
-
-            set
-            {
-                throw new NotImplementedException();
-            }
         }
 
         /// <summary>
