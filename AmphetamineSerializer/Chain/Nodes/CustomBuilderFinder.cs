@@ -19,13 +19,13 @@ namespace AmphetamineSerializer.Chain.Nodes
         {
             managedRequestes = new Dictionary<Type, RequestHandler>()
             {
-                { typeof(DelegateBuildRequest), HandleSerializationBuild}
+                { typeof(DelegateBuildRequest), HandleDelegateBuild}
             };
         }
 
         public Dictionary<Type, RequestHandler> ManagedRequestes { get { return managedRequestes; } }
 
-        public IResponse HandleSerializationBuild(IRequest request)
+        public IResponse HandleDelegateBuild(IRequest request)
         {
             var localRequest = request as DelegateBuildRequest;
             var inputTypes = localRequest.DelegateType.GetMethod("Invoke").GetParameters().Select(_ => _.ParameterType).ToArray();
@@ -43,11 +43,7 @@ namespace AmphetamineSerializer.Chain.Nodes
 
             IBuilder builder = Activator.CreateInstance(attribute.BuilderType, new object[] { localRequest }) as IBuilder;
 
-            return new SerializationBuildResponse()
-            {
-                Function = builder.Make(),
-                Instance = null
-            };
+            return builder.Make();
         }
 
         public string Name { get { return "CustomBuilderFinder"; } }

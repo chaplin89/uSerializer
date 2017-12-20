@@ -1,4 +1,5 @@
-﻿using AmphetamineSerializer.Interfaces;
+﻿using AmphetamineSerializer.Chain;
+using AmphetamineSerializer.Interfaces;
 
 namespace AmphetamineSerializer.Common
 {
@@ -15,7 +16,7 @@ namespace AmphetamineSerializer.Common
         /// <summary>
         /// Internally cached method.
         /// </summary>
-        protected BuildedFunction method;
+        protected ElementBuildResponse method;
 
         /// <summary>
         /// Construct a builder with a context.
@@ -30,7 +31,7 @@ namespace AmphetamineSerializer.Common
         /// Return a cached function or build a new one.
         /// </summary>
         /// <returns>The function</returns>
-        public BuildedFunction Make()
+        public IResponse Make()
         {
             if (method == null)
                 method = InternalMake();
@@ -42,6 +43,6 @@ namespace AmphetamineSerializer.Common
         /// Build a function.
         /// </summary>
         /// <returns>The function</returns>
-        protected abstract BuildedFunction InternalMake();
+        protected abstract ElementBuildResponse InternalMake();
     }
 }

@@ -15,8 +15,8 @@ namespace AmphetamineSerializer
         protected delegate void SerializeBinaryWriter(T obj, BinaryWriter stream);
         protected delegate void DeserializeBinaryReader(ref T obj, BinaryReader stream);
         
-        protected DeserializeBinaryReader deserializeFromStream;
-        protected SerializeBinaryWriter serializeFromStream;
+        protected DeserializeBinaryReader DeserializeFromStream { get; set; }
+        protected SerializeBinaryWriter SerializeFromStream { get; set; }
 
         private object additionalContext;
         IChainManager chain = new ChainManager()
@@ -32,18 +32,18 @@ namespace AmphetamineSerializer
 
         public virtual void Deserialize(ref T obj, BinaryReader stream)
         {
-            if (deserializeFromStream == null)
-                deserializeFromStream = (DeserializeBinaryReader)Build(typeof(DeserializeBinaryReader));
+            if (DeserializeFromStream == null)
+                DeserializeFromStream = (DeserializeBinaryReader)Build(typeof(DeserializeBinaryReader));
 
-            deserializeFromStream(ref obj, stream);
+            DeserializeFromStream(ref obj, stream);
         }
 
         public virtual void Serialize(T obj, BinaryWriter stream)
         {
-            if (serializeFromStream == null)
-                serializeFromStream = (SerializeBinaryWriter)Build(typeof(SerializeBinaryWriter));
+            if (SerializeFromStream == null)
+                SerializeFromStream = (SerializeBinaryWriter)Build(typeof(SerializeBinaryWriter));
 
-            serializeFromStream(obj, stream);
+            SerializeFromStream(obj, stream);
         }
 
         public void Serialize(object obj, BinaryWriter stream)
@@ -66,8 +66,8 @@ namespace AmphetamineSerializer
                 DelegateType = delegateType
             };
 
-            var response = chain.Process(request) as SerializationBuildResponse;
-            return response.Function.Delegate;
+            var response = chain.Process(request) as DelegateBuildResponse;
+            return response.Delegate;
         }
     }
 }

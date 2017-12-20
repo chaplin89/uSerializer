@@ -1,9 +1,10 @@
-﻿using AmphetamineSerializer.Common;
+﻿using AmphetamineSerializer.Chain;
+using AmphetamineSerializer.Common;
 
 namespace AmphetamineSerializer.Interfaces
 {
     public interface IBuilder
     {
-        BuildedFunction Make();
+        IResponse Make();
     }
 }

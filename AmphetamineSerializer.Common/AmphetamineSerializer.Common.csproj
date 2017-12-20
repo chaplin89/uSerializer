@@ -49,7 +49,6 @@
   <ItemGroup>
     <Compile Include="BuilderBase.cs" />
     <Compile Include="Chain\ChainManager.cs" />
-    <Compile Include="Chain\ParameterDescriptor.cs" />
     <Compile Include="Chain\SerializationBuildRequest.cs" />
     <Compile Include="Chain\SerializationBuildResponse.cs" />
     <Compile Include="Element\ArgumentElement.cs" />

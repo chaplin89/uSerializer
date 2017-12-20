@@ -5,37 +5,36 @@ using Sigil.NonGeneric;
 using System.Reflection;
 using System.Linq;
 using System.Diagnostics;
-using System.Linq.Expressions;
+using AmphetamineSerializer.Chain;
+using System.IO;
+using SysEmit = System.Reflection.Emit;
 
 namespace AmphetamineSerializer.Common
 {
     public class SigilFunctionProvider
     {
         AssemblyName assemblyName;
-        System.Reflection.Emit.AssemblyBuilder assemblyBuilder;
-        System.Reflection.Emit.ModuleBuilder moduleBuilder;
-        System.Reflection.Emit.TypeBuilder typeBuilder;
+        SysEmit.AssemblyBuilder assemblyBuilder;
+        SysEmit.ModuleBuilder moduleBuilder;
+        SysEmit.TypeBuilder typeBuilder;
 
-        public Dictionary<Type, BuildedFunction> AlreadyBuildedMethods { get; set; }
-        Stack<BuildedFunction> methods = new Stack<BuildedFunction>();
-        const MethodAttributes attributes = MethodAttributes.Public | MethodAttributes.Static;
-        bool dynamic = true;
+        public Dictionary<Type, ElementBuildResponse> AlreadyBuildedMethods { get; set; }
+        Stack<ElementBuildResponse> methods = new Stack<ElementBuildResponse>();
 
         public SigilFunctionProvider(string assemblyName = null)
         {
-            AlreadyBuildedMethods = new Dictionary<Type, BuildedFunction>();
+            AlreadyBuildedMethods = new Dictionary<Type, ElementBuildResponse>();
 
             if (string.IsNullOrEmpty(assemblyName))
                 return;
 
-            dynamic = false;
             this.assemblyName = new AssemblyName(assemblyName);
 #if RUN_ONLY
             var attributes = System.Reflection.Emit.AssemblyBuilderAccess.Run;
 #else
             var attributes = System.Reflection.Emit.AssemblyBuilderAccess.RunAndSave;
 #endif
-            assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(this.assemblyName, attributes, "D:\\");
+            assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(this.assemblyName, attributes, Path.GetTempPath());
             moduleBuilder = assemblyBuilder.DefineDynamicModule($"{assemblyName}.dll");
             typeBuilder = moduleBuilder.DefineType($"{this.assemblyName.Name}.Handler", TypeAttributes.Public);
         }
@@ -44,8 +43,10 @@ namespace AmphetamineSerializer.Common
         {
             if (v == null)
                 throw new ArgumentNullException("v");
+
             if (inputTypes == null)
                 throw new ArgumentNullException("inputTypes");
+
             if (returnValue == null)
                 returnValue = typeof(void);
 
@@ -55,7 +56,7 @@ namespace AmphetamineSerializer.Common
             else
                 emiter = Emit.NewDynamicMethod(returnValue, inputTypes);
 
-            BuildedFunction bf = new BuildedFunction()
+            ElementBuildResponse response = new ElementBuildResponse()
             {
                 Emiter = emiter,
                 Status = BuildedFunctionStatus.FunctionNotFinalized,
@@ -63,34 +64,25 @@ namespace AmphetamineSerializer.Common
                 Return = returnValue
             };
 
-            AlreadyBuildedMethods.Add(inputTypes[0], bf);
+            AlreadyBuildedMethods.Add(inputTypes[0], response);
 
-            methods.Push(bf);
-            return bf.Emiter;
+            methods.Push(response);
+            return response.Emiter;
         }
 
-        public BuildedFunction GetMethod()
+        public ElementBuildResponse GetMethod()
         {
-            BuildedFunction bf = methods.Pop();
+            ElementBuildResponse response = methods.Pop();
 
-            if (!dynamic)
-            { 
-                bf.Method = bf.Emiter.CreateMethod();
-            }
-            else
-            {
-                var delegateType = Expression.GetDelegateType(bf.Input.Concat(new Type[] { bf.Return }).ToArray());
-                bf.Delegate = bf.Emiter.CreateDelegate(delegateType);
-            }
-
-            bf.Status = BuildedFunctionStatus.FunctionFinalizedTypeNotFinalized;
+            response.Method = response.Emiter.CreateMethod();
+            response.Status = BuildedFunctionStatus.FunctionFinalizedTypeNotFinalized;
 
             if (methods.Count == 0)
             {
                 if (typeBuilder != null)
                 {
                     Type currentType = typeBuilder.CreateType();
-                    bf.Method = currentType.GetMethod(bf.Method.Name, bf.Method.GetParameters().Select(x => x.ParameterType).ToArray());
+                    response.Method = currentType.GetMethod(response.Method.Name, response.Method.GetParameters().Select(x => x.ParameterType).ToArray());
                     Debug.Assert(assemblyBuilder != null);
 #if !RUN_ONLY
                     assemblyBuilder.Save(assemblyName.Name + ".dll");
@@ -103,10 +95,10 @@ namespace AmphetamineSerializer.Common
                     v.Value.Status = BuildedFunctionStatus.TypeFinalized;
                 }
 
-                bf.Status = BuildedFunctionStatus.TypeFinalized;
+                response.Status = BuildedFunctionStatus.TypeFinalized;
             }
 
-            return bf;
+            return response;
         }
     }
 }

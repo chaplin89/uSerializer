@@ -1,5 +1,6 @@
 ﻿using AmphetamineSerializer.Chain;
 using AmphetamineSerializer.Common;
+using AmphetamineSerializer.Interfaces;
 using AmphetamineSerializer.Model;
 using AmphetamineSerializer.Model.Attributes;
 using System;
@@ -56,7 +57,7 @@ namespace AmphetamineSerializer.Helpers
         {
         }
 
-        protected override BuildedFunction InternalMake()
+        protected override ElementBuildResponse InternalMake()
         {
             if (ctx.Element?.LoadedType == null)
                 return null;
@@ -68,11 +69,10 @@ namespace AmphetamineSerializer.Helpers
             else
                 return null;
 
-            method = new BuildedFunction() { Status = BuildedFunctionStatus.ContextModified };
+            method = new ElementBuildResponse() { Status = BuildedFunctionStatus.ContextModified };
             return method;
         }
-
-        [SerializationHandler(typeof(string))]
+        
         public void HandleString(FoundryContext ctx)
         {
             if (ctx.IsDeserializing)
@@ -105,7 +105,7 @@ namespace AmphetamineSerializer.Helpers
             ctx.Element.Store(ctx.G, valueToLoad, TypeOfContent.Value);
         }
 
-        public BuildedFunction EncodeString(FoundryContext ctx)
+        public ElementBuildResponse EncodeString(FoundryContext ctx)
         {
             // Rough C# translation:
             // writer.Write(Encoding.ASCII.GetByteCount(Load()));
@@ -124,17 +124,9 @@ namespace AmphetamineSerializer.Helpers
             ctx.Element.Load(ctx.G, TypeOfContent.Value);
             ctx.G.CallVirtual(typeof(Encoding).GetMethod("GetBytes", new Type[] { typeof(string) }));
             ctx.G.CallVirtual(typeHandlerMap[typeof(byte[])]);
-            return new BuildedFunction() { Status = BuildedFunctionStatus.ContextModified };
+            return new ElementBuildResponse() { Status = BuildedFunctionStatus.ContextModified };
         }
 
-        [SerializationHandler(typeof(byte))]
-        [SerializationHandler(typeof(sbyte))]
-        [SerializationHandler(typeof(uint))]
-        [SerializationHandler(typeof(int))]
-        [SerializationHandler(typeof(ushort))]
-        [SerializationHandler(typeof(short))]
-        [SerializationHandler(typeof(double))]
-        [SerializationHandler(typeof(float))]
         public void HandlePrimitive(FoundryContext ctx)
         {
             if (ctx.IsDeserializing)

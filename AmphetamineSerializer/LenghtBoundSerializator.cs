@@ -18,6 +18,9 @@ namespace AmphetamineSerializer
 
         public override void Deserialize(ref T obj, BinaryReader stream)
         {
+            if (stream == null)
+                throw new ArgumentNullException("stream");
+
             if (!stream.BaseStream.CanRead)
                 throw new InvalidOperationException("The provided stream can't be read.");
 

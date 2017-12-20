@@ -28,9 +28,7 @@ namespace AmphetamineSerializer.Chain.Nodes
         /// If the type is managed by a custom serializator, retrieve it 
         /// and create a delegate.
         /// </summary>
-        /// <param name="rootType"></param>
-        /// <param name="additionalContext"></param>
-        /// <param name="delegateType"></param>
+        /// <param name="request"></param>
         /// <returns></returns>
         public IResponse HandleBuildRequest(IRequest request)
         {
@@ -47,22 +45,13 @@ namespace AmphetamineSerializer.Chain.Nodes
             if (attribute == null)
                 return null;
 
-            var instance = Activator.CreateInstance(attribute.SerializatorType, localRequest.AdditionalContext);
+            //var instance = Activator.CreateInstance(attribute.SerializatorType, localRequest.AdditionalContext);
             resolver.Register(attribute.SerializatorType);
 
-            var method = new BuildedFunction()
+            return new ElementBuildResponse()
             {
                 Method = resolver.ResolveFromSignature(rootType, localRequest.InputTypes, typeof(void)),
                 Status = BuildedFunctionStatus.TypeFinalized
-            };
-
-            if (method.Method == null)
-                throw new InvalidOperationException("Unable to retrieve the method from the custom deserializator.");
-            
-            return new SerializationBuildResponse()
-            {
-                Function = method,
-                Instance = instance
             };
         }
     }

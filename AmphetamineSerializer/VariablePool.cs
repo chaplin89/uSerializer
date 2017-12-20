@@ -72,6 +72,9 @@ namespace AmphetamineSerializer
         /// <param name="element">Element that represent the variable to release.</param>
         public void ReleaseVariable(LocalElement element)
         {
+            if (element == null)
+                throw new ArgumentNullException("element");
+
             currentPool[element.LoadedType].Where(_1 => _1.Variable == element)
                                            .Single().IsFree = false;
         }

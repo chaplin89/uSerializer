@@ -47,10 +47,7 @@ namespace AmphetamineSerializer.Chain.Nodes
                 if (method == null)
                     continue;
 
-                return new SerializationBuildResponse()
-                {
-                    Function = method
-                };
+                return method;
             }
             return null;
         }
@@ -65,12 +62,12 @@ namespace AmphetamineSerializer.Chain.Nodes
                 InputTypes = request.DelegateType.GetMethod("Invoke").GetParameters().Select(x => x.ParameterType).ToArray()
             };
 
-            var response = HandleBuildRequest(elementRequest) as SerializationBuildResponse;
+            var response = HandleBuildRequest(elementRequest) as ElementBuildResponse;
 
-            response.Function.Delegate = response.Function.Method.CreateDelegate(request.DelegateType);
-            response.Function.Method = null;
-
-            return response;
+            return new DelegateBuildResponse()
+            {
+                Delegate = response.Method.CreateDelegate(request.DelegateType)
+            };
         }
     }
 }
