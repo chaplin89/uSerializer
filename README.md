@@ -12,7 +12,7 @@ It makes porting an existing C/C++ structure to managed code very easy. Most of 
   * [How to use](#how-to-use)
      * [Serialization example](#serialization-example)
      * [Deserialization example](#deserialization-example)
-  * [Versioning](#versioning)
+     * [Versioning](#versioning)
   * [TODO](#todo-not-in-any-specific-order)
   * [Benchmark](#benchmark)
 
