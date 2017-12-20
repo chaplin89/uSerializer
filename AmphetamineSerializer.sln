@@ -31,7 +31,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestRunner", "Sigil\TestRun
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sigil NET45", "Sigil\Sigil NET45\Sigil NET45.csproj", "{CC8E294D-E06C-4420-A260-D515D89EC53A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmphetamineSerializer.PerformanceTests", "AmphetamineSerializer.PerformanceTests\AmphetamineSerializer.PerformanceTests.csproj", "{62D99F3C-53FA-4974-B490-00F47B2E4EA6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmphetamineSerializer.Performance", "AmphetamineSerializer.PerformanceTests\AmphetamineSerializer.Performance.csproj", "{62D99F3C-53FA-4974-B490-00F47B2E4EA6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmphetamineSerializer.Model", "AmphetamineSerializer.Model\AmphetamineSerializer.Model.csproj", "{27AC1F54-50B4-4299-A425-BA841A918543}"
 EndProject
