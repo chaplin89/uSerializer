@@ -307,16 +307,12 @@ namespace AmphetamineSerializer
         /// <summary>
         /// TODO: this should not be here -> FIX CA1822.
         /// Generate a loop preamble:
-        /// 1. Initialize the index
-        /// 2. Jump for checking if current index is out of bound
-        /// 3. Mark the begin of the loop's body
+        ///     1. Initialize the index
+        ///     2. Jump for checking if current index is out of bound
+        ///     3. Mark the begin of the loop's body
         /// </summary>
-        /// <param name="ctx">Context of the loop</param>
-        /// <remarks>
-        /// C# Translation:
-        ///     Index = 0;
-        ///     (Initialize the array);
-        /// </remarks>
+        /// <param name="ctx">Context.</param>
+        /// <returns>The generated loop context.</returns>
         private LoopContext AddLoopPreamble(Context ctx)
         {
             var currentLoopContext = new LoopContext(ctx.VariablePool.GetNewVariable(typeof(uint)));
@@ -326,6 +322,7 @@ namespace AmphetamineSerializer
             currentLoopContext.CheckOutOfBound = ctx.G.DefineLabel($"OutOfBound_{ctx.CurrentElement.GetHashCode()}");
 
             Type indexType = ctx.CurrentElement.Attribute?.SizeType;
+
             if (indexType == null)
                 indexType = typeof(uint);
 
@@ -339,15 +336,40 @@ namespace AmphetamineSerializer
                     int size = ctx.CurrentElement.Attribute.ArrayFixedSize;
                     currentLoopContext.Size = (ConstantElement<int>)size;
                 }
+                else
+                {
+                    currentLoopContext.Size = ctx.VariablePool.GetNewVariable(indexType);
+
+                    var request = new ElementBuildRequest()
+                    {
+                        Element = currentLoopContext.Size,
+                        InputTypes = GetInputTypes(ctx, indexType.MakeByRefType()),
+                        AdditionalContext = ctx.AdditionalContext,
+                        Provider = ctx.Provider,
+                        G = ctx.G
+                    };
+
+                    var response = ctx.Chain.Process(request) as ElementBuildResponse;
+
+                    if (response.Status != BuildedFunctionStatus.ContextModified)
+                    {
+                        currentLoopContext.Size.Load(ctx.G, TypeOfContent.Address);
+                        ForwardParameters(ctx, response);
+                    }
+                }
+
+                var newArray = new GenericElement(((g, _) =>
+                {
+                    currentLoopContext.Size.Load(g, TypeOfContent.Value);
+                    ctx.G.NewArray(ctx.CurrentElement.LoadedType.GetElementType());
+                }), null);
+
+                ctx.CurrentElement.Store(ctx.G, newArray, TypeOfContent.Value);
             }
             else
             {
                 currentLoopContext.Size = ctx.CurrentElement.Lenght;
-            }
-
-            if (!ctx.IsDeserializing)
-            {
-                // Write the size of the array
+                
                 var request = new ElementBuildRequest()
                 {
                     Element = currentLoopContext.Size,
@@ -362,62 +384,14 @@ namespace AmphetamineSerializer
                 if (response.Status != BuildedFunctionStatus.ContextModified)
                 {
                     currentLoopContext.Size.Load(ctx.G, TypeOfContent.Value);
-
-                    if (response.Status == BuildedFunctionStatus.TypeFinalized)
-                        ForwardParameters(ctx, response);
-                    else
-                    {
-                        ForwardParameters(ctx, null);
-                        ctx.G.Call(response.Emiter);
-                    }
-                }
-            }
-
-            // Case #1: Noone created the Size variable; create a new one and expect to find its value
-            //          in the stream.
-            // Case #2: The Size variable was already initialized by someone else; Use it.
-            else if (currentLoopContext.Size == null)
-            {
-                currentLoopContext.Size = ctx.VariablePool.GetNewVariable(indexType);
-
-                var request = new ElementBuildRequest()
-                {
-                    Element = currentLoopContext.Size,
-                    InputTypes = GetInputTypes(ctx, indexType.MakeByRefType()),
-                    AdditionalContext = ctx.AdditionalContext,
-                    Provider = ctx.Provider,
-                    G = ctx.G
-                };
-
-                var response = ctx.Chain.Process(request) as ElementBuildResponse;
-
-                if (response.Status != BuildedFunctionStatus.ContextModified)
-                {
-                    // this.DecodeUInt(ref size, buffer, ref position);
-                    currentLoopContext.Size.Load(ctx.G, TypeOfContent.Address);
                     ForwardParameters(ctx, response);
                 }
             }
 
-            if (ctx.IsDeserializing)
-            {
-                // ObjectInstance.CurrentItemFieldInfo = new CurrentItemUnderlyingType[Size];
-                var newArray = new GenericElement(((g, _) =>
-                {
-                    currentLoopContext.Size.Load(g, TypeOfContent.Value);
-                    ctx.G.NewArray(ctx.CurrentElement.LoadedType.GetElementType());
-                }), null);
-
-                ctx.CurrentElement.Store(ctx.G, newArray, TypeOfContent.Value);
-            }
-
-            // int indexLocal = 0;
-            // goto CheckOutOfBound;
             ctx.G.LoadConstant(0);
             ctx.G.StoreLocal(currentLoopContext.Index);
-            ctx.G.Branch(currentLoopContext.CheckOutOfBound); // Local variables initialized, jump
+            ctx.G.Branch(currentLoopContext.CheckOutOfBound);
 
-            // Loop start
             ctx.G.MarkLabel(currentLoopContext.Body);
 
             return currentLoopContext;
@@ -425,18 +399,11 @@ namespace AmphetamineSerializer
 
         /// <summary>
         /// TODO: this should not be here -> FIX CA1822.
-        /// Generate a loop epilogue:
-        /// 1. Increment index
-        /// 2. Out of bound check, eventually jump to the body
+        /// Generate all the loop epilogues for the current context:
+        ///     1. Increment index
+        ///     2. Out of bound check, eventually jump to the body
         /// </summary>
         /// <param name="ctx">Context</param>
-        /// <remarks>The loop context must be a valid context and must be the same passed
-        /// (or generated) by the <see cref="AddLoopPreamble(ref LoopContext)"/> function.
-        /// C# Translation:
-        ///     while (Index++ &lt; Size) {
-        ///         (here follow the Body label)
-        ///     }
-        /// </remarks>
         private void AddLoopEpilogue(Context ctx)
         {
             if (ctx == null)
