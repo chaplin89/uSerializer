@@ -1,8 +1,4 @@
-﻿using Sigil.NonGeneric;
-using System.Reflection;
-using System;
-
-namespace AmphetamineSerializer.Common
+﻿namespace AmphetamineSerializer.Model
 {
     /// <summary>
     /// Represent the status about a function.

@@ -1,5 +1,5 @@
-﻿using System;
-using AmphetamineSerializer.Interfaces;
+﻿using AmphetamineSerializer.Interfaces;
+using System;
 using System.Collections.Generic;
 
 namespace AmphetamineSerializer.Chain

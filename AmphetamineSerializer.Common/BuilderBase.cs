@@ -11,7 +11,7 @@ namespace AmphetamineSerializer.Common
         /// <summary>
         /// Context for the current building process.
         /// </summary>
-        protected FoundryContext ctx;
+        protected Context ctx;
 
         /// <summary>
         /// Internally cached method.
@@ -22,7 +22,7 @@ namespace AmphetamineSerializer.Common
         /// Construct a builder with a context.
         /// </summary>
         /// <param name="ctx">Context</param>
-        public BuilderBase(FoundryContext ctx)
+        public BuilderBase(Context ctx)
         {
             this.ctx = ctx;
         }

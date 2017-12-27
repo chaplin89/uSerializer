@@ -1,5 +1,5 @@
-﻿using AmphetamineSerializer.Common;
-using AmphetamineSerializer.Interfaces;
+﻿using AmphetamineSerializer.Interfaces;
+using AmphetamineSerializer.Model;
 using Sigil.NonGeneric;
 using System;
 using System.Reflection;

@@ -1,7 +1,6 @@
 ﻿using AmphetamineSerializer.Common.Element;
 using AmphetamineSerializer.Interfaces;
 using Sigil;
-using System;
 
 namespace AmphetamineSerializer.Common
 {

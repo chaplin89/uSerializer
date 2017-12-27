@@ -1,8 +1,6 @@
 ﻿using AmphetamineSerializer.Chain;
 using AmphetamineSerializer.Common;
-using AmphetamineSerializer.Interfaces;
 using AmphetamineSerializer.Model;
-using AmphetamineSerializer.Model.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -53,18 +51,18 @@ namespace AmphetamineSerializer.Helpers
             Debug.Assert(!typeHandlerMap.Where(x => x.Value == null).Any());
         }
 
-        public StreamDeserializationCtx(FoundryContext ctx) : base(ctx)
+        public StreamDeserializationCtx(Context ctx) : base(ctx)
         {
         }
 
         protected override ElementBuildResponse InternalMake()
         {
-            if (ctx.Element?.LoadedType == null)
+            if (ctx.CurrentElement?.LoadedType == null)
                 return null;
 
-            if (typeHandlerMap.ContainsKey(ctx.Element.LoadedType))
+            if (typeHandlerMap.ContainsKey(ctx.CurrentElement.LoadedType))
                 HandlePrimitive(ctx);
-            else if (ctx.Element.LoadedType == typeof(string))
+            else if (ctx.CurrentElement.LoadedType == typeof(string))
                 HandleString(ctx);
             else
                 return null;
@@ -73,7 +71,7 @@ namespace AmphetamineSerializer.Helpers
             return method;
         }
         
-        public void HandleString(FoundryContext ctx)
+        public void HandleString(Context ctx)
         {
             if (ctx.IsDeserializing)
                 DecodeString(ctx);
@@ -89,7 +87,7 @@ namespace AmphetamineSerializer.Helpers
         /// One day this will support multiple encoding depending on attributes.
         /// </summary>
         /// <param name="ctx"></param>
-        public void DecodeString(FoundryContext ctx)
+        public void DecodeString(Context ctx)
         {
             var valueToLoad = new GenericElement(((g, _) =>
             {
@@ -102,10 +100,10 @@ namespace AmphetamineSerializer.Helpers
                 g.CallVirtual(typeof(Encoding).GetMethod("GetString", new Type[] { typeof(byte[]) }));
             }), null);
 
-            ctx.Element.Store(ctx.G, valueToLoad, TypeOfContent.Value);
+            ctx.CurrentElement.Store(ctx.G, valueToLoad, TypeOfContent.Value);
         }
 
-        public ElementBuildResponse EncodeString(FoundryContext ctx)
+        public ElementBuildResponse EncodeString(Context ctx)
         {
             // Rough C# translation:
             // writer.Write(Encoding.ASCII.GetByteCount(Load()));
@@ -114,20 +112,20 @@ namespace AmphetamineSerializer.Helpers
             // Write lenght
             ctx.G.LoadArgument(1);
             ctx.G.Call(typeof(Encoding).GetProperty("ASCII").GetMethod);
-            ctx.Element.Load(ctx.G, TypeOfContent.Value);
+            ctx.CurrentElement.Load(ctx.G, TypeOfContent.Value);
             ctx.G.CallVirtual(typeof(Encoding).GetMethod("GetByteCount", new Type[] { typeof(string) }));
             ctx.G.CallVirtual(typeHandlerMap[typeof(int)]);
 
             // Write string
             ctx.G.LoadArgument(1);
             ctx.G.Call(typeof(Encoding).GetProperty("ASCII").GetMethod);
-            ctx.Element.Load(ctx.G, TypeOfContent.Value);
+            ctx.CurrentElement.Load(ctx.G, TypeOfContent.Value);
             ctx.G.CallVirtual(typeof(Encoding).GetMethod("GetBytes", new Type[] { typeof(string) }));
             ctx.G.CallVirtual(typeHandlerMap[typeof(byte[])]);
             return new ElementBuildResponse() { Status = BuildedFunctionStatus.ContextModified };
         }
 
-        public void HandlePrimitive(FoundryContext ctx)
+        public void HandlePrimitive(Context ctx)
         {
             if (ctx.IsDeserializing)
             {
@@ -135,17 +133,17 @@ namespace AmphetamineSerializer.Helpers
                 var readFromStream = new GenericElement(((g, _) =>
                 {
                     ctx.G.LoadArgument(1);
-                    g.CallVirtual(typeHandlerMap[ctx.Element.LoadedType.MakeByRefType()]);
+                    g.CallVirtual(typeHandlerMap[ctx.CurrentElement.LoadedType.MakeByRefType()]);
                 }), null);
 
-                ctx.Element.Store(ctx.G, readFromStream, TypeOfContent.Value);
+                ctx.CurrentElement.Store(ctx.G, readFromStream, TypeOfContent.Value);
             }
             else
             {
                 //Write into stream
                 ctx.G.LoadArgument(1);
-                ctx.Element.Load(ctx.G, TypeOfContent.Value);
-                ctx.G.CallVirtual(typeHandlerMap[ctx.Element.LoadedType]);
+                ctx.CurrentElement.Load(ctx.G, TypeOfContent.Value);
+                ctx.G.CallVirtual(typeHandlerMap[ctx.CurrentElement.LoadedType]);
             }
         }
     }

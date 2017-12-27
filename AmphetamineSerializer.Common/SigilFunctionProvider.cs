@@ -1,12 +1,13 @@
 ﻿#define RUN_ONLY
+using AmphetamineSerializer.Chain;
+using AmphetamineSerializer.Model;
+using Sigil.NonGeneric;
 using System;
 using System.Collections.Generic;
-using Sigil.NonGeneric;
-using System.Reflection;
-using System.Linq;
 using System.Diagnostics;
-using AmphetamineSerializer.Chain;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using SysEmit = System.Reflection.Emit;
 
 namespace AmphetamineSerializer.Common

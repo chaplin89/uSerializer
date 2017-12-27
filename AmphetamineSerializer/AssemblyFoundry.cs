@@ -20,12 +20,11 @@ namespace AmphetamineSerializer
     public class AssemblyFoundry : BuilderBase
     {
         #region ctor
-
         /// <summary>
         /// Build an AssemblyFoundry object starting from a context.
         /// </summary>
         /// <param name="ctx">Context</param>
-        public AssemblyFoundry(FoundryContext ctx) : base(ctx)
+        public AssemblyFoundry(Context ctx) : base(ctx)
         {
             if (ctx == null)
                 throw new ArgumentNullException("ctx");
@@ -49,7 +48,6 @@ namespace AmphetamineSerializer
         #endregion
 
         #region Building related methods
-
         /// <summary>
         /// Generate the method for the current ObjectType.
         /// </summary>
@@ -85,7 +83,7 @@ namespace AmphetamineSerializer
             return ctx.Provider.GetMethod();
         }
 
-        private void ManageVersions(FoundryContext ctx, IElement instance, object[] versions, Type normalizedType)
+        private void ManageVersions(Context ctx, IElement instance, object[] versions, Type normalizedType)
         {
             Label[] labels = new Label[versions.Length];
             var versionField = VersionHelper.GetAllFields(instance, normalizedType).First();
@@ -144,7 +142,7 @@ namespace AmphetamineSerializer
             }
         }
 
-        private Type[] GetInputTypes(FoundryContext ctx, Type overrideRootType)
+        private Type[] GetInputTypes(Context ctx, Type overrideRootType)
         {
             if (overrideRootType != null)
             {
@@ -175,7 +173,7 @@ namespace AmphetamineSerializer
         /// 
         /// </summary>
         /// <param name="ctx"></param>
-        private void ForwardParameters(FoundryContext ctx, ElementBuildResponse currentMethod)
+        private void ForwardParameters(Context ctx, ElementBuildResponse currentMethod)
         {
             if (currentMethod == null)
             {
@@ -224,7 +222,7 @@ namespace AmphetamineSerializer
             throw new InvalidOperationException("Can't forward parameters. Function is in an inconsistent state.");
         }
 
-        private void SimpleForward(FoundryContext ctx)
+        private void SimpleForward(Context ctx)
         {
             for (ushort j = 1; j < ctx.InputParameters.Length; j++)
                 ctx.G.LoadArgument(j);
@@ -236,37 +234,37 @@ namespace AmphetamineSerializer
         /// </summary>
         /// <param name="ctx">Context</param>
         /// <param name="fields">Fields to manage</param>
-        private void BuildFromFields(FoundryContext ctx, IEnumerable<IElement> fields)
+        private void BuildFromFields(Context ctx, IEnumerable<IElement> fields)
         {
             var linkedList = new LinkedList<IElement>(fields);
 
             while (linkedList.Count > 0)
             {
-                ctx.Element = linkedList.First.Value;
+                ctx.CurrentElement = linkedList.First.Value;
                 ElementBuildResponse response = null;
 
                 // TODO:
                 // 1. List (needs a special handling because of its similarities with Array)
                 // 2. Anything else implementing IEnumerable (excluding List ofc)
-                if (ctx.Element.LoadedType.IsAbstract)
+                if (ctx.CurrentElement.LoadedType.IsAbstract)
                     throw new InvalidOperationException("Incomplete types are not allowed.");
 
                 // Indexable; just generate the loop preamble and skip to element @ "Index" of the inner type.
-                if (ctx.Element.IsIndexable)
+                if (ctx.CurrentElement.IsIndexable)
                 {
                     var index = AddLoopPreamble(ctx).Index;
 
                     linkedList.RemoveFirst();
-                    linkedList.AddFirst(ctx.Element.EnterArray(index));
+                    linkedList.AddFirst(ctx.CurrentElement.EnterArray(index));
                     continue;
                 }
 
                 // Not indexable; proceed with the request.
                 var request = new ElementBuildRequest()
                 {
-                    Element = ctx.Element,
+                    Element = ctx.CurrentElement,
                     AdditionalContext = ctx.AdditionalContext,
-                    InputTypes = GetInputTypes(ctx, ctx.NormalizedType),
+                    InputTypes = GetInputTypes(ctx, GetNormalizedType(ctx)),
                     Provider = ctx.Provider,
                     G = ctx.G,
                 };
@@ -279,7 +277,7 @@ namespace AmphetamineSerializer
                 // Depending on who handled the request, complex object may require a call to another method.
                 if (response.Status != BuildedFunctionStatus.ContextModified)
                 {
-                    HandleType(ctx, ctx.Element);
+                    HandleType(ctx, ctx.CurrentElement);
 
                     if (response.Status != BuildedFunctionStatus.TypeFinalized)
                         ctx.G.Call(response.Emiter, null);
@@ -298,12 +296,11 @@ namespace AmphetamineSerializer
         #endregion
 
         #region Type management
-
         /// <summary>
         /// Manage 
         /// </summary>
         /// <param name="ctx">Context</param>
-        private void HandleType(FoundryContext ctx, IElement element)
+        private void HandleType(Context ctx, IElement element)
         {
             if (ctx.IsDeserializing)
                 element.Load(ctx.G, TypeOfContent.Address);
@@ -313,6 +310,23 @@ namespace AmphetamineSerializer
             ForwardParameters(ctx, null);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="currentElement"></param>
+        /// <returns></returns>
+        private Type GetNormalizedType(Context ctx)
+        {
+            Type normalizedType = ctx.CurrentElement.LoadedType;
+
+            if (normalizedType.IsEnum)
+                normalizedType = normalizedType.GetEnumUnderlyingType();
+
+            if (ctx.IsDeserializing)
+                normalizedType = normalizedType.MakeByRefType();
+
+            return normalizedType;
+        }
         #endregion
 
         #region Loop
@@ -329,32 +343,32 @@ namespace AmphetamineSerializer
         ///     Index = 0;
         ///     (Initialize the array);
         /// </remarks>
-        private LoopContext AddLoopPreamble(FoundryContext ctx)
+        private LoopContext AddLoopPreamble(Context ctx)
         {
             var currentLoopContext = new LoopContext(ctx.VariablePool.GetNewVariable(typeof(uint)));
             ctx.LoopCtx.Push(currentLoopContext);
 
-            currentLoopContext.Body = ctx.G.DefineLabel($"Body_{ctx.Element.GetHashCode()}");
-            currentLoopContext.CheckOutOfBound = ctx.G.DefineLabel($"OutOfBound_{ctx.Element.GetHashCode()}");
+            currentLoopContext.Body = ctx.G.DefineLabel($"Body_{ctx.CurrentElement.GetHashCode()}");
+            currentLoopContext.CheckOutOfBound = ctx.G.DefineLabel($"OutOfBound_{ctx.CurrentElement.GetHashCode()}");
 
-            Type indexType = ctx.Element.Attribute?.SizeType;
+            Type indexType = ctx.CurrentElement.Attribute?.SizeType;
             if (indexType == null)
                 indexType = typeof(uint);
 
             if (ctx.IsDeserializing)
             {
-                if (ctx.Element.Attribute?.ArrayFixedSize != -1)
+                if (ctx.CurrentElement.Attribute?.ArrayFixedSize != -1)
                 {
-                    if (ctx.Element.Index != null)
+                    if (ctx.CurrentElement.Index != null)
                         throw new NotSupportedException("Fixed size arrays for multi-dimensional array is not supported.");
 
-                    int size = ctx.Element.Attribute.ArrayFixedSize;
+                    int size = ctx.CurrentElement.Attribute.ArrayFixedSize;
                     currentLoopContext.Size = (ConstantElement<int>)size;
                 }
             }
             else
             {
-                currentLoopContext.Size = ctx.Element.Lenght;
+                currentLoopContext.Size = ctx.CurrentElement.Lenght;
             }
 
 
@@ -418,10 +432,10 @@ namespace AmphetamineSerializer
                 var newArray = new GenericElement(((g, _) =>
                 {
                     currentLoopContext.Size.Load(g, TypeOfContent.Value);
-                    ctx.G.NewArray(ctx.Element.LoadedType.GetElementType());
+                    ctx.G.NewArray(ctx.CurrentElement.LoadedType.GetElementType());
                 }), null);
 
-                ctx.Element.Store(ctx.G, newArray, TypeOfContent.Value);
+                ctx.CurrentElement.Store(ctx.G, newArray, TypeOfContent.Value);
             }
 
             // int indexLocal = 0;
@@ -462,7 +476,7 @@ namespace AmphetamineSerializer
         ///         (here follow the Body label)
         ///     }
         /// </remarks>
-        private void AddLoopEpilogue(FoundryContext ctx)
+        private void AddLoopEpilogue(Context ctx)
         {
             if (ctx == null)
                 throw new ArgumentNullException("ctx");
@@ -481,8 +495,8 @@ namespace AmphetamineSerializer
                 // If the Size is not provided, load the lenght of the array.
                 if (currentLoopContext.Size == null)
                 {
-                    ctx.Element.Load(ctx.G, TypeOfContent.Value);
-                    ctx.G.LoadLength(ctx.Element.LoadedType);
+                    ctx.CurrentElement.Load(ctx.G, TypeOfContent.Value);
+                    ctx.G.LoadLength(ctx.CurrentElement.LoadedType);
                 }
                 else
                 {

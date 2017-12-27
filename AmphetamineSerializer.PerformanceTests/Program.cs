@@ -9,7 +9,6 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Xml.Serialization;
 using ZeroFormatter;
-using ZeroFormatter.Formatters;
 
 namespace AmphetamineSerializer.PerformanceTests
 {

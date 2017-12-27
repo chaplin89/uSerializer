@@ -74,7 +74,7 @@ namespace AmphetamineSerializer.Helpers
         [SerializationHandler(typeof(short))]
         [SerializationHandler(typeof(double))]
         [SerializationHandler(typeof(float))]
-        static public bool DecodePrimitive(FoundryContext ctx)
+        static public bool DecodePrimitive(Context ctx)
         {
             return false;
         }

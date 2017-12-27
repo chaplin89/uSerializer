@@ -34,7 +34,7 @@ namespace AmphetamineSerializer.Chain.Nodes
         {
             var request = genericRequest as ElementBuildRequest;
 
-            var ctx = new FoundryContext(request.InputTypes,
+            var ctx = new Context(request.InputTypes,
                                          request.AdditionalContext,
                                          request.Element,
                                          request.Provider,

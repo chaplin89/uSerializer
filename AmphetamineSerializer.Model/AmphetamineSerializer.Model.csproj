@@ -41,15 +41,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Attributes\BuildedWithAttribute.cs" />
-    <Compile Include="Attributes\DeserializedWithAttribute.cs" />
     <Compile Include="Attributes\IndexAttribute.cs" />
     <Compile Include="Attributes\SerializationAttribute.cs" />
-    <Compile Include="Attributes\TagAttribute.cs" />
-    <Compile Include="BuildedFunction.cs" />
+    <Compile Include="BuildedFunctionStatus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypeOfContent.cs" />
-    <Compile Include="TypeOfRequest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sigil\Sigil NET45\Sigil NET45.csproj">

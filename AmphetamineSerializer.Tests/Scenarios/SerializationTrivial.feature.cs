@@ -13,8 +13,8 @@
 namespace AmphetamineSerializer.Tests.Scenarios
 {
     using TechTalk.SpecFlow;
-    
-    
+
+
     [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "2.2.0.0")]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [NUnit.Framework.TestFixtureAttribute()]

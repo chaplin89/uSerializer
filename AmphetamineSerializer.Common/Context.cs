@@ -1,28 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using AmphetamineSerializer.Interfaces;
 using Sigil.NonGeneric;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using AmphetamineSerializer.Interfaces;
+using System.Linq;
 
 namespace AmphetamineSerializer.Common
 {
     /// <summary>
     /// Context of the assembly building process.
     /// </summary>
-    public class FoundryContext
+    public class Context
     {
         private Emit g;
 
         /// <summary>
-        /// 
+        /// Build a context.
         /// </summary>
         /// <param name="inputParameters"></param>
         /// <param name="additionalContext"></param>
         /// <param name="element"></param>
         /// <param name="provider"></param>
         /// <param name="g"></param>
-        public FoundryContext(Type[] inputParameters,
+        public Context(Type[] inputParameters,
                               object additionalContext,
                               IElement element,
                               SigilFunctionProvider provider,
@@ -31,12 +31,12 @@ namespace AmphetamineSerializer.Common
             LoopCtx = new Stack<LoopContext>();
             InputParameters = inputParameters;
             AdditionalContext = additionalContext;
-            Element = element;
+            CurrentElement = element;
             Provider = provider;
             G = g;
         }
 
-        public IElement Element;
+        public IElement CurrentElement;
 
         /// <summary>
         /// Manage the contexs of loops.
@@ -113,25 +113,6 @@ namespace AmphetamineSerializer.Common
             {
                 Debug.Assert(InputParameters != null && InputParameters.Length > 0);
                 return InputParameters.First().IsByRef;
-            }
-        }
-
-        /// <summary>
-        ///  
-        /// </summary>
-        public Type NormalizedType
-        {
-            get
-            {
-                Type normalizedType = Element.LoadedType;
-
-                if (normalizedType.IsEnum)
-                    normalizedType = normalizedType.GetEnumUnderlyingType();
-
-                if (IsDeserializing)
-                    normalizedType = normalizedType.MakeByRefType();
-
-                return normalizedType;
             }
         }
 

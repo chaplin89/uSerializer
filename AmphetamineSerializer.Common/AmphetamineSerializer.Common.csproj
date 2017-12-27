@@ -56,7 +56,7 @@
     <Compile Include="Element\ConstantElement.cs" />
     <Compile Include="Element\FieldElement.cs" />
     <Compile Include="Element\LocalElement.cs" />
-    <Compile Include="FoundryContext.cs" />
+    <Compile Include="Context.cs" />
     <Compile Include="Element\GenericElement.cs" />
     <Compile Include="LoopContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
