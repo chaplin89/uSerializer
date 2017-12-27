@@ -1,6 +1,4 @@
-﻿using AmphetamineSerializer.Interfaces;
-
-namespace AmphetamineSerializer
+﻿namespace AmphetamineSerializer.Interfaces
 {
     public interface IChainManager
     {

@@ -1,4 +1,4 @@
-﻿using AmphetamineSerializer.Common;
+﻿using AmphetamineSerializer.Common.Element;
 using AmphetamineSerializer.Interfaces;
 using AmphetamineSerializer.Model.Attributes;
 using System;

@@ -1,9 +1,8 @@
-﻿using AmphetamineSerializer.Common;
-using AmphetamineSerializer.Interfaces;
+﻿using AmphetamineSerializer.Interfaces;
 using Sigil.NonGeneric;
 using System;
 
-namespace AmphetamineSerializer.Chain
+namespace AmphetamineSerializer.Common.Chain
 {
     public class ElementBuildRequest : IRequest
     {

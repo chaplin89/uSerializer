@@ -14,6 +14,7 @@ namespace AmphetamineSerializer.Common.Element
         /// Build a wrapper around an argument index.
         /// </summary>
         /// <param name="argumentIndex">Index of the argument.</param>
+        /// <param name="argumentType">Type of the argument (no way to infer this).</param>
         public ArgumentElement(ushort argumentIndex, Type argumentType)
         {
             ArgumentIndex = argumentIndex;
@@ -30,7 +31,7 @@ namespace AmphetamineSerializer.Common.Element
             get
             {
                 return null;
-            }            
+            }
         }
 
         protected override void InternalLoad(Emit emit, TypeOfContent value)

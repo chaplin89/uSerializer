@@ -1,4 +1,5 @@
-﻿using AmphetamineSerializer.Interfaces;
+﻿using AmphetamineSerializer.Common.Chain;
+using AmphetamineSerializer.Interfaces;
 using System;
 using System.Collections.Generic;
 

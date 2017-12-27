@@ -1,4 +1,4 @@
-﻿using AmphetamineSerializer.Chain;
+﻿using AmphetamineSerializer.Common.Chain;
 using AmphetamineSerializer.Interfaces;
 
 namespace AmphetamineSerializer.Common

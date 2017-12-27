@@ -1,5 +1,6 @@
-﻿using AmphetamineSerializer.Common;
-using AmphetamineSerializer.Helpers;
+﻿using AmphetamineSerializer.Backends;
+using AmphetamineSerializer.Common;
+using AmphetamineSerializer.Common.Chain;
 using AmphetamineSerializer.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace AmphetamineSerializer.Chain.Nodes
 
         Type[] defaultHelpers = new Type[]
         {
-            typeof(StreamDeserializationCtx),
+            typeof(StreamBackend),
             typeof(AssemblyFoundry)
         };
 

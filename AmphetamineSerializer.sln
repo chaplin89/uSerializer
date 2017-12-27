@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmphetamineSerializer.Commo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmphetamineSerializer.Example", "AmphetamineSerializer.Example\AmphetamineSerializer.Example.csproj", "{FC61C371-E149-4C61-8CB8-7821FB589AF2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmphetamineSerializer.Helpers", "AmphetamineSerializer.Helpers\AmphetamineSerializer.Helpers.csproj", "{BCC10417-C8F1-4E9E-AB4A-1582327427EA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmphetamineSerializer.Backends", "AmphetamineSerializer.Helpers\AmphetamineSerializer.Backends.csproj", "{BCC10417-C8F1-4E9E-AB4A-1582327427EA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmphetamineSerializer.Interfaces", "AmphetamineSerializer.Interfaces\AmphetamineSerializer.Interfaces.csproj", "{5EB81743-BF16-4C46-B74E-2C846281AF2B}"
 EndProject

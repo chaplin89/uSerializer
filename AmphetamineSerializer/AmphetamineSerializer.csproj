@@ -68,9 +68,9 @@
       <Project>{e2e1d44c-d506-4d37-aac9-a96f65d3d348}</Project>
       <Name>AmphetamineSerializer.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AmphetamineSerializer.Helpers\AmphetamineSerializer.Helpers.csproj">
+    <ProjectReference Include="..\AmphetamineSerializer.Helpers\AmphetamineSerializer.Backends.csproj">
       <Project>{bcc10417-c8f1-4e9e-ab4a-1582327427ea}</Project>
-      <Name>AmphetamineSerializer.Helpers</Name>
+      <Name>AmphetamineSerializer.Backends</Name>
     </ProjectReference>
     <ProjectReference Include="..\AmphetamineSerializer.Interfaces\AmphetamineSerializer.Interfaces.csproj">
       <Project>{5eb81743-bf16-4c46-b74e-2c846281af2b}</Project>

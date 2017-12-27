@@ -1,6 +1,6 @@
-﻿using AmphetamineSerializer.Chain;
-using AmphetamineSerializer.Chain.Nodes;
+﻿using AmphetamineSerializer.Chain.Nodes;
 using AmphetamineSerializer.Common;
+using AmphetamineSerializer.Common.Chain;
 using AmphetamineSerializer.Common.Element;
 using AmphetamineSerializer.Interfaces;
 using AmphetamineSerializer.Model;

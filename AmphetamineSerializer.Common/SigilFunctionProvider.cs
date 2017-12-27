@@ -1,5 +1,5 @@
 ﻿#define RUN_ONLY
-using AmphetamineSerializer.Chain;
+using AmphetamineSerializer.Common.Chain;
 using AmphetamineSerializer.Model;
 using Sigil.NonGeneric;
 using System;

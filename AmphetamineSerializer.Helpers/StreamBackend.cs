@@ -1,5 +1,6 @@
-﻿using AmphetamineSerializer.Chain;
-using AmphetamineSerializer.Common;
+﻿using AmphetamineSerializer.Common;
+using AmphetamineSerializer.Common.Chain;
+using AmphetamineSerializer.Common.Element;
 using AmphetamineSerializer.Model;
 using System;
 using System.Collections.Generic;
@@ -9,9 +10,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace AmphetamineSerializer.Helpers
+namespace AmphetamineSerializer.Backends
 {
-    public class StreamDeserializationCtx : BuilderBase
+    public class StreamBackend : BuilderBase
     {
         /// <summary>
         /// Map every trivial type with its handler inside BinaryWriter or BinaryReader.
@@ -45,13 +46,13 @@ namespace AmphetamineSerializer.Helpers
             {typeof(char).MakeByRefType(),   typeof(BinaryReader).GetMethod("ReadChar")},
         };
         
-        static StreamDeserializationCtx()
+        static StreamBackend()
         {
             // Not all methods were found
             Debug.Assert(!typeHandlerMap.Where(x => x.Value == null).Any());
         }
 
-        public StreamDeserializationCtx(Context ctx) : base(ctx)
+        public StreamBackend(Context ctx) : base(ctx)
         {
         }
 

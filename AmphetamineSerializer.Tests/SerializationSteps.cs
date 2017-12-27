@@ -1,12 +1,11 @@
-﻿using AmphetamineSerializer.Tests;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using TechTalk.SpecFlow;
 
-namespace AmphetamineSerializer.SystemTests
+namespace AmphetamineSerializer.Tests
 {
     [Binding]
     public class SerializationSteps

@@ -4,7 +4,7 @@ using Sigil.NonGeneric;
 using System;
 using System.Reflection;
 
-namespace AmphetamineSerializer.Chain
+namespace AmphetamineSerializer.Common.Chain
 {
     public class DelegateBuildResponse : IResponse
     {

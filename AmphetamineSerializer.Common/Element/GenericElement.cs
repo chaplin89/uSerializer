@@ -1,11 +1,10 @@
-﻿using AmphetamineSerializer.Common.Element;
-using AmphetamineSerializer.Interfaces;
+﻿using AmphetamineSerializer.Interfaces;
 using AmphetamineSerializer.Model;
 using AmphetamineSerializer.Model.Attributes;
 using Sigil.NonGeneric;
 using System;
 
-namespace AmphetamineSerializer.Common
+namespace AmphetamineSerializer.Common.Element
 {
     /// <summary>
     /// Manage a generic element.
