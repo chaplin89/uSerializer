@@ -43,16 +43,24 @@ namespace AmphetamineSerializer
 
             var vBegin = GetFields(null, rootType)
                             .Where(x => x.Attribute.VersionBegin != -1)
-                            .Select(x => x.Attribute.VersionBegin).Distinct();
+                            .Select(x => x.Attribute.VersionBegin)
+                            .Distinct();
 
             var vEnd = GetFields(null, rootType)
                             .Where(x => x.Attribute.VersionEnd != -1)
-                            .Select(x => x.Attribute.VersionEnd).Distinct();
-            
+                            .Select(x => x.Attribute.VersionEnd)
+                            .Distinct();
+
+
+            var vSpecific = GetFields(null, rootType)
+                            .Where(x => x.Attribute.Version != null)
+                            .Select(x => (int)x.Attribute.Version)
+                            .Distinct();
+
             if (vBegin.Any() || vEnd.Any())
             {
-                minExplicitlyManagedVersion = vBegin.Concat(vEnd).Min();
-                maxExplicitlyManagedVersion = vBegin.Concat(vEnd).Max();
+                minExplicitlyManagedVersion = vBegin.Concat(vEnd).Concat(vSpecific).Min();
+                maxExplicitlyManagedVersion = vBegin.Concat(vEnd).Concat(vSpecific).Max();
             }
 
             //TODO: check for nonsense interval
@@ -104,10 +112,12 @@ namespace AmphetamineSerializer
             if (version != null && version.GetType() == typeof(int))
             {
                 fields = fields
-                            .Where(x => !(x.Attribute.VersionBegin != -1) ||
-                                         x.Attribute.VersionBegin <= (int)version)
-                            .Where(x => !(x.Attribute.VersionEnd != -1) ||
-                                         x.Attribute.VersionEnd >= (int)version)
+                            .Where(x => x.Attribute.VersionBegin == -1 ||
+                                         x.Attribute.VersionBegin <= (int)version ||
+                                         (int)x.Attribute.Version == (int)version)
+                            .Where(x => x.Attribute.VersionEnd == -1 ||
+                                        x.Attribute.VersionEnd >= (int)version ||
+                                        (int)x.Attribute.Version == (int)version)
                             .OrderBy(x => x.Attribute.Index);
             }
             else

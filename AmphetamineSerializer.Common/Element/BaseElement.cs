@@ -6,6 +6,9 @@ using AmphetamineSerializer.Model;
 
 namespace AmphetamineSerializer.Common.Element
 {
+    /// <summary>
+    /// Add common functionalities (like array management) to a generic element.
+    /// </summary>
     public abstract class BaseElement : IElement, ICloneable
     {
         protected Type loadedType;
@@ -92,8 +95,15 @@ namespace AmphetamineSerializer.Common.Element
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks><see cref="IElement.Next"/></remarks>
         public IElement Next { get { return next; } }
-
+        
+        /// <summary>
+        /// <see cref="IElement.Previous"/>
+        /// </summary>
         public IElement Previous { get { return previous; } }
 
         public IElement EnterArray(IElement index)

@@ -37,6 +37,7 @@ namespace AmphetamineSerializer
             else
                 objectContained = ctx.Provider.AlreadyBuildedMethods.ContainsKey(ctx.ObjectType);
 
+
             if (objectContained)
                 method = ctx.Provider.AlreadyBuildedMethods[ctx.ObjectType];
             else
@@ -137,7 +138,7 @@ namespace AmphetamineSerializer
                     ctx.G.Return();
                 }
             }
-            else if(versionField.Field.FieldType.IsAssignableFrom(typeof(IEquatable<>)))
+            else if (versionField.Field.FieldType.IsAssignableFrom(typeof(IEquatable<>)))
             {
                 // TODO: Manage non numeric versions
             }
@@ -157,21 +158,17 @@ namespace AmphetamineSerializer
         }
 
         /// <summary>
-        /// Increment a local variable with a given step
+        /// Increment a local variable
         /// </summary>
         /// <param name="index">Variable to increment</param>
-        /// <param name="step">Step</param>
-        private void IncrementLocalVariable(Local index, int step = 1)
+        private void IncrementLocalVariable(Local index)
         {
             // C# Translation:
             //     index+=step;
-            ctx.G.LoadLocal(index); // index --> stack
-            if (step == 1)
-                ctx.G.LoadConstant(1); // 1 --> stack
-            else
-                ctx.G.LoadConstant(step); // step --> stack
-            ctx.G.Add(); // index + step --> stack
-            ctx.G.StoreLocal(index); // stack --> index
+            ctx.G.LoadLocal(index);
+            ctx.G.LoadConstant(1);
+            ctx.G.Add();
+            ctx.G.StoreLocal(index);
         }
 
         /// <summary>
@@ -180,7 +177,20 @@ namespace AmphetamineSerializer
         /// <param name="ctx"></param>
         private void ForwardParameters(FoundryContext ctx, ElementBuildResponse currentMethod)
         {
-            if (currentMethod != null && currentMethod.Status == BuildedFunctionStatus.TypeFinalized)
+            if (currentMethod == null)
+            {
+                SimpleForward(ctx);
+                return;
+            }
+
+            if (currentMethod.Status == BuildedFunctionStatus.FunctionFinalizedTypeNotFinalized)
+            {
+                SimpleForward(ctx);
+                ctx.G.Call(currentMethod.Emiter);
+                return;
+            }
+
+            if (currentMethod.Status == BuildedFunctionStatus.TypeFinalized)
             {
                 ParameterInfo[] parameters = currentMethod.Method.GetParameters();
                 bool[] foundParameter = new bool[parameters.Length - 1];
@@ -193,16 +203,16 @@ namespace AmphetamineSerializer
                         {
                             if (foundParameter[i - 1])
                                 throw new AmbiguousMatchException("Input arguments match more than one argument in the handler signature.");
+
                             foundParameter[i - 1] = true;
 
                             ctx.G.LoadArgument(j); // argument i --> stack
                             break;
                         }
                     }
+
                     if (!foundParameter[i - 1])
-                    {
                         throw new InvalidOperationException("Unable to load all the parameters for the handler.");
-                    }
                 }
 
                 if (currentMethod.Method.IsStatic)
@@ -210,11 +220,14 @@ namespace AmphetamineSerializer
                 else
                     ctx.G.CallVirtual(currentMethod.Method);
             }
-            else
-            {
-                for (ushort j = 1; j < ctx.InputParameters.Length; j++)
-                    ctx.G.LoadArgument(j); // argument i --> stack
-            }
+
+            throw new InvalidOperationException("Can't forward parameters. Function is in an inconsistent state.");
+        }
+
+        private void SimpleForward(FoundryContext ctx)
+        {
+            for (ushort j = 1; j < ctx.InputParameters.Length; j++)
+                ctx.G.LoadArgument(j);
         }
 
         /// <summary>
@@ -232,12 +245,13 @@ namespace AmphetamineSerializer
                 ctx.Element = linkedList.First.Value;
                 ElementBuildResponse response = null;
 
-                // todo:
+                // TODO:
                 // 1. List (needs a special handling because of its similarities with Array)
                 // 2. Anything else implementing IEnumerable (excluding List ofc)
                 if (ctx.Element.LoadedType.IsAbstract)
                     throw new InvalidOperationException("Incomplete types are not allowed.");
 
+                // Indexable; just generate the loop preamble and skip to element @ "Index" of the inner type.
                 if (ctx.Element.IsIndexable)
                 {
                     var index = AddLoopPreamble(ctx).Index;
@@ -247,6 +261,7 @@ namespace AmphetamineSerializer
                     continue;
                 }
 
+                // Not indexable; proceed with the request.
                 var request = new ElementBuildRequest()
                 {
                     Element = ctx.Element,
@@ -261,22 +276,17 @@ namespace AmphetamineSerializer
                 if (response == null)
                     throw new NotSupportedException();
 
-                // So we have correctly send a request we have its reply.
-                // Whoever handled the request had chance to:
-                // 1) Modify the context in order to produce some instruction capable of 
-                //    handling the request. We don't need to do anything else.
-                // 2) Giving back a method that we have to call.
-                //    If that is the case, we should rearrange the input and call the method.
+                // Depending on who handled the request, complex object may require a call to another method.
                 if (response.Status != BuildedFunctionStatus.ContextModified)
                 {
-                    HandleType(ctx);
+                    HandleType(ctx, ctx.Element);
 
                     if (response.Status != BuildedFunctionStatus.TypeFinalized)
                         ctx.G.Call(response.Emiter, null);
                     else if (method != null)
                         ctx.G.Call(response.Method, null);
-                    //else
-                    //    throw new InvalidOperationException("Unable to call builded method.");
+                    else
+                        throw new InvalidOperationException("Unable to call builded method.");
                 }
 
                 if (ctx.LoopCtx.Count > 0)
@@ -293,15 +303,16 @@ namespace AmphetamineSerializer
         /// Manage 
         /// </summary>
         /// <param name="ctx">Context</param>
-        private void HandleType(FoundryContext ctx)
+        private void HandleType(FoundryContext ctx, IElement element)
         {
-            if (ctx.ObjectType.IsByRef)
-                ctx.Element.Load(ctx.G, TypeOfContent.Address);
+            if (ctx.IsDeserializing)
+                element.Load(ctx.G, TypeOfContent.Address);
             else
-                ctx.Element.Load(ctx.G, TypeOfContent.Value);
+                element.Load(ctx.G, TypeOfContent.Value);
 
             ForwardParameters(ctx, null);
         }
+
         #endregion
 
         #region Loop
@@ -325,7 +336,7 @@ namespace AmphetamineSerializer
 
             currentLoopContext.Body = ctx.G.DefineLabel($"Body_{ctx.Element.GetHashCode()}");
             currentLoopContext.CheckOutOfBound = ctx.G.DefineLabel($"OutOfBound_{ctx.Element.GetHashCode()}");
-            
+
             Type indexType = ctx.Element.Attribute?.SizeType;
             if (indexType == null)
                 indexType = typeof(uint);
@@ -346,7 +357,7 @@ namespace AmphetamineSerializer
                 currentLoopContext.Size = ctx.Element.Lenght;
             }
 
-            // Write in stream
+
             if (!ctx.IsDeserializing)
             {
                 // Write the size of the array
