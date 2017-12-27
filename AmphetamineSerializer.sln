@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmphetamineSerializer.Commo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmphetamineSerializer.Example", "AmphetamineSerializer.Example\AmphetamineSerializer.Example.csproj", "{FC61C371-E149-4C61-8CB8-7821FB589AF2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmphetamineSerializer.Backends", "AmphetamineSerializer.Helpers\AmphetamineSerializer.Backends.csproj", "{BCC10417-C8F1-4E9E-AB4A-1582327427EA}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmphetamineSerializer.Interfaces", "AmphetamineSerializer.Interfaces\AmphetamineSerializer.Interfaces.csproj", "{5EB81743-BF16-4C46-B74E-2C846281AF2B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmphetamineSerializer.Tests", "AmphetamineSerializer.Tests\AmphetamineSerializer.Tests.csproj", "{5BC951CC-E55B-4099-B077-CB535162C1D2}"
@@ -35,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmphetamineSerializer.Perfo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmphetamineSerializer.Model", "AmphetamineSerializer.Model\AmphetamineSerializer.Model.csproj", "{27AC1F54-50B4-4299-A425-BA841A918543}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmphetamineSerializer.Backends", "AmphetamineSerializer.Backends\AmphetamineSerializer.Backends.csproj", "{BCC10417-C8F1-4E9E-AB4A-1582327427EA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,10 +54,6 @@ Global
 		{FC61C371-E149-4C61-8CB8-7821FB589AF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC61C371-E149-4C61-8CB8-7821FB589AF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC61C371-E149-4C61-8CB8-7821FB589AF2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BCC10417-C8F1-4E9E-AB4A-1582327427EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BCC10417-C8F1-4E9E-AB4A-1582327427EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BCC10417-C8F1-4E9E-AB4A-1582327427EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BCC10417-C8F1-4E9E-AB4A-1582327427EA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5EB81743-BF16-4C46-B74E-2C846281AF2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5EB81743-BF16-4C46-B74E-2C846281AF2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5EB81743-BF16-4C46-B74E-2C846281AF2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -82,6 +78,10 @@ Global
 		{27AC1F54-50B4-4299-A425-BA841A918543}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{27AC1F54-50B4-4299-A425-BA841A918543}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{27AC1F54-50B4-4299-A425-BA841A918543}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCC10417-C8F1-4E9E-AB4A-1582327427EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCC10417-C8F1-4E9E-AB4A-1582327427EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCC10417-C8F1-4E9E-AB4A-1582327427EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCC10417-C8F1-4E9E-AB4A-1582327427EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
