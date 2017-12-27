@@ -59,15 +59,8 @@ namespace AmphetamineSerializer
 
             if (ctx.IsDeserializing)
             {
-                normalizedType = ctx.ObjectType.GetElementType();
-                var ctor = normalizedType.GetConstructor(new Type[] { });
-
-                if (ctor == null)
-                    throw new NotSupportedException($"The type {normalizedType.Name} does not have a parameterless constructor.");
-
-                var load = new GenericElement(((g, _) => g.NewObject(normalizedType)), null);
-
-                instance.Store(ctx.G, load, TypeOfContent.Value);
+                normalizedType = normalizedType.GetElementType();
+                CreateAndAssignNewInstance(normalizedType, instance);
             }
 
             var versions = VersionHelper.GetExplicitlyManagedVersions(normalizedType).ToArray();
@@ -81,6 +74,16 @@ namespace AmphetamineSerializer
             }
 
             return ctx.Provider.GetMethod();
+        }
+
+        private void CreateAndAssignNewInstance(Type typeToCreate, IElement instance)
+        {
+            if (typeToCreate.GetConstructor(Type.EmptyTypes) == null)
+                throw new NotSupportedException($"The type {typeToCreate.Name} does not have a parameterless constructor.");
+
+            var newInstance = new GenericElement(((g, _) => g.NewObject(typeToCreate)), null);
+
+            instance.Store(ctx.G, newInstance, TypeOfContent.Value);
         }
 
         private void ManageVersions(Context ctx, IElement instance, object[] versions, Type normalizedType)
@@ -175,57 +178,28 @@ namespace AmphetamineSerializer
         /// <param name="ctx"></param>
         private void ForwardParameters(Context ctx, ElementBuildResponse currentMethod)
         {
+            for (ushort j = 1; j < ctx.InputParameters.Length; j++)
+                ctx.G.LoadArgument(j);
+
             if (currentMethod == null)
             {
-                SimpleForward(ctx);
                 return;
             }
-
-            if (currentMethod.Status == BuildedFunctionStatus.FunctionFinalizedTypeNotFinalized)
+            else if (currentMethod.Status == BuildedFunctionStatus.FunctionFinalizedTypeNotFinalized)
             {
-                SimpleForward(ctx);
                 ctx.G.Call(currentMethod.Emiter);
                 return;
             }
-
-            if (currentMethod.Status == BuildedFunctionStatus.TypeFinalized)
+            else if (currentMethod.Status == BuildedFunctionStatus.TypeFinalized)
             {
-                ParameterInfo[] parameters = currentMethod.Method.GetParameters();
-                bool[] foundParameter = new bool[parameters.Length - 1];
-
-                for (int i = 1; i < parameters.Length; ++i)
-                {
-                    for (ushort j = 1; j < ctx.InputParameters.Length; j++)
-                    {
-                        if (ctx.InputParameters[j] == parameters[i].ParameterType)
-                        {
-                            if (foundParameter[i - 1])
-                                throw new AmbiguousMatchException("Input arguments match more than one argument in the handler signature.");
-
-                            foundParameter[i - 1] = true;
-
-                            ctx.G.LoadArgument(j); // argument i --> stack
-                            break;
-                        }
-                    }
-
-                    if (!foundParameter[i - 1])
-                        throw new InvalidOperationException("Unable to load all the parameters for the handler.");
-                }
-
                 if (currentMethod.Method.IsStatic)
-                    ctx.G.Call(currentMethod.Method);                 // void func(ref obj,byte[], ref int)
+                    ctx.G.Call(currentMethod.Method);
                 else
                     ctx.G.CallVirtual(currentMethod.Method);
+                return;
             }
 
-            throw new InvalidOperationException("Can't forward parameters. Function is in an inconsistent state.");
-        }
-
-        private void SimpleForward(Context ctx)
-        {
-            for (ushort j = 1; j < ctx.InputParameters.Length; j++)
-                ctx.G.LoadArgument(j);
+            throw new InvalidOperationException("Can't forward parameters.");
         }
 
         /// <summary>
@@ -370,7 +344,7 @@ namespace AmphetamineSerializer
             {
                 currentLoopContext.Size = ctx.CurrentElement.Lenght;
             }
-            
+
             if (!ctx.IsDeserializing)
             {
                 // Write the size of the array
@@ -447,18 +421,6 @@ namespace AmphetamineSerializer
             ctx.G.MarkLabel(currentLoopContext.Body);
 
             return currentLoopContext;
-        }
-
-        private Type MakeDelegateType(Type objectType, Type[] inputTypes)
-        {
-            List<Type> arguments = new List<Type>(inputTypes.Length + 1);
-            arguments.Add(objectType);
-
-            for (int i = 1; i < inputTypes.Length; i++)
-                arguments.Add(inputTypes[i]);
-            arguments.Add(typeof(void));
-
-            return Expression.GetDelegateType(arguments.ToArray());
         }
 
         /// <summary>
