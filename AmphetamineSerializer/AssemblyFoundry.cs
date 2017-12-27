@@ -370,8 +370,7 @@ namespace AmphetamineSerializer
             {
                 currentLoopContext.Size = ctx.CurrentElement.Lenght;
             }
-
-
+            
             if (!ctx.IsDeserializing)
             {
                 // Write the size of the array

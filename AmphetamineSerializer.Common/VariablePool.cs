@@ -6,14 +6,14 @@ using System.Linq;
 
 namespace AmphetamineSerializer.Common
 {
-    class VariableStatus
-    {
-        internal LocalElement Variable;
-        internal bool IsFree;
-    }
-
     public class VariablePool
     {
+        private class VariableStatus
+        {
+            internal LocalElement Variable;
+            internal bool IsFree;
+        }
+
         private Emit g;
         Dictionary<Type, List<VariableStatus>> currentPool;
 

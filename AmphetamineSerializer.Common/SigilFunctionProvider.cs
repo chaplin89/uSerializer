@@ -12,15 +12,21 @@ using SysEmit = System.Reflection.Emit;
 
 namespace AmphetamineSerializer.Common
 {
+    /// <summary>
+    /// Deal with type creation and IL code Emiter. 
+    /// </summary>
     public class SigilFunctionProvider
     {
-        AssemblyName assemblyName;
-        SysEmit.AssemblyBuilder assemblyBuilder;
-        SysEmit.ModuleBuilder moduleBuilder;
-        SysEmit.TypeBuilder typeBuilder;
+        private AssemblyName assemblyName;
+        private SysEmit.AssemblyBuilder assemblyBuilder;
+        private SysEmit.ModuleBuilder moduleBuilder;
+        private SysEmit.TypeBuilder typeBuilder;
+        private Stack<ElementBuildResponse> methods = new Stack<ElementBuildResponse>();
 
-        Stack<ElementBuildResponse> methods = new Stack<ElementBuildResponse>();
-
+        /// <summary>
+        /// Build a new provider
+        /// </summary>
+        /// <param name="assemblyName">Name of the assembly to build.</param>
         public SigilFunctionProvider(string assemblyName = null)
         {
             AlreadyBuildedMethods = new Dictionary<Type, ElementBuildResponse>();
