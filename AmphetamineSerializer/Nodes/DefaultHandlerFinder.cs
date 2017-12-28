@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmphetamineSerializer.Chain.Nodes
+namespace AmphetamineSerializer.Nodes
 {
     public class DefaultHandlerFinder : IChainElement
     {
@@ -15,7 +15,7 @@ namespace AmphetamineSerializer.Chain.Nodes
         Type[] defaultHelpers = new Type[]
         {
             typeof(StreamBackend),
-            typeof(AssemblyFoundry)
+            typeof(AssemblyBuilder)
         };
 
         public DefaultHandlerFinder()

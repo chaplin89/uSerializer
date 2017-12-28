@@ -3,7 +3,7 @@
 namespace AmphetamineSerializer.Model.Attributes
 {
     /// <summary>
-    /// Instruct the deserializator about how to deserialize a give field.
+    /// Instruct the deserializator about how to deserialize a given field.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
     public class ASIndexAttribute : Attribute
@@ -13,9 +13,9 @@ namespace AmphetamineSerializer.Model.Attributes
         /// </summary>
         /// <remarks>
         /// This is the only required information that have to be provided in order
-        /// to corretcly build the logic for deserialization.
+        /// to correctly build the logic for deserialization.
         /// Indexes has not to be sequential because the index is just an hint for the deserializator.
-        /// In other word, it won't care if you specify the index 1 and the index 3 but not the index 2.
+        /// In other word, it won't care if are specified the index 1 and the index 3 but not the index 2.
         /// If you specify two field with the same Index the behaviour is undefined (no warning are issued).
         /// </remarks>
         public int Index { get; }
@@ -26,7 +26,7 @@ namespace AmphetamineSerializer.Model.Attributes
         /// </summary>
         /// <remarks>
         /// This property should be set only if the field is an array.
-        /// If the field is not an array this will be ignored (no warninga are issued).
+        /// If the field is not an array this will be ignored (no warning are issued).
         /// </remarks>
         public Type SizeType { get; set; }
 
@@ -40,6 +40,9 @@ namespace AmphetamineSerializer.Model.Attributes
         /// </summary>
         public int VersionEnd { get; set; }
 
+        /// <summary>
+        /// If set, the field will be deserialized only if the version is == this property.
+        /// </summary>
         public object Version { get; set; }
 
         /// <summary>
@@ -50,14 +53,10 @@ namespace AmphetamineSerializer.Model.Attributes
         public int ArrayFixedSize { get; set; }
 
         /// <summary>
-        /// If set and the handlers accept an ulong field, the content of this property
-        /// will be forward to the handler.
+        /// If the type is an array, this property specify what is the field that contains the
+        /// size of this array. Of course, the size should come before the array itself.
         /// </summary>
-        /// <remarks>
-        /// The meaning of this field vary from handler to handler, refer to the documentation
-        /// of the handler to understand if and how the handler manage this info.
-        /// </remarks>
-        public ulong AdditionalOptions { get; set; }
+        public int SizeIndex { get; set; }
 
         /// <summary>
         /// Initialize an attribute with an index.
@@ -70,7 +69,6 @@ namespace AmphetamineSerializer.Model.Attributes
             VersionBegin = -1;
             VersionEnd = -1;
             ArrayFixedSize = -1;
-            AdditionalOptions = 0;
         }
     }
 }

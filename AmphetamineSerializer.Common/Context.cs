@@ -36,7 +36,10 @@ namespace AmphetamineSerializer.Common
             G = g;
         }
 
-        public IElement CurrentElement;
+        /// <summary>
+        /// 
+        /// </summary>
+        public IElement CurrentElement { get; set; }
 
         /// <summary>
         /// Manage the contexs of loops.
@@ -73,7 +76,7 @@ namespace AmphetamineSerializer.Common
         public SigilFunctionProvider Provider { get; set; }
 
         /// <summary>
-        /// Generator.
+        /// IL Generator for the current method.
         /// </summary>
         public Emit G
         {
@@ -103,9 +106,6 @@ namespace AmphetamineSerializer.Common
         /// This means:
         ///     1) true if the input is passed ByRef
         ///     2) false vice-versa
-        /// This is the only thing that differentiate a Serialization from a Deserialization.
-        /// The inner part of the builder, in fact, does not know anything about Serialization or 
-        /// Deserialization because it's only a way to iterate over an object graph and call some methods.
         /// </remarks>
         public bool IsDeserializing
         {
@@ -119,6 +119,6 @@ namespace AmphetamineSerializer.Common
         /// <summary>
         /// Local variable pool for the current function.
         /// </summary>
-        public VariablePool VariablePool { get; set; }
+        public VariablePool VariablePool { get; private set; }
     }
 }

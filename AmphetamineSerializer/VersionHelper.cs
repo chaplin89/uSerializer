@@ -28,6 +28,11 @@ namespace AmphetamineSerializer
                 return GetNumericVersions(rootType);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="rootType"></param>
+        /// <returns></returns>
         private static IEnumerable<object> GetNonNumericVersions(Type rootType)
         {
             return GetAllFields(null, rootType)
@@ -36,6 +41,11 @@ namespace AmphetamineSerializer
                 .Distinct();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="rootType"></param>
+        /// <returns></returns>
         private static IEnumerable<object> GetNumericVersions(Type rootType)
         {
             int? maxExplicitlyManagedVersion = null;

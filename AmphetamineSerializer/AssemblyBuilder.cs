@@ -1,4 +1,4 @@
-﻿using AmphetamineSerializer.Chain.Nodes;
+﻿using AmphetamineSerializer.Nodes;
 using AmphetamineSerializer.Common;
 using AmphetamineSerializer.Common.Chain;
 using AmphetamineSerializer.Common.Element;
@@ -9,22 +9,20 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 
 namespace AmphetamineSerializer
 {
     /// <summary>
     /// Make new assemblies.
     /// </summary>
-    public class AssemblyFoundry : BuilderBase
+    public class AssemblyBuilder : BuilderBase
     {
         #region ctor
         /// <summary>
-        /// Build an AssemblyFoundry object starting from a context.
+        /// Build an AssemblyBuilder object starting from a context.
         /// </summary>
         /// <param name="ctx">Context</param>
-        public AssemblyFoundry(Context ctx) : base(ctx)
+        public AssemblyBuilder(Context ctx) : base(ctx)
         {
             if (ctx == null)
                 throw new ArgumentNullException("ctx");
@@ -97,31 +95,21 @@ namespace AmphetamineSerializer
             for (int i = 0; i < labels.Length; i++)
                 labels[i] = ctx.G.DefineLabel($"Version_{i}");
 
-            Type requestType = versionField.LoadedType;
+            Type versionType = versionField.LoadedType;
             if (ctx.IsDeserializing)
-                requestType = requestType.MakeByRefType();
+                versionType = versionType.MakeByRefType();
 
             var request = new ElementBuildRequest()
             {
                 Element = versionField,
                 AdditionalContext = ctx.AdditionalContext,
-                InputTypes = GetInputTypes(ctx, requestType),
+                InputTypes = GetInputTypes(ctx, versionType),
                 Provider = ctx.Provider,
                 G = ctx.G
             };
 
             var response = ctx.Chain.Process(request) as ElementBuildResponse;
-            var targetMethod = response;
-
-            if (targetMethod.Status != BuildedFunctionStatus.ContextModified)
-            {
-                if (ctx.IsDeserializing)
-                    versionField.Load(ctx.G, TypeOfContent.Address);
-                else
-                    versionField.Load(ctx.G, TypeOfContent.Value);
-
-                ForwardParameters(ctx, targetMethod);
-            }
+            ManageReponse(ctx, response, versionField);
 
             if (versionField.Field.FieldType == typeof(int))
             {
@@ -176,26 +164,33 @@ namespace AmphetamineSerializer
         /// 
         /// </summary>
         /// <param name="ctx"></param>
-        private void ForwardParameters(Context ctx, ElementBuildResponse currentMethod)
+        private void ManageReponse(Context ctx, ElementBuildResponse response, IElement firstElement)
         {
+            if (response == null)
+                throw new ArgumentNullException("response");
+
+            if (response.Status == BuildedFunctionStatus.ContextModified)
+                return;
+
+            if (ctx.IsDeserializing)
+                firstElement.Load(ctx.G, TypeOfContent.Address);
+            else
+                firstElement.Load(ctx.G, TypeOfContent.Value);
+
             for (ushort j = 1; j < ctx.InputParameters.Length; j++)
                 ctx.G.LoadArgument(j);
 
-            if (currentMethod == null)
+            if (response.Status == BuildedFunctionStatus.FunctionFinalizedTypeNotFinalized)
             {
+                ctx.G.Call(response.Emiter);
                 return;
             }
-            else if (currentMethod.Status == BuildedFunctionStatus.FunctionFinalizedTypeNotFinalized)
+            else if (response.Status == BuildedFunctionStatus.TypeFinalized)
             {
-                ctx.G.Call(currentMethod.Emiter);
-                return;
-            }
-            else if (currentMethod.Status == BuildedFunctionStatus.TypeFinalized)
-            {
-                if (currentMethod.Method.IsStatic)
-                    ctx.G.Call(currentMethod.Method);
+                if (response.Method.IsStatic)
+                    ctx.G.Call(response.Method);
                 else
-                    ctx.G.CallVirtual(currentMethod.Method);
+                    ctx.G.CallVirtual(response.Method);
                 return;
             }
 
@@ -244,22 +239,7 @@ namespace AmphetamineSerializer
                 };
 
                 response = ctx.Chain.Process(request) as ElementBuildResponse;
-
-                if (response == null)
-                    throw new NotSupportedException();
-
-                // Depending on who handled the request, complex object may require a call to another method.
-                if (response.Status != BuildedFunctionStatus.ContextModified)
-                {
-                    HandleType(ctx, ctx.CurrentElement);
-
-                    if (response.Status != BuildedFunctionStatus.TypeFinalized)
-                        ctx.G.Call(response.Emiter, null);
-                    else if (method != null)
-                        ctx.G.Call(response.Method, null);
-                    else
-                        throw new InvalidOperationException("Unable to call builded method.");
-                }
+                ManageReponse(ctx, response, ctx.CurrentElement);
 
                 if (ctx.LoopCtx.Count > 0)
                     AddLoopEpilogue(ctx);
@@ -270,19 +250,6 @@ namespace AmphetamineSerializer
         #endregion
 
         #region Type management
-        /// <summary>
-        /// Manage 
-        /// </summary>
-        /// <param name="ctx">Context</param>
-        private void HandleType(Context ctx, IElement element)
-        {
-            if (ctx.IsDeserializing)
-                element.Load(ctx.G, TypeOfContent.Address);
-            else
-                element.Load(ctx.G, TypeOfContent.Value);
-
-            ForwardParameters(ctx, null);
-        }
 
         /// <summary>
         /// 
@@ -315,7 +282,12 @@ namespace AmphetamineSerializer
         /// <returns>The generated loop context.</returns>
         private LoopContext AddLoopPreamble(Context ctx)
         {
+            if (ctx == null)
+                throw new ArgumentNullException("ctx");
+
             var currentLoopContext = new LoopContext(ctx.VariablePool.GetNewVariable(typeof(uint)));
+            currentLoopContext.Size = ctx.CurrentElement.Lenght;
+
             ctx.LoopCtx.Push(currentLoopContext);
 
             currentLoopContext.Body = ctx.G.DefineLabel($"Body_{ctx.CurrentElement.GetHashCode()}");
@@ -325,51 +297,26 @@ namespace AmphetamineSerializer
 
             if (indexType == null)
                 indexType = typeof(uint);
+            ElementBuildResponse response = null;
 
-            if (ctx.IsDeserializing)
+            bool staticSize = ctx.IsDeserializing && ctx.CurrentElement.Attribute?.ArrayFixedSize != -1;
+
+            if (staticSize)
             {
-                if (ctx.CurrentElement.Attribute?.ArrayFixedSize != -1)
-                {
-                    if (ctx.CurrentElement.Index != null)
-                        throw new NotSupportedException("Fixed size arrays for multi-dimensional array is not supported.");
+                if (ctx.CurrentElement.Index != null)
+                    throw new NotSupportedException("Fixed size arrays for jagged array is not supported.");
 
-                    int size = ctx.CurrentElement.Attribute.ArrayFixedSize;
-                    currentLoopContext.Size = (ConstantElement<int>)size;
-                }
-                else
-                {
-                    currentLoopContext.Size = ctx.VariablePool.GetNewVariable(indexType);
-
-                    var request = new ElementBuildRequest()
-                    {
-                        Element = currentLoopContext.Size,
-                        InputTypes = GetInputTypes(ctx, indexType.MakeByRefType()),
-                        AdditionalContext = ctx.AdditionalContext,
-                        Provider = ctx.Provider,
-                        G = ctx.G
-                    };
-
-                    var response = ctx.Chain.Process(request) as ElementBuildResponse;
-
-                    if (response.Status != BuildedFunctionStatus.ContextModified)
-                    {
-                        currentLoopContext.Size.Load(ctx.G, TypeOfContent.Address);
-                        ForwardParameters(ctx, response);
-                    }
-                }
-
-                var newArray = new GenericElement(((g, _) =>
-                {
-                    currentLoopContext.Size.Load(g, TypeOfContent.Value);
-                    ctx.G.NewArray(ctx.CurrentElement.LoadedType.GetElementType());
-                }), null);
-
-                ctx.CurrentElement.Store(ctx.G, newArray, TypeOfContent.Value);
+                int size = ctx.CurrentElement.Attribute.ArrayFixedSize;
+                currentLoopContext.Size = (ConstantElement<int>)size;
             }
             else
             {
-                currentLoopContext.Size = ctx.CurrentElement.Lenght;
-                
+                if (ctx.IsDeserializing)
+                {
+                    currentLoopContext.Size = ctx.VariablePool.GetNewVariable(indexType);
+                    indexType = indexType.MakeByRefType();
+                }
+
                 var request = new ElementBuildRequest()
                 {
                     Element = currentLoopContext.Size,
@@ -379,12 +326,18 @@ namespace AmphetamineSerializer
                     G = ctx.G
                 };
 
-                var response = ctx.Chain.Process(request) as ElementBuildResponse;
+                response = ctx.Chain.Process(request) as ElementBuildResponse;
+                ManageReponse(ctx, response, currentLoopContext.Size);
 
-                if (response.Status != BuildedFunctionStatus.ContextModified)
+                if (ctx.IsDeserializing)
                 {
-                    currentLoopContext.Size.Load(ctx.G, TypeOfContent.Value);
-                    ForwardParameters(ctx, response);
+                    var newArray = new GenericElement(((g, _) =>
+                    {
+                        currentLoopContext.Size.Load(g, TypeOfContent.Value);
+                        g.NewArray(ctx.CurrentElement.LoadedType.GetElementType());
+                    }), null);
+
+                    ctx.CurrentElement.Store(ctx.G, newArray, TypeOfContent.Value);
                 }
             }
 
@@ -419,17 +372,7 @@ namespace AmphetamineSerializer
 
                 ctx.G.MarkLabel(currentLoopContext.CheckOutOfBound);
                 ctx.G.LoadLocal(currentLoopContext.Index);
-
-                // If the Size is not provided, load the lenght of the array.
-                if (currentLoopContext.Size == null)
-                {
-                    ctx.CurrentElement.Load(ctx.G, TypeOfContent.Value);
-                    ctx.G.LoadLength(ctx.CurrentElement.LoadedType);
-                }
-                else
-                {
-                    currentLoopContext.Size.Load(ctx.G, TypeOfContent.Value);
-                }
+                currentLoopContext.Size.Load(ctx.G, TypeOfContent.Value);
 
                 ctx.G.BranchIfLess(currentLoopContext.Body);
                 ctx.VariablePool.ReleaseVariable(currentLoopContext.Index);
