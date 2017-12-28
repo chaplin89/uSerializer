@@ -102,9 +102,9 @@ namespace AmphetamineSerializer.Tests
     {
         [ASIndex(00), DataMember] public int           Version;
 
-        [ASIndex(02), DataMember] public float Test_100;
-        [ASIndex(03), DataMember] public double Test_101;
-        [ASIndex(04), DataMember] public Contained_102 Test_102;
+        [ASIndex(02, Version = 100), DataMember] public float Test_100;
+        [ASIndex(03, Version = 101), DataMember] public double Test_101;
+        [ASIndex(04, Version = 102), DataMember] public Contained_102 Test_102;
 
         // [ASIndex(21)] public TestJaggedArray           Test_Field21;
         // [ASIndex(22)] public TestJaggedArray   []      Test_Field22;

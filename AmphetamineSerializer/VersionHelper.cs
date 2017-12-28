@@ -60,8 +60,7 @@ namespace AmphetamineSerializer
                             .Where(x => x.Attribute.VersionEnd != -1)
                             .Select(x => x.Attribute.VersionEnd)
                             .Distinct();
-
-
+            
             var vSpecific = GetFields(null, rootType)
                             .Where(x => x.Attribute.Version != null)
                             .Select(x => (int)x.Attribute.Version)
@@ -129,10 +128,6 @@ namespace AmphetamineSerializer
                                         x.Attribute.VersionEnd >= (int)version ||
                                         (int)x.Attribute.Version == (int)version)
                             .OrderBy(x => x.Attribute.Index);
-            }
-            else
-            {
-                fields = fields.Where(x => x.Attribute.Version == version);
             }
 
             return fields;
