@@ -94,13 +94,13 @@ There are plans to support the version field to be a generic complex object.
 [WIP]
 ## TODO (not in any specific order)
 - [X] ~~Remove obsolete code/improve readability~~
-- [ ] Provide a better abstraction for the IL generation part
+- [X] ~~Test coverage of the versioning part~~
+- [X] ~~Provide a better abstraction for the IL generation part~~
+- [ ] Document all classes
 - [ ] Compile to multiple .NET Framework
 - [ ] Create a NuGet package
-- [ ] Test coverage of the versioning part
 - [ ] Allow version to be a complex object
 - [ ] Improve the example in order to support serialization/deserialization of a full PE32/PE64 Header
-- [ ] Document all classes
 - [ ] Allow an array to have its lenght in any other field
 - [ ] Provide a better support for plugin-like features
 ## Benchmark
