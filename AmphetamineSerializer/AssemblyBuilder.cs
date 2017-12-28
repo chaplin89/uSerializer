@@ -218,7 +218,7 @@ namespace AmphetamineSerializer
             if (ctx == null)
                 throw new InvalidOperationException("Context is null.");
 
-            var linkedList = new Stack<IElement>(fields);
+            var linkedList = new Stack<IElement>(fields.Reverse());
 
             while (linkedList.Count > 0)
             {
