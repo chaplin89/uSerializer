@@ -93,7 +93,7 @@ There are plans to support the version field to be a generic complex object.
 ## Extension
 [WIP]
 ## TODO (not in any specific order)
-- [ ] Remove some obsolete code/clean some parts
+- [X] ~~Remove obsolete code/improve readability~~
 - [ ] Provide a better abstraction for the IL generation part
 - [ ] Compile to multiple .NET Framework
 - [ ] Create a NuGet package
