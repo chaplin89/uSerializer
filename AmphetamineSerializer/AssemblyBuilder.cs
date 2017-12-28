@@ -7,7 +7,6 @@ using AmphetamineSerializer.Model;
 using Sigil;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace AmphetamineSerializer
@@ -24,17 +23,13 @@ namespace AmphetamineSerializer
         /// <param name="ctx">Context</param>
         public AssemblyBuilder(Context ctx) : base(ctx)
         {
-            if (ctx == null)
-                throw new ArgumentNullException("ctx");
-
             bool objectContained = false;
 
             if (ctx.Provider == null)
                 ctx.Provider = new SigilFunctionProvider($"{ctx.ObjectType.Name}_{Guid.NewGuid()}");
             else
                 objectContained = ctx.Provider.AlreadyBuildedMethods.ContainsKey(ctx.ObjectType);
-
-
+            
             if (objectContained)
                 method = ctx.Provider.AlreadyBuildedMethods[ctx.ObjectType];
             else
@@ -58,33 +53,55 @@ namespace AmphetamineSerializer
             if (ctx.IsDeserializing)
             {
                 normalizedType = normalizedType.GetElementType();
-                CreateAndAssignNewInstance(normalizedType, instance);
+                CreateAndAssignNewInstance(instance, null);
             }
 
             var versions = VersionHelper.GetExplicitlyManagedVersions(normalizedType).ToArray();
 
             if (versions.Length > 1)
-                ManageVersions(ctx, instance, versions, normalizedType);
+                ManageVersions(instance, versions, normalizedType);
             else
             {
-                BuildFromFields(ctx, VersionHelper.GetAllFields(instance, normalizedType));
+                BuildFromFields(VersionHelper.GetAllFields(instance, normalizedType));
                 ctx.G.Return();
             }
 
             return ctx.Provider.GetMethod();
         }
 
-        private void CreateAndAssignNewInstance(Type typeToCreate, IElement instance)
+        /// <summary>
+        /// Creat an element of type "instance" and store it in the "instance" element.
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="size"></param>
+        private void CreateAndAssignNewInstance(IElement instance, IElement size)
         {
-            if (typeToCreate.GetConstructor(Type.EmptyTypes) == null)
-                throw new NotSupportedException($"The type {typeToCreate.Name} does not have a parameterless constructor.");
+            Type elementType = instance.LoadedType.GetElementType();
+            GenericElement newInstance = null;
 
-            var newInstance = new GenericElement(((g, _) => g.NewObject(typeToCreate)), null);
+            if (size == null)
+            {
+                newInstance = new GenericElement(((g, _) => g.NewObject(elementType)), null);
+            }
+            else
+            {
+                newInstance = new GenericElement(((g, _) =>
+                {
+                    size.Load(g, TypeOfContent.Value);
+                    g.NewArray(elementType);
+                }), null);
+            }
 
             instance.Store(ctx.G, newInstance, TypeOfContent.Value);
         }
 
-        private void ManageVersions(Context ctx, IElement instance, object[] versions, Type normalizedType)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="versions"></param>
+        /// <param name="normalizedType"></param>
+        private void ManageVersions(IElement instance, object[] versions, Type normalizedType)
         {
             Label[] labels = new Label[versions.Length];
             var versionField = VersionHelper.GetAllFields(instance, normalizedType).First();
@@ -103,13 +120,12 @@ namespace AmphetamineSerializer
             {
                 Element = versionField,
                 AdditionalContext = ctx.AdditionalContext,
-                InputTypes = GetInputTypes(ctx, versionType),
+                InputTypes = GetInputTypes(versionType),
                 Provider = ctx.Provider,
                 G = ctx.G
             };
 
-            var response = ctx.Chain.Process(request) as ElementBuildResponse;
-            ManageReponse(ctx, response, versionField);
+            Request(request, versionField);
 
             if (versionField.Field.FieldType == typeof(int))
             {
@@ -123,7 +139,7 @@ namespace AmphetamineSerializer
                     var fields = VersionHelper.GetVersionSnapshot(instance, normalizedType, versions[i])
                                               .Where(x => x.Field.Name.ToUpperInvariant() != "version");
                     ctx.G.MarkLabel(labels[i]);
-                    BuildFromFields(ctx, fields);
+                    BuildFromFields(fields);
                     ctx.G.Return();
                 }
             }
@@ -133,49 +149,44 @@ namespace AmphetamineSerializer
             }
         }
 
-        private Type[] GetInputTypes(Context ctx, Type overrideRootType)
-        {
-            if (overrideRootType != null)
-            {
-                Type[] finalTypes = new Type[ctx.InputParameters.Length];
-                Array.Copy(ctx.InputParameters, finalTypes, ctx.InputParameters.Length);
-                finalTypes[0] = overrideRootType;
-                return finalTypes;
-            }
-
-            return ctx.InputParameters;
-        }
-
-        /// <summary>
-        /// Increment a local variable
-        /// </summary>
-        /// <param name="index">Variable to increment</param>
-        private void IncrementLocalVariable(Local index)
-        {
-            // C# Translation:
-            //     index+=step;
-            ctx.G.LoadLocal(index);
-            ctx.G.LoadConstant(1);
-            ctx.G.Add();
-            ctx.G.StoreLocal(index);
-        }
-
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="ctx"></param>
-        private void ManageReponse(Context ctx, ElementBuildResponse response, IElement firstElement)
+        /// <param name="overrideRootType"></param>
+        /// <returns></returns>
+        private Type[] GetInputTypes(Type overrideRootType)
         {
+            Type[] finalTypes = new Type[ctx.InputParameters.Length];
+            Array.Copy(ctx.InputParameters, finalTypes, ctx.InputParameters.Length);
+            finalTypes[0] = overrideRootType;
+            return finalTypes;
+        }
+
+        /// <summary>
+        /// Send the request to the chain and undertakes the appropriate action.
+        /// </summary>
+        /// <param name="element"></param>
+        /// <param name="response"></param>
+        private void Request(IRequest request, IElement element)
+        {
+            if (request == null)
+                throw new ArgumentNullException("request");
+
+            if (element == null)
+                throw new ArgumentNullException("element");
+
+            var response = ctx.Chain.Process(request) as ElementBuildResponse;
+
             if (response == null)
-                throw new ArgumentNullException("response");
+                throw new InvalidOperationException("Unable to process the request.");
 
             if (response.Status == BuildedFunctionStatus.ContextModified)
                 return;
 
             if (ctx.IsDeserializing)
-                firstElement.Load(ctx.G, TypeOfContent.Address);
+                element.Load(ctx.G, TypeOfContent.Address);
             else
-                firstElement.Load(ctx.G, TypeOfContent.Value);
+                element.Load(ctx.G, TypeOfContent.Value);
 
             for (ushort j = 1; j < ctx.InputParameters.Length; j++)
                 ctx.G.LoadArgument(j);
@@ -187,10 +198,10 @@ namespace AmphetamineSerializer
             }
             else if (response.Status == BuildedFunctionStatus.TypeFinalized)
             {
-                if (response.Method.IsStatic)
-                    ctx.G.Call(response.Method);
-                else
-                    ctx.G.CallVirtual(response.Method);
+                if (!response.Method.IsStatic)
+                    throw new InvalidOperationException("Expected a static function but received a non-static one.");
+
+                ctx.G.Call(response.Method);
                 return;
             }
 
@@ -201,16 +212,27 @@ namespace AmphetamineSerializer
         /// Recursively emit the instruction for deserialize everything,
         /// including array, primitive and non primitive types.
         /// </summary>
-        /// <param name="ctx">Context</param>
         /// <param name="fields">Fields to manage</param>
-        private void BuildFromFields(Context ctx, IEnumerable<IElement> fields)
+        private void BuildFromFields(IEnumerable<IElement> fields)
         {
-            var linkedList = new LinkedList<IElement>(fields);
+            if (ctx == null)
+                throw new InvalidOperationException("Context is null.");
+
+            var linkedList = new Stack<IElement>(fields);
 
             while (linkedList.Count > 0)
             {
-                ctx.CurrentElement = linkedList.First.Value;
-                ElementBuildResponse response = null;
+                ctx.CurrentElement = linkedList.Pop();
+
+                while (ctx.CurrentElement.IsIndexable)
+                {
+                    // Generate the loop preamble and skip to element @ "Index" of the inner type.
+                    var loopContext = AddLoopPreamble();
+                    var innerElement = ctx.CurrentElement.EnterArray(loopContext.Index);
+
+                    ctx.CurrentElement = innerElement;
+                    ctx.LoopCtx.Push(loopContext);
+                }
 
                 // TODO:
                 // 1. List (needs a special handling because of its similarities with Array)
@@ -218,45 +240,30 @@ namespace AmphetamineSerializer
                 if (ctx.CurrentElement.LoadedType.IsAbstract)
                     throw new InvalidOperationException("Incomplete types are not allowed.");
 
-                // Indexable; just generate the loop preamble and skip to element @ "Index" of the inner type.
-                if (ctx.CurrentElement.IsIndexable)
-                {
-                    var index = AddLoopPreamble(ctx).Index;
-
-                    linkedList.RemoveFirst();
-                    linkedList.AddFirst(ctx.CurrentElement.EnterArray(index));
-                    continue;
-                }
-
-                // Not indexable; proceed with the request.
                 var request = new ElementBuildRequest()
                 {
                     Element = ctx.CurrentElement,
                     AdditionalContext = ctx.AdditionalContext,
-                    InputTypes = GetInputTypes(ctx, GetNormalizedType(ctx)),
+                    InputTypes = GetInputTypes(GetCurrentNormalizedType()),
                     Provider = ctx.Provider,
                     G = ctx.G,
                 };
 
-                response = ctx.Chain.Process(request) as ElementBuildResponse;
-                ManageReponse(ctx, response, ctx.CurrentElement);
+                Request(request, ctx.CurrentElement);
 
-                if (ctx.LoopCtx.Count > 0)
-                    AddLoopEpilogue(ctx);
-
-                linkedList.RemoveFirst();
+                while (ctx.LoopCtx.Count > 0)
+                    AddLoopEpilogue(ctx.LoopCtx.Pop());
             }
         }
-        #endregion
-
-        #region Type management
 
         /// <summary>
-        /// 
+        /// Return a "normalized" version of the type of the current element.
         /// </summary>
-        /// <param name="currentElement"></param>
-        /// <returns></returns>
-        private Type GetNormalizedType(Context ctx)
+        /// <returns>
+        /// If the type is an enum, this return the underlying type.
+        /// If the first input parameter is by ref, this return the type by ref.
+        /// </returns>
+        private Type GetCurrentNormalizedType()
         {
             Type normalizedType = ctx.CurrentElement.LoadedType;
 
@@ -270,34 +277,27 @@ namespace AmphetamineSerializer
         }
         #endregion
 
-        #region Loop
+        #region Loop handling
         /// <summary>
-        /// TODO: this should not be here -> FIX CA1822.
         /// Generate a loop preamble:
         ///     1. Initialize the index
         ///     2. Jump for checking if current index is out of bound
         ///     3. Mark the begin of the loop's body
         /// </summary>
-        /// <param name="ctx">Context.</param>
         /// <returns>The generated loop context.</returns>
-        private LoopContext AddLoopPreamble(Context ctx)
+        private LoopContext AddLoopPreamble()
         {
-            if (ctx == null)
-                throw new ArgumentNullException("ctx");
-
-            var currentLoopContext = new LoopContext(ctx.VariablePool.GetNewVariable(typeof(uint)));
-            currentLoopContext.Size = ctx.CurrentElement.Lenght;
-
-            ctx.LoopCtx.Push(currentLoopContext);
-
-            currentLoopContext.Body = ctx.G.DefineLabel($"Body_{ctx.CurrentElement.GetHashCode()}");
-            currentLoopContext.CheckOutOfBound = ctx.G.DefineLabel($"OutOfBound_{ctx.CurrentElement.GetHashCode()}");
+            var loopContext = new LoopContext(ctx.VariablePool.GetNewVariable(typeof(uint)))
+            {
+                Size = ctx.CurrentElement.Lenght,
+                Body = ctx.G.DefineLabel($"Body_{ctx.CurrentElement.GetHashCode()}"),
+                CheckOutOfBound = ctx.G.DefineLabel($"OutOfBound_{ctx.CurrentElement.GetHashCode()}"),
+            };
 
             Type indexType = ctx.CurrentElement.Attribute?.SizeType;
 
             if (indexType == null)
                 indexType = typeof(uint);
-            ElementBuildResponse response = null;
 
             bool staticSize = ctx.IsDeserializing && ctx.CurrentElement.Attribute?.ArrayFixedSize != -1;
 
@@ -306,80 +306,61 @@ namespace AmphetamineSerializer
                 if (ctx.CurrentElement.Index != null)
                     throw new NotSupportedException("Fixed size arrays for jagged array is not supported.");
 
-                int size = ctx.CurrentElement.Attribute.ArrayFixedSize;
-                currentLoopContext.Size = (ConstantElement<int>)size;
+                loopContext.Size = (ConstantElement<int>)ctx.CurrentElement.Attribute.ArrayFixedSize;
             }
             else
             {
                 if (ctx.IsDeserializing)
                 {
-                    currentLoopContext.Size = ctx.VariablePool.GetNewVariable(indexType);
+                    loopContext.Size = ctx.VariablePool.GetNewVariable(indexType);
                     indexType = indexType.MakeByRefType();
                 }
 
                 var request = new ElementBuildRequest()
                 {
-                    Element = currentLoopContext.Size,
-                    InputTypes = GetInputTypes(ctx, indexType),
+                    Element = loopContext.Size,
+                    InputTypes = GetInputTypes(indexType),
                     AdditionalContext = ctx.AdditionalContext,
                     Provider = ctx.Provider,
                     G = ctx.G
                 };
 
-                response = ctx.Chain.Process(request) as ElementBuildResponse;
-                ManageReponse(ctx, response, currentLoopContext.Size);
+                Request(request, loopContext.Size);
 
                 if (ctx.IsDeserializing)
-                {
-                    var newArray = new GenericElement(((g, _) =>
-                    {
-                        currentLoopContext.Size.Load(g, TypeOfContent.Value);
-                        g.NewArray(ctx.CurrentElement.LoadedType.GetElementType());
-                    }), null);
-
-                    ctx.CurrentElement.Store(ctx.G, newArray, TypeOfContent.Value);
-                }
+                    CreateAndAssignNewInstance(ctx.CurrentElement, loopContext.Size);
             }
 
             ctx.G.LoadConstant(0);
-            ctx.G.StoreLocal(currentLoopContext.Index);
-            ctx.G.Branch(currentLoopContext.CheckOutOfBound);
+            ctx.G.StoreLocal(loopContext.Index);
+            ctx.G.Branch(loopContext.CheckOutOfBound);
 
-            ctx.G.MarkLabel(currentLoopContext.Body);
+            ctx.G.MarkLabel(loopContext.Body);
 
-            return currentLoopContext;
+            return loopContext;
         }
 
         /// <summary>
-        /// TODO: this should not be here -> FIX CA1822.
         /// Generate all the loop epilogues for the current context:
         ///     1. Increment index
         ///     2. Out of bound check, eventually jump to the body
         /// </summary>
-        /// <param name="ctx">Context</param>
-        private void AddLoopEpilogue(Context ctx)
+        private void AddLoopEpilogue(LoopContext loopContext)
         {
-            if (ctx == null)
-                throw new ArgumentNullException("ctx");
+            ctx.G.LoadLocal(loopContext.Index);
+            ctx.G.LoadConstant(1);
+            ctx.G.Add();
+            ctx.G.StoreLocal(loopContext.Index);
 
-            Contract.Ensures(ctx.LoopCtx.Count > 0);
+            ctx.G.MarkLabel(loopContext.CheckOutOfBound);
+            ctx.G.LoadLocal(loopContext.Index);
+            loopContext.Size.Load(ctx.G, TypeOfContent.Value);
 
-            while (ctx.LoopCtx.Count > 0)
-            {
-                var currentLoopContext = ctx.LoopCtx.Pop();
+            ctx.G.BranchIfLess(loopContext.Body);
+            ctx.VariablePool.ReleaseVariable(loopContext.Index);
 
-                IncrementLocalVariable(currentLoopContext.Index);
-
-                ctx.G.MarkLabel(currentLoopContext.CheckOutOfBound);
-                ctx.G.LoadLocal(currentLoopContext.Index);
-                currentLoopContext.Size.Load(ctx.G, TypeOfContent.Value);
-
-                ctx.G.BranchIfLess(currentLoopContext.Body);
-                ctx.VariablePool.ReleaseVariable(currentLoopContext.Index);
-
-                if (currentLoopContext.Size is LocalElement)
-                    ctx.VariablePool.ReleaseVariable(currentLoopContext.Size as LocalElement);
-            }
+            if (loopContext.Size is LocalElement)
+                ctx.VariablePool.ReleaseVariable(loopContext.Size as LocalElement);
         }
         #endregion
     }

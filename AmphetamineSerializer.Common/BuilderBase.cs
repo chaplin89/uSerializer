@@ -1,5 +1,6 @@
 ﻿using AmphetamineSerializer.Common.Chain;
 using AmphetamineSerializer.Interfaces;
+using System;
 
 namespace AmphetamineSerializer.Common
 {
@@ -24,7 +25,7 @@ namespace AmphetamineSerializer.Common
         /// <param name="ctx">Context</param>
         public BuilderBase(Context ctx)
         {
-            this.ctx = ctx;
+            this.ctx = ctx ?? throw new ArgumentNullException("ctx");
         }
 
         /// <summary>
