@@ -2,7 +2,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/jbsqh4a686ost3mc?svg=true)](https://ci.appveyor.com/project/chaplin89/amphetamineserializer)
 [![Test status](http://teststatusbadge.azurewebsites.net/api/status/chaplin89/AmphetamineSerializer)](https://ci.appveyor.com/project/chaplin89/amphetamineserializer)
 
-It's a binary serializator that is made to ease the interoperation between managed and native code.
+It's a serializator that is made to ease the interoperation between managed and native code.
 It makes porting an existing C/C++ structure to managed code very easy. Most of the time, all you need to do is to copy the structure and decorate its fields.
 
 **This is WIP, definitely not suitable for production**
@@ -94,15 +94,20 @@ There are plans to support the version field to be a generic complex object.
 [WIP]
 ## TODO (not in any specific order)
 - [X] ~~Remove obsolete code/improve readability~~
-- [ ] Provide a better abstraction for the IL generation part
+- [X] ~~Test coverage of the versioning part~~
+- [X] ~~Provide a better abstraction for the IL generation part~~
+- [ ] Document all classes
 - [ ] Compile to multiple .NET Framework
 - [ ] Create a NuGet package
-- [ ] Test coverage of the versioning part
 - [ ] Allow version to be a complex object
 - [ ] Improve the example in order to support serialization/deserialization of a full PE32/PE64 Header
-- [ ] Document all classes
 - [ ] Allow an array to have its lenght in any other field
 - [ ] Provide a better support for plugin-like features
+- [ ] Support for null object
+- [ ] Support for struct
+- [ ] Implement byte array backend
+- [ ] Implement other backends
+- [ ] Think about/implement something to manage properties other than fields
 ## Benchmark
 
 Here follow the output of the benchmark inside AmphetamineSerializer that show how AmpethamineSerializer performance compare to the performance of other serializators.
