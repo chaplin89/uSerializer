@@ -96,6 +96,7 @@ There are plans to support the version field to be a generic complex object.
 - [X] ~~Remove obsolete code/improve readability~~
 - [X] ~~Test coverage of the versioning part~~
 - [X] ~~Provide a better abstraction for the IL generation part~~
+- [ ] ~~Implement byte array backend~~ (in progress)
 - [ ] Document all classes
 - [ ] Compile to multiple .NET Framework
 - [ ] Create a NuGet package
@@ -105,7 +106,6 @@ There are plans to support the version field to be a generic complex object.
 - [ ] Provide a better support for plugin-like features
 - [ ] Support for null object
 - [ ] Support for struct
-- [ ] Implement byte array backend
 - [ ] Implement other backends
 - [ ] Think about/implement something to manage properties other than fields
 ## Benchmark
