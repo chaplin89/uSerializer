@@ -12,7 +12,7 @@ using System.Text;
 
 namespace AmphetamineSerializer.Backends
 {
-    public class StreamBackend : BuilderBase
+    public class BinaryStreamBackend : BuilderBase
     {
         /// <summary>
         /// Map every trivial type with its handler inside BinaryWriter or BinaryReader.
@@ -46,13 +46,13 @@ namespace AmphetamineSerializer.Backends
             {typeof(char).MakeByRefType(),   typeof(BinaryReader).GetMethod("ReadChar")},
         };
         
-        static StreamBackend()
+        static BinaryStreamBackend()
         {
             // Not all methods were found
             Debug.Assert(!typeHandlerMap.Where(x => x.Value == null).Any());
         }
 
-        public StreamBackend(Context ctx) : base(ctx)
+        public BinaryStreamBackend(Context ctx) : base(ctx)
         {
         }
 

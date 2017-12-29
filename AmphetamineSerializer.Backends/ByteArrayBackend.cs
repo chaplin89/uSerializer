@@ -1,6 +1,7 @@
 ﻿using AmphetamineSerializer.Common;
 using AmphetamineSerializer.Common.Chain;
 using AmphetamineSerializer.Common.Element;
+using AmphetamineSerializer.Interfaces;
 using AmphetamineSerializer.Model;
 using System;
 using System.Collections.Generic;
@@ -14,8 +15,13 @@ namespace AmphetamineSerializer.Backends
 {
     public class ByteArrayBackend : BuilderBase
     {
+        IElement indexElement = new ArgumentElement(2, typeof(int).MakeByRefType());
+        IElement byteArrayElement = new ArgumentElement(1, typeof(byte[]));
+
+        IElement arrayWithOffset;
+
         /// <summary>
-        /// Map every trivial type with its handler inside BinaryWriter or BinaryReader.
+        /// Map every trivial type with its handler inside BitConverter.
         /// </summary>
         static private readonly Dictionary<Type, Tuple<MethodInfo, uint>> typeHandlerMap = new Dictionary<Type, Tuple<MethodInfo, uint>>()
         {
@@ -50,6 +56,7 @@ namespace AmphetamineSerializer.Backends
 
         public ByteArrayBackend(Context ctx) : base(ctx)
         {
+            arrayWithOffset = byteArrayElement.EnterArray(indexElement);
         }
 
         protected override ElementBuildResponse InternalMake()
@@ -126,24 +133,17 @@ namespace AmphetamineSerializer.Backends
         {
             if (ctx.IsDeserializing)
             {
-                //Read from stream
-                var readFromStream = new GenericElement(((g, _) =>
+                Type currentType = ctx.CurrentElement.LoadedType.MakeByRefType();
+                ctx.CurrentElement.Store(ctx.G, GetReadElement(currentType), TypeOfContent.Value);
+                
+                var indexPlusSize = new GenericElement(((g, _) =>
                 {
-                    ctx.G.LoadArgument(1);
-                    ctx.G.LoadArgument(2);
-                    ctx.G.LoadIndirect(typeof(uint));
-
-                    g.Call(typeHandlerMap[ctx.CurrentElement.LoadedType.MakeByRefType()].Item1);
+                    indexElement.Load(g, TypeOfContent.Value);
+                    ctx.G.LoadConstant(typeHandlerMap[ctx.CurrentElement.LoadedType.MakeByRefType()].Item2);
+                    ctx.G.Add();
                 }), null);
 
-                ctx.CurrentElement.Store(ctx.G, readFromStream, TypeOfContent.Value);
-
-                ctx.G.LoadArgument(2);
-                ctx.G.LoadArgument(2);
-                ctx.G.LoadIndirect(typeof(uint));
-                ctx.G.LoadConstant(typeHandlerMap[ctx.CurrentElement.LoadedType.MakeByRefType()].Item2);
-                ctx.G.Add();
-                ctx.G.StoreIndirect(typeof(uint));
+                indexElement.Store(ctx.G, indexPlusSize, TypeOfContent.Value);
             }
             else
             {
@@ -152,6 +152,16 @@ namespace AmphetamineSerializer.Backends
                 ctx.CurrentElement.Load(ctx.G, TypeOfContent.Value);
                 ctx.G.Call(typeHandlerMap[ctx.CurrentElement.LoadedType].Item1);
             }
+        }
+
+        private IElement GetReadElement(Type type)
+        {
+            return new GenericElement(((g, _) =>
+            {
+                byteArrayElement.Load(g, TypeOfContent.Value);
+                indexElement.Load(g, TypeOfContent.Value);
+                g.Call(typeHandlerMap[type].Item1);
+            }), null);
         }
     }
 }

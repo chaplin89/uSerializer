@@ -14,7 +14,7 @@ namespace AmphetamineSerializer.Nodes
 
         Type[] defaultHelpers = new Type[]
         {
-            typeof(StreamBackend),
+            typeof(BinaryStreamBackend),
             typeof(AssemblyBuilder)
         };
 
