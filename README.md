@@ -96,6 +96,7 @@ There are plans to support the version field to be a generic complex object.
 - [X] ~~Remove obsolete code/improve readability~~
 - [X] ~~Test coverage of the versioning part~~
 - [X] ~~Provide a better abstraction for the IL generation part~~
+- [ ] ~~Implement byte array backend~~ (in progress)
 - [ ] Document all classes
 - [ ] Compile to multiple .NET Framework
 - [ ] Create a NuGet package
@@ -105,17 +106,17 @@ There are plans to support the version field to be a generic complex object.
 - [ ] Provide a better support for plugin-like features
 - [ ] Support for null object
 - [ ] Support for struct
-- [ ] Implement byte array backend
 - [ ] Implement other backends
 - [ ] Think about/implement something to manage properties other than fields
 ## Benchmark
 
 Here follow the output of the benchmark inside AmphetamineSerializer that show how AmpethamineSerializer performance compare to the performance of other serializators.
-Not much care has been put into trying to generate optimized code, it's not excluded that those results may vary considerably.
 
-**NOTE**: the serialization is done on a MemoryStream.
+**Note 1**: Performance is not a top priority at this stage of development. Actually, most of the efforts are moving toward defining a semi-decent architecture with a reasonable level of maintainability (as far as writing IL code can be defined "maintainable") and developing unit-tests, so this chart is purely indicative because there are room for improvements for sure.
 
-(The less, the better)
+**Note 2**: It's simply impossible to provide a completely fair comparison. Of course, some of those serializator are binary, other are textual; some use bytearray, some don't. Nevertheless this can be an interesting starting point to see how AS compare to other serializators.
+
+(In ms; the less, the better)
 
    ![Trivial](/Charts/1_Trivial.png)
    ![1D](/Charts/2_1DArray.png)
