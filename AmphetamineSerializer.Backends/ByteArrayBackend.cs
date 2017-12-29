@@ -64,6 +64,9 @@ namespace AmphetamineSerializer.Backends
             if (ctx.CurrentElement?.LoadedType == null)
                 return null;
 
+            if (ctx.InputParameters.Length != 3)
+                return null;
+            
             if (typeHandlerMap.ContainsKey(ctx.CurrentElement.LoadedType))
                 HandlePrimitive(ctx);
             else if (ctx.CurrentElement.LoadedType == typeof(string))
