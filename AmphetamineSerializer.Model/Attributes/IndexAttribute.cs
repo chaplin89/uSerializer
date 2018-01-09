@@ -69,6 +69,7 @@ namespace AmphetamineSerializer.Model.Attributes
             VersionBegin = -1;
             VersionEnd = -1;
             ArrayFixedSize = -1;
+            SizeIndex = -1;
         }
     }
 }

@@ -23,6 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Sigil\LICENSE.txt = Sigil\LICENSE.txt
 		Sigil\NuGet.Config = Sigil\NuGet.Config
 		Sigil\README.markdown = Sigil\README.markdown
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestRunner", "Sigil\TestRunner\TestRunner.csproj", "{1FE8362E-A099-4739-9B1F-12ADCF10BA02}"
