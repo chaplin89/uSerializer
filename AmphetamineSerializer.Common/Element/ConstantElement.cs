@@ -71,7 +71,7 @@ namespace AmphetamineSerializer.Common.Element
         /// </summary>
         public override Type LoadedType
         {
-            get { return typeof(ValueType); }
+            get { return typeof(ConstantType); }
             set { throw new InvalidOperationException("RootType for constant type is fixed."); }
         }
 

@@ -30,8 +30,8 @@ namespace AmphetamineSerializer.Common.Element
             {
                 InternalLoad(g, TypeOfContent.Value);
 
-                if (loadedType.IsByRef)
-                    g.LoadIndirect(loadedType.GetElementType());
+                if (LoadedType.IsByRef)
+                    g.LoadIndirect(LoadedType.GetElementType());
 
                 Index.Load(g, TypeOfContent.Value);
 
@@ -42,11 +42,11 @@ namespace AmphetamineSerializer.Common.Element
             }
             else
             {
-                if (loadedType.IsByRef)
+                if (LoadedType.IsByRef)
                 {
                     InternalLoad(g, TypeOfContent.Value);
                     if (content == TypeOfContent.Value)
-                        g.LoadIndirect(loadedType.GetElementType());
+                        g.LoadIndirect(LoadedType.GetElementType());
                 }
                 else
                 {
@@ -63,12 +63,12 @@ namespace AmphetamineSerializer.Common.Element
 
         public virtual void Store(Emit g, IElement value, TypeOfContent content)
         {
-            if (Index != null || loadedType.IsByRef)
+            if (Index != null || LoadedType.IsByRef)
             {
                 InternalLoad(g, TypeOfContent.Value);
 
-                if (Index != null && loadedType.IsByRef)
-                    g.LoadIndirect(loadedType.GetElementType());
+                if (Index != null && LoadedType.IsByRef)
+                    g.LoadIndirect(LoadedType.GetElementType());
             }
 
             Index?.Load(g, TypeOfContent.Value);
@@ -80,8 +80,8 @@ namespace AmphetamineSerializer.Common.Element
             }
             else
             {
-                if (loadedType.IsByRef)
-                    g.StoreIndirect(loadedType.GetElementType());
+                if (LoadedType.IsByRef)
+                    g.StoreIndirect(LoadedType.GetElementType());
                 else
                     InternalStore(g, TypeOfContent.Value);
             }
@@ -114,7 +114,7 @@ namespace AmphetamineSerializer.Common.Element
             var arrayElement = (BaseElement)this[index];
             arrayElement.previous = this;
             next = arrayElement;
-            arrayElement.loadedType = loadedType.GetElementType();
+            arrayElement.LoadedType = LoadedType.GetElementType();
             return next;
         }
 
