@@ -1,12 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
 namespace AmphetamineSerializer.Example
 {
     public class PeParser
     {
-        public static void Parse(string path = @"C:\Users\Marco\Desktop\devenv.exe")
+        public static void Parse(string path = null)
         {
+            if (path == null)
+                path = Assembly.GetExecutingAssembly().Location;
+
             var dosHeader                   = new DosHeader();
             var ntHeader                    = new NtHeader();
             var sections                    = new List<ImageSectionHeader>(4);
@@ -17,7 +21,7 @@ namespace AmphetamineSerializer.Example
             var sectionHeaderSerializator   = new Serializator<ImageSectionHeader>();
             var importDirectorySerializator = new Serializator<ImportDirectory>();
 
-            using (var file = File.Open(path, FileMode.Open))
+            using (var file = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 BinaryReader reader = new BinaryReader(file);
                 dosHeaderSerializator.Deserialize(ref dosHeader, reader);

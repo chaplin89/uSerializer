@@ -45,7 +45,7 @@ namespace AmphetamineSerializer.Common.Element
         protected override void InternalStore(Emit emit, TypeOfContent content)
         {
             if (content == TypeOfContent.Address)
-                emit.StoreIndirect(loadedType);
+                emit.StoreIndirect(LoadedType);
             else
                 emit.StoreArgument(ArgumentIndex);
         }

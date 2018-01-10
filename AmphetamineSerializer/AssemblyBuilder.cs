@@ -29,7 +29,7 @@ namespace AmphetamineSerializer
                 ctx.Provider = new SigilFunctionProvider($"{ctx.ObjectType.Name}_{Guid.NewGuid()}");
             else
                 objectContained = ctx.Provider.AlreadyBuildedMethods.ContainsKey(ctx.ObjectType);
-            
+
             if (objectContained)
                 method = ctx.Provider.AlreadyBuildedMethods[ctx.ObjectType];
             else
@@ -227,7 +227,15 @@ namespace AmphetamineSerializer
                 while (ctx.CurrentElement.IsIndexable)
                 {
                     // Generate the loop preamble and skip to element @ "Index" of the inner type.
-                    var loopContext = AddLoopPreamble();
+                    IElement sizeElement = null;
+                    if (ctx.CurrentElement.Attribute?.SizeIndex != -1)
+                    {
+                        if (ctx.CurrentElement.Attribute.SizeIndex > ctx.CurrentElement.Attribute.Index)
+                            throw new InvalidOperationException("Size should come before the array.");
+                        sizeElement = fields.Where(_ => _.Attribute.Index == ctx.CurrentElement.Attribute.SizeIndex).Single();
+                    }
+
+                    var loopContext = GenerateLoopPreamble(sizeElement);
                     var innerElement = ctx.CurrentElement.EnterArray(loopContext.Index);
 
                     ctx.CurrentElement = innerElement;
@@ -252,7 +260,7 @@ namespace AmphetamineSerializer
                 Request(request, ctx.CurrentElement);
 
                 while (ctx.LoopCtx.Count > 0)
-                    AddLoopEpilogue(ctx.LoopCtx.Pop());
+                    GenerateLoopEpilogue(ctx.LoopCtx.Pop());
             }
         }
 
@@ -285,7 +293,7 @@ namespace AmphetamineSerializer
         ///     3. Mark the begin of the loop's body
         /// </summary>
         /// <returns>The generated loop context.</returns>
-        private LoopContext AddLoopPreamble()
+        private LoopContext GenerateLoopPreamble(IElement size)
         {
             var loopContext = new LoopContext(ctx.VariablePool.GetNewVariable(typeof(uint)))
             {
@@ -300,6 +308,7 @@ namespace AmphetamineSerializer
                 indexType = typeof(uint);
 
             bool staticSize = ctx.IsDeserializing && ctx.CurrentElement.Attribute?.ArrayFixedSize != -1;
+            bool isSizeInAnotherField = ctx.IsDeserializing && ctx.CurrentElement.Attribute?.SizeIndex != -1;
 
             if (staticSize)
             {
@@ -307,14 +316,17 @@ namespace AmphetamineSerializer
                     throw new NotSupportedException("Fixed size arrays for jagged array is not supported.");
 
                 loopContext.Size = (ConstantElement<int>)ctx.CurrentElement.Attribute.ArrayFixedSize;
+
+                CreateAndAssignNewInstance(ctx.CurrentElement, loopContext.Size);
             }
-            else
+            else if (ctx.IsDeserializing)
             {
-                if (ctx.IsDeserializing)
-                {
+                if (size != null)
+                    loopContext.Size = size;
+                else
                     loopContext.Size = ctx.VariablePool.GetNewVariable(indexType);
-                    indexType = indexType.MakeByRefType();
-                }
+
+                indexType = indexType.MakeByRefType();
 
                 var request = new ElementBuildRequest()
                 {
@@ -326,9 +338,20 @@ namespace AmphetamineSerializer
                 };
 
                 Request(request, loopContext.Size);
+                CreateAndAssignNewInstance(ctx.CurrentElement, loopContext.Size);
+            }
+            else if (size == null)
+            {
+                var request = new ElementBuildRequest()
+                {
+                    Element = loopContext.Size,
+                    InputTypes = GetInputTypes(indexType),
+                    AdditionalContext = ctx.AdditionalContext,
+                    Provider = ctx.Provider,
+                    G = ctx.G
+                };
 
-                if (ctx.IsDeserializing)
-                    CreateAndAssignNewInstance(ctx.CurrentElement, loopContext.Size);
+                Request(request, loopContext.Size);
             }
 
             ctx.G.LoadConstant(0);
@@ -345,7 +368,7 @@ namespace AmphetamineSerializer
         ///     1. Increment index
         ///     2. Out of bound check, eventually jump to the body
         /// </summary>
-        private void AddLoopEpilogue(LoopContext loopContext)
+        private void GenerateLoopEpilogue(LoopContext loopContext)
         {
             ctx.G.LoadLocal(loopContext.Index);
             ctx.G.LoadConstant(1);
