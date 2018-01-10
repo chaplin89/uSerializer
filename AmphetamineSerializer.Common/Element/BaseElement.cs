@@ -165,6 +165,11 @@ namespace AmphetamineSerializer.Common.Element
 
         public abstract ASIndexAttribute Attribute { get; }
 
+        public override string ToString()
+        {
+            return $"{GetType().ToString()}; Load: {LoadedType.ToString()};";
+        }
+
         public virtual object Clone()
         {
             return MemberwiseClone();

@@ -26,26 +26,26 @@ namespace AmphetamineSerializer.Backends
         static private readonly Dictionary<Type, Tuple<MethodInfo, uint>> typeHandlerMap = new Dictionary<Type, Tuple<MethodInfo, uint>>()
         {
             // From obj to byte[]
-           {typeof(uint),                   new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("GetBytes", new Type[] {typeof(uint),   }), 4u)},
-           {typeof(int),                    new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("GetBytes", new Type[] {typeof(int),    }), 4u)},
-           {typeof(ushort),                 new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("GetBytes", new Type[] {typeof(ushort), }), 2u)},
-           {typeof(short),                  new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("GetBytes", new Type[] {typeof(short),  }), 2u)},
-           {typeof(double),                 new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("GetBytes", new Type[] {typeof(double), }), 8u)},
-           {typeof(float),                  new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("GetBytes", new Type[] {typeof(float),  }), 4u)},
-           {typeof(ulong),                  new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("GetBytes", new Type[] {typeof(ulong),  }), 8u)},
-           {typeof(long),                   new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("GetBytes", new Type[] {typeof(long),   }), 8u)},
-           {typeof(char),                   new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("GetBytes", new Type[] {typeof(char),   }), 1u)},
+           {typeof(uint),                   new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("GetBytes", new Type[] {typeof(uint),   }), sizeof(uint) )},
+           {typeof(int),                    new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("GetBytes", new Type[] {typeof(int),    }), sizeof(int)  )},
+           {typeof(ushort),                 new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("GetBytes", new Type[] {typeof(ushort), }), sizeof(ushort))},
+           {typeof(short),                  new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("GetBytes", new Type[] {typeof(short),  }), sizeof(short))},
+           {typeof(double),                 new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("GetBytes", new Type[] {typeof(double), }), sizeof(double))},
+           {typeof(float),                  new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("GetBytes", new Type[] {typeof(float),  }), sizeof(float))},
+           {typeof(ulong),                  new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("GetBytes", new Type[] {typeof(ulong),  }), sizeof(ulong))},
+           {typeof(long),                   new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("GetBytes", new Type[] {typeof(long),   }), sizeof(long) )},
+           {typeof(char),                   new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("GetBytes", new Type[] {typeof(char),   }), sizeof(char) )},
 
            // From byte[] to Obj
-           {typeof(uint).MakeByRefType(),   new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("ToUInt32")                                ,4u)  },
-           {typeof(int).MakeByRefType(),    new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("ToInt32")                                 ,4u)  },
-           {typeof(ushort).MakeByRefType(), new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("ToUInt16")                                ,2u)  },
-           {typeof(short).MakeByRefType(),  new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("ToInt16")                                 ,2u)  },
-           {typeof(double).MakeByRefType(), new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("ToDouble")                                ,8u)  },
-           {typeof(float).MakeByRefType(),  new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("ToSingle")                                ,4u)  },
-           {typeof(ulong).MakeByRefType(),  new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("ToUInt64")                                ,8u)  },
-           {typeof(long).MakeByRefType(),   new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("ToInt64")                                 ,8u)  },
-           {typeof(char).MakeByRefType(),   new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("ToChar")                                  ,1u)  },
+           {typeof(uint).MakeByRefType(),   new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("ToUInt32")                                ,sizeof(uint) )  },
+           {typeof(int).MakeByRefType(),    new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("ToInt32")                                 ,sizeof(int)  )  },
+           {typeof(ushort).MakeByRefType(), new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("ToUInt16")                                ,sizeof(ushort)) },
+           {typeof(short).MakeByRefType(),  new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("ToInt16")                                 ,sizeof(short))  },
+           {typeof(double).MakeByRefType(), new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("ToDouble")                                ,sizeof(double)) },
+           {typeof(float).MakeByRefType(),  new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("ToSingle")                                ,sizeof(float))  },
+           {typeof(ulong).MakeByRefType(),  new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("ToUInt64")                                ,sizeof(ulong))  },
+           {typeof(long).MakeByRefType(),   new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("ToInt64")                                 ,sizeof(long) )  },
+           {typeof(char).MakeByRefType(),   new Tuple<MethodInfo,uint>(typeof(BitConverter).GetMethod("ToChar")                                  ,sizeof(char) )  },
         };
 
         static ByteArrayBackend()
@@ -67,6 +67,25 @@ namespace AmphetamineSerializer.Backends
             if (ctx.InputParameters.Length != 3)
                 return null;
             
+            // if (ctx.AdditionalContext == null)
+            // {
+            //     var defaultFinder = new DefaultHandlerFinder().Use<ByteCountBackend>();
+            //     var chain = new ChainManager().SetNext(defaultFinder);
+            // 
+            //     var oldChain = ctx.Chain;
+            //     ctx.Chain = chain;
+            // 
+            //     var request = new ElementBuildRequest()
+            //     {
+            //         Element = ctx.CurrentElement,
+            //         G = ctx.G,
+            //         InputTypes = ctx.InputParameters,
+            //         Provider = ctx.Provider
+            //     };
+            // 
+            //     var response = ctx.Chain.Process(request);
+            // }
+
             if (typeHandlerMap.ContainsKey(ctx.CurrentElement.LoadedType))
                 HandlePrimitive(ctx);
             else if (ctx.CurrentElement.LoadedType == typeof(string))
@@ -150,10 +169,12 @@ namespace AmphetamineSerializer.Backends
             }
             else
             {
+                var typeTuple = typeHandlerMap[ctx.CurrentElement.LoadedType];
+
                 //Write into stream
                 ctx.G.LoadArgument(1);
                 ctx.CurrentElement.Load(ctx.G, TypeOfContent.Value);
-                ctx.G.Call(typeHandlerMap[ctx.CurrentElement.LoadedType].Item1);
+                ctx.G.Call(typeTuple.Item1);
             }
         }
 

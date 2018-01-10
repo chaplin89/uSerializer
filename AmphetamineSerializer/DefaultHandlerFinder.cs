@@ -4,19 +4,16 @@ using AmphetamineSerializer.Common.Chain;
 using AmphetamineSerializer.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
-namespace AmphetamineSerializer.Nodes
+namespace AmphetamineSerializer
 {
     public class DefaultHandlerFinder : IChainElement
     {
         readonly Dictionary<Type, RequestHandler> managedRequests;
 
-        Type[] defaultHelpers = new Type[]
-        {
-            typeof(BinaryStreamBackend),
-            typeof(AssemblyBuilder)
-        };
+        List<Type> backends = new List<Type>();
 
         public DefaultHandlerFinder()
         {
@@ -41,16 +38,33 @@ namespace AmphetamineSerializer.Nodes
                                          request.Provider,
                                          request.G);
 
-            foreach (var item in defaultHelpers)
+            foreach (var item in backends)
             {
                 IBuilder instance = (IBuilder)Activator.CreateInstance(item, new object[] { ctx });
-                var method = instance.Make();
-                if (method == null)
+                var response = instance.Make();
+                if (response == null)
                     continue;
 
-                return method;
+                Debugger.Log(0, "Info", $"Request {ctx.CurrentElement.ToString()} handled by {response.ProcessedBy}");
+                return response;
             }
             return null;
+        }
+
+        public DefaultHandlerFinder Use<T>()
+            where T : BuilderBase
+        {
+            backends.Add(typeof(T));
+            return this;
+        }
+
+        public static DefaultHandlerFinder WithDefaultBackends()
+        {
+            return new DefaultHandlerFinder()
+                        .Use<BinaryStreamBackend>()
+                        //.Use<ByteCountBackend>()
+                        // .Use<ByteArrayBackend>()
+                        .Use<AssemblyBuilder>();
         }
 
         private IResponse HandleDelegateRequest(IRequest genericRequest)

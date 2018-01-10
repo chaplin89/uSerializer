@@ -1,4 +1,4 @@
-﻿using AmphetamineSerializer.Nodes;
+﻿using AmphetamineSerializer.Backends;
 using AmphetamineSerializer.Common;
 using AmphetamineSerializer.Common.Chain;
 using AmphetamineSerializer.Common.Element;
@@ -36,7 +36,10 @@ namespace AmphetamineSerializer
                 ctx.G = ctx.Provider.AddMethod("Handle", ctx.InputParameters, typeof(void));
 
             if (ctx.Chain == null)
-                ctx.Chain = new ChainManager().SetNext(new DefaultHandlerFinder());
+            {
+                var defaultFinder = DefaultHandlerFinder.WithDefaultBackends();
+                ctx.Chain = new ChainManager().SetNext(defaultFinder);
+            }
         }
         #endregion
 

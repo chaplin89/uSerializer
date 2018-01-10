@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ByteArrayBackend.cs" />
+    <Compile Include="ByteCountBackend.cs" />
     <Compile Include="StreamBackend.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
