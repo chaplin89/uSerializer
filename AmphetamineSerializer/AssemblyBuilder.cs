@@ -316,6 +316,8 @@ namespace AmphetamineSerializer
                     throw new NotSupportedException("Fixed size arrays for jagged array is not supported.");
 
                 loopContext.Size = (ConstantElement<int>)ctx.CurrentElement.Attribute.ArrayFixedSize;
+
+                CreateAndAssignNewInstance(ctx.CurrentElement, loopContext.Size);
             }
             else if (ctx.IsDeserializing)
             {
