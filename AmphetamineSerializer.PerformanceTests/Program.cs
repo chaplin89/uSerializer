@@ -97,7 +97,6 @@ namespace AmphetamineSerializer.PerformanceTests
             }
 
             double[] meanTime = new double[5];
-            double[] percentage = new double[5];
             string[] messages = new string[]
             {
                 "Mean time BinaryFormatter:",
@@ -113,36 +112,12 @@ namespace AmphetamineSerializer.PerformanceTests
             meanTime[3] = s4Performance.Aggregate((_1, _2) => _1 + _2) / totalIterations;
             meanTime[4] = s5Performance.Aggregate((_1, _2) => _1 + _2) / totalIterations;
 
-            var min = meanTime.Max();
-
-            percentage[0] = meanTime[0] / min;
-            percentage[1] = meanTime[1] / min;
-            percentage[2] = meanTime[2] / min;
-            percentage[3] = meanTime[3] / min;
-            percentage[4] = meanTime[4] / min;
-
-            var beginPosition = messages.Select(x => x.Length).Max() + 1;
-            var endPosition = Console.BufferWidth - 5;
-
-            var blockLenght = (endPosition - beginPosition) / percentage.Max();
-
-            List<string> bars = new List<string>();
-
-            foreach (var v in percentage)
-            {//█
-                bars.Add(new string('X', (int)Math.Floor(blockLenght * v) - 3));
-            }
-
             for (int i = 0; i < messages.Length; i++)
             {
                 Console.Write(messages[i]);
-                //Console.CursorLeft = beginPosition;
                 Console.WriteLine(meanTime[i]);
             }
-
-            //Console.WriteLine($"Mean time BinaryFormatter:  {percentage[0]}");
-            //Console.WriteLine($"Mean time Amphetamine: {percentage[1]}");
-            //Console.WriteLine($"Mean time XmlSerializer: {percentage[2]}");
+            
             Console.WriteLine(new string('+', 10));
             Console.WriteLine();
         }

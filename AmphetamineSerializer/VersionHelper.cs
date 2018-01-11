@@ -22,7 +22,7 @@ namespace AmphetamineSerializer
         {
             var versionField = GetAllFields(null, rootType).First();
 
-            if (versionField.Field.FieldType != typeof(int))
+            if (versionField.LoadedType != typeof(int))
                 return GetNonNumericVersions(rootType);
             else
                 return GetNumericVersions(rootType);
@@ -88,7 +88,7 @@ namespace AmphetamineSerializer
         /// <param name="rootType">Type</param>
         /// <param name="version">Version</param>
         /// <returns>All the fields that match the given version</returns>
-        static public IEnumerable<FieldElement> GetVersionSnapshot(IElement instance, Type rootType, object version)
+        static public IEnumerable<MemberElement> GetVersionSnapshot(IElement instance, Type rootType, object version)
         {
             return GetFields(instance, rootType, version);
         }
@@ -98,7 +98,7 @@ namespace AmphetamineSerializer
         /// </summary>
         /// <param name="rootType"></param>
         /// <returns>All the fields contained in a type</returns>
-        static public IEnumerable<FieldElement> GetAllFields(IElement instance, Type rootType)
+        static public IEnumerable<MemberElement> GetAllFields(IElement instance, Type rootType)
         {
             return GetFields(instance, rootType);
         }
@@ -108,7 +108,7 @@ namespace AmphetamineSerializer
         /// </summary>
         /// <param name="rootType">Context</param>
         /// <param name="version">Version used to filter fields.</param>
-        static private IEnumerable<FieldElement> GetFields(IElement instance, Type rootType, object version = null)
+        static private IEnumerable<MemberElement> GetFields(IElement instance, Type rootType, object version = null)
         {
             var attributes = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
@@ -116,11 +116,21 @@ namespace AmphetamineSerializer
                             .GetFields(attributes)
                             .Where(x => x.GetCustomAttribute<ASIndexAttribute>(false) != null)
                             .OrderBy(x => x.GetCustomAttribute<ASIndexAttribute>(false).Index)
-                            .Select(x=> new FieldElement(instance, x));
+                            .Select(x=> new FieldElement(instance, x))
+                            .Cast<MemberElement>();
+            
+            var properties = rootType
+                            .GetProperties(attributes)
+                            .Where(x => x.GetCustomAttribute<ASIndexAttribute>(false) != null)
+                            .OrderBy(x => x.GetCustomAttribute<ASIndexAttribute>(false).Index)
+                            .Select(x => new PropertyElement(instance, x))
+                            .Cast<MemberElement>();
+
+            var merged = fields.Concat(properties);
 
             if (version != null && version.GetType() == typeof(int))
             {
-                fields = fields
+                merged = merged
                             .Where(x => x.Attribute.VersionBegin == -1 ||
                                          x.Attribute.VersionBegin <= (int)version ||
                                          (int)x.Attribute.Version == (int)version)
@@ -130,7 +140,7 @@ namespace AmphetamineSerializer
                             .OrderBy(x => x.Attribute.Index);
             }
 
-            return fields;
+            return merged;
         }
     }
 }

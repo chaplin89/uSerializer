@@ -5,7 +5,7 @@ namespace AmphetamineSerializer.Model.Attributes
     /// <summary>
     /// Instruct the deserializator about how to deserialize a given field.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
     public class ASIndexAttribute : Attribute
     {
         /// <summary>

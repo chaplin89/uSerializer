@@ -1,4 +1,4 @@
-﻿using AmphetamineSerializer.Nodes;
+﻿using AmphetamineSerializer.Backends;
 using AmphetamineSerializer.Common.Chain;
 using AmphetamineSerializer.Interfaces;
 using System;
@@ -24,7 +24,7 @@ namespace AmphetamineSerializer
 
         private object additionalContext;
         IChainManager chain = new ChainManager()
-                                  .SetNext(new DefaultHandlerFinder());
+                                  .SetNext(DefaultHandlerFinder.WithDefaultBackends());
 
         public Serializator(object additionalContext = null)
         {

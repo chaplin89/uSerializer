@@ -9,44 +9,17 @@ namespace AmphetamineSerializer.Common.Element
     /// <summary>
     /// Manage a class field.
     /// </summary>
-    public class FieldElement : BaseElement
+    public class FieldElement : MemberElement
     {
         /// <summary>
         /// Build this object and initialize instance and field.
         /// </summary>
         /// <param name="instance">Instance of the object that contain the field</param>
         /// <param name="field">The field</param>
-        public FieldElement(IElement instance, FieldInfo field)
+        public FieldElement(IElement instance, FieldInfo field) : base(instance, field, field.FieldType)
         {
-            Instance = instance;
-            Field = field;
-            loadedType = Field.FieldType;
         }
-
-        /// <summary>
-        /// Object instance.
-        /// </summary>
-        public IElement Instance { get; private set; }
-
-        /// <summary>
-        /// Field information.
-        /// </summary>
-        public FieldInfo Field { get; private set; }
-
-        /// <summary>
-        /// Access the ASIndexAttribute of the field.
-        /// </summary>
-        public override ASIndexAttribute Attribute
-        {
-            get
-            {
-                if (Field == null)
-                    return null;
-                return Field.GetCustomAttribute<ASIndexAttribute>();
-            }
-        }
-
-
+        
         public override void Load(Emit g, TypeOfContent content)
         {
             Instance.Load(g, TypeOfContent.Value);
@@ -61,15 +34,17 @@ namespace AmphetamineSerializer.Common.Element
 
         protected override void InternalStore(Emit g, TypeOfContent content)
         {
-            g.StoreField(Field);
+            var field = Member as FieldInfo;
+            g.StoreField(field);
         }
 
         protected override void InternalLoad(Emit g, TypeOfContent content)
         {
+            var field = Member as FieldInfo;
             if (content == TypeOfContent.Value)
-                g.LoadField(Field);
+                g.LoadField(field);
             else
-                g.LoadFieldAddress(Field);
+                g.LoadFieldAddress(field);
         }
     }
 }
