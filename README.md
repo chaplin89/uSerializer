@@ -97,7 +97,7 @@ There are plans to support the version field to be a generic complex object.
 - [X] ~~Test coverage of the versioning part~~
 - [X] ~~Provide a better abstraction for the IL generation part~~
 - [X] ~~Allow an array to have its lenght in any other field~~ (miss tests coverage)
-- [X] ~~Think about/implement something to manage properties other than fields~~ (miss tests coverage)
+- [X] ~~Think about/implement something to manage properties other than fields~~ (tests coverage for complex object fail)
 - [ ] ~~Implement byte array backend~~ (in progress)
 - [ ] Document all classes
 - [ ] Compile to multiple .NET Framework
