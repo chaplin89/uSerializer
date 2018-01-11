@@ -52,7 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DefaultHandlerFinder.cs" />
+    <Compile Include="Nodes\DefaultHandlerFinder.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="LenghtBoundSerializator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -84,9 +84,7 @@
       <Name>Sigil NET45</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Nodes\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

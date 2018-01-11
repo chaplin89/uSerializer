@@ -109,7 +109,7 @@ namespace AmphetamineSerializer
             Label[] labels = new Label[versions.Length];
             var versionField = VersionHelper.GetAllFields(instance, normalizedType).First();
 
-            if (versionField.Field.Name.ToUpperInvariant() != "version")
+            if (versionField.Member.Name.ToUpperInvariant() != "version")
                 throw new InvalidOperationException("The version field should be the first.");
 
             for (int i = 0; i < labels.Length; i++)
@@ -130,7 +130,7 @@ namespace AmphetamineSerializer
 
             Request(request, versionField);
 
-            if (versionField.Field.FieldType == typeof(int))
+            if (versionField.LoadedType == typeof(int))
             {
                 versionField.Load(ctx.G, TypeOfContent.Value);
                 ctx.G.LoadConstant((int)versions[0]);
@@ -140,13 +140,13 @@ namespace AmphetamineSerializer
                 for (int i = 0; i < versions.Length; i++)
                 {
                     var fields = VersionHelper.GetVersionSnapshot(instance, normalizedType, versions[i])
-                                              .Where(x => x.Field.Name.ToUpperInvariant() != "version");
+                                              .Where(x => x.Member.Name.ToUpperInvariant() != "version");
                     ctx.G.MarkLabel(labels[i]);
                     BuildFromFields(fields);
                     ctx.G.Return();
                 }
             }
-            else if (versionField.Field.FieldType.IsAssignableFrom(typeof(IEquatable<>)))
+            else if (versionField.LoadedType.IsAssignableFrom(typeof(IEquatable<>)))
             {
                 // TODO: Manage non numeric versions
             }
