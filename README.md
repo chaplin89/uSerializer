@@ -96,8 +96,9 @@ There are plans to support the version field to be a generic complex object.
 - [X] ~~Remove obsolete code/improve readability~~
 - [X] ~~Test coverage of the versioning part~~
 - [X] ~~Provide a better abstraction for the IL generation part~~
-- [X] ~~Allow an array to have its lenght in any other field~~
+- [X] ~~Allow an array to have its lenght in any other field~~ (miss tests coverage)
 - [ ] ~~Implement byte array backend~~ (in progress)
+- [ ] ~~Think about/implement something to manage properties other than fields~~ (in progress)
 - [ ] Document all classes
 - [ ] Compile to multiple .NET Framework
 - [ ] Create a NuGet package
@@ -107,7 +108,6 @@ There are plans to support the version field to be a generic complex object.
 - [ ] Support for null object
 - [ ] Support for struct
 - [ ] Implement other backends
-- [ ] Think about/implement something to manage properties other than fields
 ## Benchmark
 
 Here follow the output of the benchmark inside AmphetamineSerializer that show how AmpethamineSerializer performance compare to the performance of other serializators.
