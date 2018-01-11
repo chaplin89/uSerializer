@@ -91,9 +91,9 @@ namespace AmphetamineSerializer.Tests
         [ASIndex(19), DataMember] public byte[][] Test_Property19 { get; set; }
         [ASIndex(20), DataMember] public string[][] Test_Property20 { get; set; }
 
-        [ASIndex(21), DataMember] public TestJaggedArray Test_Property21 { get; set; }
-        [ASIndex(22), DataMember] public TestJaggedArray[] Test_Property22 { get; set; }
-        [ASIndex(23), DataMember] public TestJaggedArray[][] Test_Property23 { get; set; }
+        [ASIndex(21), DataMember] public TestPropertyJaggedArray Test_Property21 { get; set; }
+        [ASIndex(22), DataMember] public TestPropertyJaggedArray[] Test_Property22 { get; set; }
+        [ASIndex(23), DataMember] public TestPropertyJaggedArray[][] Test_Property23 { get; set; }
     }
 
     [Serializable, DataContract]
@@ -103,7 +103,7 @@ namespace AmphetamineSerializer.Tests
 
         [ASIndex(02, Version = 100), DataMember] public float Test_100 { get; set; }
         [ASIndex(03, Version = 101), DataMember] public double Test_101 { get; set; }
-        [ASIndex(04, Version = 102), DataMember] public Contained_102 Test_102 { get; set; }
+        [ASIndex(04, Version = 102), DataMember] public PropertyContained_102 Test_102 { get; set; }
 
         // [ASIndex(21)] public TestJaggedArray           Test_Property21{get;set;}
         // [ASIndex(22)] public TestJaggedArray   []      Test_Property22{get;set;}
