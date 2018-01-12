@@ -21,10 +21,10 @@ namespace AmphetamineSerializer.PerformanceTests
         {
             Console.WriteLine($"Number of iterations: {totalIterations}");
             Console.WriteLine();
-            TestSerialization<TestTrivialTypes, ZeroTrivialTypes>();
-            TestSerialization<Test1DArray, ZeroTest1DArray>();
-            TestSerialization<TestJaggedArray, ZeroTestJaggedArray>();
-            TestSerialization<TestFull, ZeroTestFull>();
+            TestSerialization<TestFieldTrivialTypes, ZeroTrivialTypes>();
+            TestSerialization<TestField1DArray, ZeroTest1DArray>();
+            TestSerialization<TestFieldJaggedArray, ZeroTestJaggedArray>();
+            TestSerialization<TestFieldFull, ZeroTestFull>();
             Console.ReadKey();
         }
 

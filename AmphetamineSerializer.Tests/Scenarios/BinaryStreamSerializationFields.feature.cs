@@ -18,20 +18,20 @@ namespace AmphetamineSerializer.Tests.Scenarios
     [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "2.2.0.0")]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [NUnit.Framework.TestFixtureAttribute()]
-    [NUnit.Framework.DescriptionAttribute("BinaryStreamSerialization")]
-    public partial class BinaryStreamSerializationFeature
+    [NUnit.Framework.DescriptionAttribute("BinaryStreamSerializationFields")]
+    public partial class BinaryStreamSerializationFieldsFeature
     {
         
         private TechTalk.SpecFlow.ITestRunner testRunner;
         
-#line 1 "BinaryStreamSerialization.feature"
+#line 1 "BinaryStreamSerializationFields.feature"
 #line hidden
         
         [NUnit.Framework.OneTimeSetUpAttribute()]
         public virtual void FeatureSetup()
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
-            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "BinaryStreamSerialization", "\tSerialization and deserialization of the same class\r\n\tin order to ensure that re" +
+            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "BinaryStreamSerializationFields", "\tSerialization and deserialization of the same class\r\n\tin order to ensure that re" +
                     "sults are consistent.", ProgrammingLanguage.CSharp, ((string[])(null)));
             testRunner.OnFeatureStart(featureInfo);
         }
@@ -74,7 +74,7 @@ namespace AmphetamineSerializer.Tests.Scenarios
 #line 5
 this.ScenarioSetup(scenarioInfo);
 #line 6
- testRunner.Given("The instance Instance1 of type Test1DArray filled with random data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+ testRunner.Given("The instance Instance1 of type TestField1DArray filled with random data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line 7
  testRunner.And("I serialize the instance Instance1 in Stream1", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line 8
@@ -93,7 +93,7 @@ this.ScenarioSetup(scenarioInfo);
 #line 11
 this.ScenarioSetup(scenarioInfo);
 #line 12
- testRunner.Given("The instance Instance1 of type TestFull filled with random data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+ testRunner.Given("The instance Instance1 of type TestFieldFull filled with random data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line 13
  testRunner.And("I serialize the instance Instance1 in Stream1", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line 14
@@ -112,7 +112,7 @@ this.ScenarioSetup(scenarioInfo);
 #line 17
 this.ScenarioSetup(scenarioInfo);
 #line 18
- testRunner.Given("The instance Instance1 of type TestJaggedArray filled with random data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+ testRunner.Given("The instance Instance1 of type TestFieldJaggedArray filled with random data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line 19
  testRunner.And("I serialize the instance Instance1 in Stream1", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line 20
@@ -131,7 +131,7 @@ this.ScenarioSetup(scenarioInfo);
 #line 23
 this.ScenarioSetup(scenarioInfo);
 #line 24
- testRunner.Given("The instance Instance1 of type TestTrivialTypes filled with random data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+ testRunner.Given("The instance Instance1 of type TestFieldTrivialTypes filled with random data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line 25
  testRunner.And("I serialize the instance Instance1 in Stream1", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line 26
@@ -152,7 +152,7 @@ this.ScenarioSetup(scenarioInfo);
 #line 29
 this.ScenarioSetup(scenarioInfo);
 #line 30
- testRunner.Given("The instance Instance1 of type TestFullVersion filled with random data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+ testRunner.Given("The instance Instance1 of type TestFieldFullVersion filled with random data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line 31
  testRunner.And("I serialize the instance Instance1 in Stream1", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line 32

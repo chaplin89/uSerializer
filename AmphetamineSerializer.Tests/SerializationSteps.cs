@@ -25,7 +25,7 @@ namespace AmphetamineSerializer.Tests
 
             object randomData = CreateNonVersion(type);
 
-            if (type.Name == "TestFullVersion")
+            if (type.Name == "TestFieldFullVersion")
                 randomData = CreateVersion();
 
             ScenarioContext.Current.Add("typeToSerialize", type);
@@ -48,10 +48,10 @@ namespace AmphetamineSerializer.Tests
 
         object CreateVersion()
         {
-            TestFullVersion randomData = new TestFullVersion()
+            TestFieldFullVersion randomData = new TestFieldFullVersion()
             {
                 Version = 102,
-                Test_102 = (Contained_102)CreateNonVersion(typeof(Contained_102))
+                Test_102 = (FieldContained_102)CreateNonVersion(typeof(FieldContained_102))
             };
 
             return randomData;

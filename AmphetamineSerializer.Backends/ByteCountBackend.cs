@@ -31,7 +31,7 @@ namespace AmphetamineSerializer.Backends
         {
         }
 
-        protected override ElementBuildResponse InternalMake()
+        protected override IResponse InternalMake()
         {
             if (ctx.CurrentElement == null)
                 return null;
@@ -60,7 +60,7 @@ namespace AmphetamineSerializer.Backends
 
             size.Store(ctx.G, sumElement, Model.TypeOfContent.Value);
 
-            return new ElementBuildResponse() { Status = Model.BuildedFunctionStatus.ContextModified };
+            return new ContextModifiedBuildResponse();
         }
     }
 }

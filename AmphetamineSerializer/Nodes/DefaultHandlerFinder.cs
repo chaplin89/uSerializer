@@ -77,11 +77,13 @@ namespace AmphetamineSerializer
                 InputTypes = request.DelegateType.GetMethod("Invoke").GetParameters().Select(x => x.ParameterType).ToArray()
             };
 
-            var response = HandleBuildRequest(elementRequest) as ElementBuildResponse;
+            var response = HandleBuildRequest(elementRequest) ;
+
+            var fin = response as TypeFinalizedBuildResponse;
 
             return new DelegateBuildResponse()
             {
-                Delegate = response.Method.CreateDelegate(request.DelegateType)
+                Delegate = fin.Method.CreateDelegate(request.DelegateType)
             };
         }
     }

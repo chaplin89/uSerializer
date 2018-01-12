@@ -47,7 +47,7 @@ namespace AmphetamineSerializer
         /// Generate the method for the current ObjectType.
         /// </summary>
         /// <returns>Builded method</returns>
-        protected override ElementBuildResponse InternalMake()
+        protected override IResponse InternalMake()
         {
             Type normalizedType = ctx.ObjectType;
             ArgumentElement instance = new ArgumentElement(0, ctx.ObjectType);
@@ -177,12 +177,12 @@ namespace AmphetamineSerializer
             if (element == null)
                 throw new ArgumentNullException("element");
 
-            var response = ctx.Chain.Process(request) as ElementBuildResponse;
+            var response = ctx.Chain.Process(request);
 
             if (response == null)
                 throw new InvalidOperationException("Unable to process the request.");
 
-            if (response.Status == BuildedFunctionStatus.ContextModified)
+            if (response is ContextModifiedBuildResponse)
                 return;
 
             if (ctx.IsDeserializing)
@@ -193,21 +193,24 @@ namespace AmphetamineSerializer
             for (ushort j = 1; j < ctx.InputParameters.Length; j++)
                 ctx.G.LoadArgument(j);
 
-            if (response.Status == BuildedFunctionStatus.FunctionFinalizedTypeNotFinalized)
+            if (response is TypeFinalizedBuildResponse)
             {
-                ctx.G.Call(response.Emiter);
-                return;
-            }
-            else if (response.Status == BuildedFunctionStatus.TypeFinalized)
-            {
-                if (!response.Method.IsStatic)
+                var typeFinalizedResponse = response as TypeFinalizedBuildResponse;
+                if (!typeFinalizedResponse.Method.IsStatic)
                     throw new InvalidOperationException("Expected a static function but received a non-static one.");
 
-                ctx.G.Call(response.Method);
+                ctx.G.Call(typeFinalizedResponse.Method);
                 return;
             }
+            else 
+            {
+                var typeNotFinalizedResponse = response as TypeNotFinalizedBuildResponse;
+                if (typeNotFinalizedResponse == null)
+                    throw new InvalidOperationException("Can't forward parameters.");
 
-            throw new InvalidOperationException("Can't forward parameters.");
+                ctx.G.Call(typeNotFinalizedResponse.Emiter);
+                return;
+            }
         }
 
         /// <summary>
