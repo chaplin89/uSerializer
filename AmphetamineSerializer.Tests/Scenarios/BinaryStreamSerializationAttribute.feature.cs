@@ -107,19 +107,42 @@ this.ScenarioSetup(scenarioInfo);
         }
         
         [NUnit.Framework.TestAttribute()]
+        [NUnit.Framework.DescriptionAttribute("Serializing and deserializing complex nested types with version produce the same " +
+            "result")]
+        [NUnit.Framework.IgnoreAttribute("Ignored scenario")]
+        public virtual void SerializingAndDeserializingComplexNestedTypesWithVersionProduceTheSameResult()
+        {
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Serializing and deserializing complex nested types with version produce the same " +
+                    "result", new string[] {
+                        "ignore"});
+#line 19
+this.ScenarioSetup(scenarioInfo);
+#line 20
+ testRunner.Given("The instance Instance1 of type TestPropertyFullVersion filled with random data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line 21
+ testRunner.And("I serialize the instance Instance1 in Stream1", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line 22
+ testRunner.When("I deserialize the instance Instance2 from Stream1", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line 23
+ testRunner.Then("Instance1 and Instance2 are identical", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+            this.ScenarioCleanup();
+        }
+        
+        [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Serializing and deserializing containing jagged array produce the same result")]
         public virtual void SerializingAndDeserializingContainingJaggedArrayProduceTheSameResult()
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Serializing and deserializing containing jagged array produce the same result", ((string[])(null)));
-#line 18
+#line 25
 this.ScenarioSetup(scenarioInfo);
-#line 19
+#line 26
  testRunner.Given("The instance Instance1 of type TestPropertyJaggedArray filled with random data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line 20
+#line 27
  testRunner.And("I serialize the instance Instance1 in Stream1", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 21
+#line 28
  testRunner.When("I deserialize the instance Instance2 from Stream1", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line 22
+#line 29
  testRunner.Then("Instance1 and Instance2 are identical", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             this.ScenarioCleanup();
@@ -130,33 +153,10 @@ this.ScenarioSetup(scenarioInfo);
         public virtual void SerializingAndDeserializingTrivialTypesProduceTheSameResult()
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Serializing and deserializing trivial types produce the same result", ((string[])(null)));
-#line 24
-this.ScenarioSetup(scenarioInfo);
-#line 25
- testRunner.Given("The instance Instance1 of type TestPropertyTrivialTypes filled with random data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line 26
- testRunner.And("I serialize the instance Instance1 in Stream1", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 27
- testRunner.When("I deserialize the instance Instance2 from Stream1", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line 28
- testRunner.Then("Instance1 and Instance2 are identical", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
-#line hidden
-            this.ScenarioCleanup();
-        }
-        
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Serializing and deserializing complex nested types with version produce the same " +
-            "result")]
-        [NUnit.Framework.IgnoreAttribute("Ignored scenario")]
-        public virtual void SerializingAndDeserializingComplexNestedTypesWithVersionProduceTheSameResult()
-        {
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Serializing and deserializing complex nested types with version produce the same " +
-                    "result", new string[] {
-                        "ignore"});
 #line 31
 this.ScenarioSetup(scenarioInfo);
 #line 32
- testRunner.Given("The instance Instance1 of type TestPropertyFullVersion filled with random data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+ testRunner.Given("The instance Instance1 of type TestPropertyTrivialTypes filled with random data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line 33
  testRunner.And("I serialize the instance Instance1 in Stream1", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line 34

@@ -49,8 +49,11 @@
   <ItemGroup>
     <Compile Include="BuilderBase.cs" />
     <Compile Include="Chain\ChainManager.cs" />
+    <Compile Include="Chain\ContextModifiedBuildResponse.cs" />
     <Compile Include="Chain\SerializationBuildRequest.cs" />
-    <Compile Include="Chain\SerializationBuildResponse.cs" />
+    <Compile Include="Chain\DelegateBuildResponse.cs" />
+    <Compile Include="Chain\TypeFinalizedBuildResponse.cs" />
+    <Compile Include="Chain\TypeNotFinalizedBuildResponse.cs" />
     <Compile Include="Element\ArgumentElement.cs" />
     <Compile Include="Element\MemberElement.cs" />
     <Compile Include="Element\PropertyElement.cs" />

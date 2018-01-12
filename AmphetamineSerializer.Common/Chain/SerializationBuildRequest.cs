@@ -4,6 +4,9 @@ using System;
 
 namespace AmphetamineSerializer.Common.Chain
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class ElementBuildRequest : IRequest
     {
         /// <summary>

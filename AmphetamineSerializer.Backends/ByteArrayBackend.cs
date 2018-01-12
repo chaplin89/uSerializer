@@ -59,7 +59,7 @@ namespace AmphetamineSerializer.Backends
             arrayWithOffset = byteArrayElement.EnterArray(indexElement);
         }
 
-        protected override ElementBuildResponse InternalMake()
+        protected override IResponse InternalMake()
         {
             if (ctx.CurrentElement?.LoadedType == null)
                 return null;
@@ -92,9 +92,8 @@ namespace AmphetamineSerializer.Backends
                 HandleString(ctx);
             else
                 return null;
-
-            method = new ElementBuildResponse() { Status = BuildedFunctionStatus.ContextModified };
-            return method;
+            
+            return new ContextModifiedBuildResponse();
         }
 
         public void HandleString(Context ctx)
@@ -129,7 +128,7 @@ namespace AmphetamineSerializer.Backends
             ctx.CurrentElement.Store(ctx.G, valueToLoad, TypeOfContent.Value);
         }
 
-        public ElementBuildResponse EncodeString(Context ctx)
+        public ContextModifiedBuildResponse EncodeString(Context ctx)
         {
             // Rough C# translation:
             // writer.Write(Encoding.ASCII.GetByteCount(Load()));
@@ -148,7 +147,7 @@ namespace AmphetamineSerializer.Backends
             ctx.CurrentElement.Load(ctx.G, TypeOfContent.Value);
             ctx.G.CallVirtual(typeof(Encoding).GetMethod("GetBytes", new Type[] { typeof(string) }));
             ctx.G.CallVirtual(typeHandlerMap[typeof(byte[])].Item1);
-            return new ElementBuildResponse() { Status = BuildedFunctionStatus.ContextModified };
+            return new ContextModifiedBuildResponse();
         }
 
         public void HandlePrimitive(Context ctx)

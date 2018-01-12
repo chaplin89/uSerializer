@@ -1,5 +1,6 @@
 ﻿#define RUN_ONLY
 using AmphetamineSerializer.Common.Chain;
+using AmphetamineSerializer.Interfaces;
 using AmphetamineSerializer.Model;
 using Sigil.NonGeneric;
 using System;
@@ -21,7 +22,7 @@ namespace AmphetamineSerializer.Common
         private SysEmit.AssemblyBuilder assemblyBuilder;
         private SysEmit.ModuleBuilder moduleBuilder;
         private SysEmit.TypeBuilder typeBuilder;
-        private Stack<ElementBuildResponse> methods = new Stack<ElementBuildResponse>();
+        private Stack<TypeNotFinalizedBuildResponse> methods = new Stack<TypeNotFinalizedBuildResponse>();
 
         /// <summary>
         /// Build a new provider
@@ -29,7 +30,7 @@ namespace AmphetamineSerializer.Common
         /// <param name="assemblyName">Name of the assembly to build.</param>
         public SigilFunctionProvider(string assemblyName = null)
         {
-            AlreadyBuildedMethods = new Dictionary<Type, ElementBuildResponse>();
+            AlreadyBuildedMethods = new Dictionary<Type, IResponse>();
 
             if (string.IsNullOrEmpty(assemblyName))
                 return;
@@ -49,7 +50,7 @@ namespace AmphetamineSerializer.Common
         /// Contains known methods.
         /// A method is associated with a status.
         /// </summary>
-        public Dictionary<Type, ElementBuildResponse> AlreadyBuildedMethods { get; set; }
+        public Dictionary<Type, IResponse> AlreadyBuildedMethods { get; set; }
 
         /// <summary>
         /// Add a method to the generator.
@@ -105,7 +106,7 @@ namespace AmphetamineSerializer.Common
             else
                 emiter = Emit.NewDynamicMethod(returnValue, inputTypes);
 
-            ElementBuildResponse response = new ElementBuildResponse()
+            var response = new TypeNotFinalizedBuildResponse()
             {
                 Emiter = emiter,
                 Status = BuildedFunctionStatus.FunctionNotFinalized,
@@ -124,34 +125,30 @@ namespace AmphetamineSerializer.Common
         /// </summary>
         /// <returns>Builded method</returns>
         /// <seealso cref="AddMethod(string, Type[], Type)"/>
-        public ElementBuildResponse GetMethod()
+        public IResponse GetMethod()
         {
-            ElementBuildResponse response = methods.Pop();
-
-            response.Method = response.Emiter.CreateMethod();
+            TypeNotFinalizedBuildResponse response = methods.Pop();
             response.Status = BuildedFunctionStatus.FunctionFinalizedTypeNotFinalized;
+
+            var created = response.Emiter.CreateMethod();
 
             if (methods.Count == 0)
             {
+                AlreadyBuildedMethods = new Dictionary<Type, IResponse>();
+
                 if (typeBuilder != null)
                 {
                     Type currentType = typeBuilder.CreateType();
-                    response.Method = currentType.GetMethod(response.Method.Name, response.Method.GetParameters().Select(x => x.ParameterType).ToArray());
                     Debug.Assert(assemblyBuilder != null);
 #if !RUN_ONLY
                     assemblyBuilder.Save(assemblyName.Name + ".dll");
 #endif
+                    return new TypeFinalizedBuildResponse()
+                    {
+                        Method = currentType.GetMethod(created.Name, created.GetParameters().Select(x => x.ParameterType).ToArray())
+                    };
                 }
-
-                foreach (var v in AlreadyBuildedMethods)
-                {
-                    v.Value.Emiter = null;
-                    v.Value.Status = BuildedFunctionStatus.TypeFinalized;
-                }
-
-                response.Status = BuildedFunctionStatus.TypeFinalized;
             }
-
             return response;
         }
     }

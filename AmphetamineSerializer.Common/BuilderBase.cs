@@ -17,7 +17,7 @@ namespace AmphetamineSerializer.Common
         /// <summary>
         /// Internally cached method.
         /// </summary>
-        protected ElementBuildResponse method;
+        protected IResponse method;
 
         /// <summary>
         /// Construct a builder with a context.
@@ -44,6 +44,6 @@ namespace AmphetamineSerializer.Common
         /// Build a function.
         /// </summary>
         /// <returns>The function</returns>
-        protected abstract ElementBuildResponse InternalMake();
+        protected abstract IResponse InternalMake();
     }
 }
