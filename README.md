@@ -95,9 +95,11 @@ There are plans to support the version field to be a generic complex object.
 ## TODO (not in any specific order)
 - [X] ~~Remove obsolete code/improve readability~~
 - [X] ~~Test coverage of the versioning part~~
-- [X] ~~Provide a better abstraction for the IL generation part~~
+- [X] ~~Provide a better abstraction for the IL generation part~~ (IElement seems a good abstraction)
 - [X] ~~Allow an array to have its lenght in any other field~~ (miss tests coverage)
-- [X] ~~Think about/implement something to manage properties other than fields~~ (tests coverage for complex object fail)
+- [ ] Think about/implement something to manage properties other than fields
+   - [X] ~~Basic support~~
+   - [ ] Support for complex objects
 - [ ] ~~Implement byte array backend~~ (in progress)
 - [ ] Document all classes
 - [ ] Compile to multiple .NET Framework
