@@ -59,6 +59,9 @@ namespace AmphetamineSerializer.Backends
 
         public override IResponse PreMake()
         {
+            Context newCtx = new Context(ctx.InputParameters, ctx.AdditionalContext, null, 
+                                         null, null, new Type[] { typeof(ByteCountBackend) });
+
             return null;
         }
 
