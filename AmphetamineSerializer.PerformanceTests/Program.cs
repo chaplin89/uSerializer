@@ -1,18 +1,11 @@
-﻿using AmphetamineSerializer.Tests;
-using Ploeh.AutoFixture;
+﻿using AmphetamineSerializer.PerformanceTests.Tests;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Xml.Serialization;
-using ZeroFormatter;
 
 namespace AmphetamineSerializer.PerformanceTests
 {
-
     class Program
     {
         const int totalIterations = 1000;
@@ -21,105 +14,36 @@ namespace AmphetamineSerializer.PerformanceTests
         {
             Console.WriteLine($"Number of iterations: {totalIterations}");
             Console.WriteLine();
-            TestSerialization<TestFieldTrivialTypes, ZeroTrivialTypes>();
-            TestSerialization<TestField1DArray, ZeroTest1DArray>();
-            TestSerialization<TestFieldJaggedArray, ZeroTestJaggedArray>();
-            TestSerialization<TestFieldFull, ZeroTestFull>();
+            
+            var performanceTrivial = TestSerialization(TestContainer.FieldTrivial);
+            var performance1d = TestSerialization(TestContainer.Field1D);
+            var performanceJagged = TestSerialization(TestContainer.FieldJagged);
+            var performanceFull = TestSerialization(TestContainer.FieldFull);
+
             Console.ReadKey();
         }
 
-        static void TestSerialization<T, V>()
+        static Dictionary<string, double> TestSerialization(IPerformanceTest[] tests)
         {
-            Console.WriteLine(new string('+', 10));
-            Console.WriteLine($"Starting {typeof(T).Name}");
+            Dictionary<string, List<double>> performance = new Dictionary<string, List<double>>();
 
-            // TODO: remove this shit
-            List<double> s1Performance = new List<double>();
-            List<double> s2Performance = new List<double>();
-            List<double> s3Performance = new List<double>();
-            List<double> s4Performance = new List<double>();
-            List<double> s5Performance = new List<double>();
-
-            BinaryFormatter serializer1 = new BinaryFormatter();
-            Serializator<T> serializer2 = new Serializator<T>();
-            XmlSerializer serializer3 = new XmlSerializer(typeof(T));
-            DataContractSerializer serializer4 = new DataContractSerializer(typeof(T));
-
-
-            foreach (var idx in Enumerable.Range(1, totalIterations))
+            foreach (var idx in Enumerable.Range(0, totalIterations + 1))
             {
-                using (var stream1 = new MemoryStream())
-                using (var stream2 = new BinaryWriter(new MemoryStream()))
-                using (var stream3 = new MemoryStream())
-                using (var stream4 = new MemoryStream())
-                using (var stream5 = new MemoryStream())
+                foreach (var testIndex in Enumerable.Range(0, tests.Length))
                 {
-
-                    Fixture fixture = new Fixture();
-                    T toSerialize = fixture.Create<T>();
-                    V zeroToSerialize = fixture.Create<V>();
-
-                    Stopwatch t1 = new Stopwatch();
-                    Stopwatch t2 = new Stopwatch();
-                    Stopwatch t3 = new Stopwatch();
-                    Stopwatch t4 = new Stopwatch();
-                    Stopwatch t5 = new Stopwatch();
-
-                    t1.Start();
-                    serializer1.Serialize(stream1, toSerialize);
-                    t1.Stop();
-
-                    t2.Start();
-                    serializer2.Serialize(toSerialize, stream2);
-                    t2.Stop();
-
-                    t3.Start();
-                    serializer3.Serialize(stream3, toSerialize);
-                    t3.Stop();
-
-                    t4.Start();
-                    serializer4.WriteObject(stream4, toSerialize);
-                    t4.Stop();
-                                        
-                    t5.Start();
-                    ZeroFormatterSerializer.Serialize(stream5, zeroToSerialize);
-                    t5.Stop();
-
-                    if (idx != 1)
+                    using (var stream = new MemoryStream())
                     {
-                        s1Performance.Add(t1.Elapsed.TotalMilliseconds);
-                        s2Performance.Add(t2.Elapsed.TotalMilliseconds);
-                        s3Performance.Add(t3.Elapsed.TotalMilliseconds);
-                        s4Performance.Add(t4.Elapsed.TotalMilliseconds);
-                        s5Performance.Add(t5.Elapsed.TotalMilliseconds);
+                        var elapsed = tests[testIndex].Do(stream);
+
+                        if (idx == 0)
+                            performance[tests[testIndex].Description] = new List<double>(totalIterations);
+                        else
+                            performance[tests[testIndex].Description].Add(elapsed);
                     }
                 }
             }
 
-            double[] meanTime = new double[5];
-            string[] messages = new string[]
-            {
-                "Mean time BinaryFormatter:",
-                "Mean time Amphetamine:",
-                "Mean time XmlSerializer:",
-                "Mean time DataContractSerializer:",
-                "Mean time ZeroFormatter:"
-            };
-
-            meanTime[0] = s1Performance.Aggregate((_1, _2) => _1 + _2) / totalIterations;
-            meanTime[1] = s2Performance.Aggregate((_1, _2) => _1 + _2) / totalIterations;
-            meanTime[2] = s3Performance.Aggregate((_1, _2) => _1 + _2) / totalIterations;
-            meanTime[3] = s4Performance.Aggregate((_1, _2) => _1 + _2) / totalIterations;
-            meanTime[4] = s5Performance.Aggregate((_1, _2) => _1 + _2) / totalIterations;
-
-            for (int i = 0; i < messages.Length; i++)
-            {
-                Console.Write(messages[i]);
-                Console.WriteLine(meanTime[i]);
-            }
-            
-            Console.WriteLine(new string('+', 10));
-            Console.WriteLine();
+            return performance.ToDictionary(_=> _.Key, _=> _.Value.Aggregate((_1, _2) => _1 + _2) / totalIterations);
         }
     }
 }
