@@ -6,6 +6,7 @@ using AmphetamineSerializer.Model;
 using Sigil;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace AmphetamineSerializer
@@ -33,9 +34,6 @@ namespace AmphetamineSerializer
                 method = ctx.Provider.AlreadyBuildedMethods[ctx.ObjectType];
             else
                 ctx.G = ctx.Provider.AddMethod("Handle", ctx.InputParameters, typeof(void));
-
-            if (ctx.Finder == null)
-                ctx.Finder = DefaultHandlerFinder.WithDefaultBackends();
         }
         #endregion
 
@@ -115,16 +113,7 @@ namespace AmphetamineSerializer
             if (ctx.IsDeserializing)
                 versionType = versionType.MakeByRefType();
 
-            var request = new ElementBuildRequest()
-            {
-                Element = versionField,
-                AdditionalContext = ctx.AdditionalContext,
-                InputTypes = GetInputTypes(versionType),
-                Provider = ctx.Provider,
-                G = ctx.G
-            };
-
-            Request(request, versionField);
+            ElementRequest(GetInputTypes(versionType), versionField);
 
             if (versionField.LoadedType == typeof(int))
             {
@@ -166,15 +155,28 @@ namespace AmphetamineSerializer
         /// </summary>
         /// <param name="element"></param>
         /// <param name="response"></param>
-        private void Request(IRequest request, IElement element)
+        private void ElementRequest(Type[] inputTypes, IElement element)
         {
-            if (request == null)
+            if (inputTypes == null)
                 throw new ArgumentNullException("request");
 
             if (element == null)
                 throw new ArgumentNullException("element");
 
-            var response = ctx.Finder.RequestHandler(request);
+            var ctx = new Context(inputTypes, this.ctx.AdditionalContext, element, 
+                                  this.ctx.Provider, this.ctx.G, this.ctx.Backends);
+
+            IResponse response = null;
+
+            foreach (var item in ctx.Backends)
+            {
+                IBuilder instance = (IBuilder)Activator.CreateInstance(item, new object[] { ctx });
+                response = instance.Make();
+                if (response == null)
+                    continue;
+
+                Debugger.Log(0, "Info", $"Request {ctx.CurrentElement.ToString()} handled by {response.ProcessedBy}\n");
+            }
 
             if (response == null)
                 throw new InvalidOperationException("Unable to process the request.");
@@ -202,6 +204,7 @@ namespace AmphetamineSerializer
             else
             {
                 var typeNotFinalizedResponse = response as TypeNotFinalizedBuildResponse;
+
                 if (typeNotFinalizedResponse == null)
                     throw new InvalidOperationException("Can't forward parameters.");
 
@@ -250,16 +253,7 @@ namespace AmphetamineSerializer
                 if (ctx.CurrentElement.LoadedType.IsAbstract)
                     throw new InvalidOperationException("Incomplete types are not allowed.");
 
-                var request = new ElementBuildRequest()
-                {
-                    Element = ctx.CurrentElement,
-                    AdditionalContext = ctx.AdditionalContext,
-                    InputTypes = GetInputTypes(GetCurrentNormalizedType()),
-                    Provider = ctx.Provider,
-                    G = ctx.G,
-                };
-
-                Request(request, ctx.CurrentElement);
+                ElementRequest(GetInputTypes(GetCurrentNormalizedType()), ctx.CurrentElement);
 
                 while (ctx.LoopCtx.Count > 0)
                     GenerateLoopEpilogue(ctx.LoopCtx.Pop());
@@ -330,30 +324,12 @@ namespace AmphetamineSerializer
 
                 indexType = indexType.MakeByRefType();
 
-                var request = new ElementBuildRequest()
-                {
-                    Element = loopContext.Size,
-                    InputTypes = GetInputTypes(indexType),
-                    AdditionalContext = ctx.AdditionalContext,
-                    Provider = ctx.Provider,
-                    G = ctx.G
-                };
-
-                Request(request, loopContext.Size);
+                ElementRequest(GetInputTypes(indexType), loopContext.Size);
                 CreateAndAssignNewInstance(ctx.CurrentElement, loopContext.Size);
             }
             else if (size == null)
             {
-                var request = new ElementBuildRequest()
-                {
-                    Element = loopContext.Size,
-                    InputTypes = GetInputTypes(indexType),
-                    AdditionalContext = ctx.AdditionalContext,
-                    Provider = ctx.Provider,
-                    G = ctx.G
-                };
-
-                Request(request, loopContext.Size);
+                ElementRequest(GetInputTypes(indexType), loopContext.Size);
             }
 
             ctx.G.LoadConstant(0);
