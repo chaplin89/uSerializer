@@ -13,7 +13,7 @@ namespace AmphetamineSerializer.Interfaces
         /// <summary>
         /// 
         /// </summary>
-        Dictionary<Type, RequestHandler> ManagedRequestes { get; }
+        IResponse RequestHandler(IRequest request);
 
         /// <summary>
         /// 

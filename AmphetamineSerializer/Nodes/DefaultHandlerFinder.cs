@@ -11,24 +11,11 @@ namespace AmphetamineSerializer
 {
     public class DefaultHandlerFinder : IChainElement
     {
-        readonly Dictionary<Type, RequestHandler> managedRequests;
-
         List<Type> backends = new List<Type>();
 
-        public DefaultHandlerFinder()
-        {
-            managedRequests = new Dictionary<Type, RequestHandler>()
-            {
-                { typeof(ElementBuildRequest), HandleBuildRequest},
-                { typeof(DelegateBuildRequest), HandleDelegateRequest }
-            };
-        }
-
         public string Name { get { return "DefaultHandlerFinder"; } }
-
-        public Dictionary<Type, RequestHandler> ManagedRequestes { get { return managedRequests; } }
-
-        public IResponse HandleBuildRequest(IRequest genericRequest)
+        
+        public IResponse HandleElementRequest(IRequest genericRequest)
         {
             var request = genericRequest as ElementBuildRequest;
 
@@ -62,8 +49,6 @@ namespace AmphetamineSerializer
         {
             return new DefaultHandlerFinder()
                         .Use<BinaryStreamBackend>()
-                        //.Use<ByteCountBackend>()
-                        // .Use<ByteArrayBackend>()
                         .Use<AssemblyBuilder>();
         }
 
@@ -77,7 +62,7 @@ namespace AmphetamineSerializer
                 InputTypes = request.DelegateType.GetMethod("Invoke").GetParameters().Select(x => x.ParameterType).ToArray()
             };
 
-            var response = HandleBuildRequest(elementRequest) ;
+            var response = HandleElementRequest(elementRequest) ;
 
             var fin = response as TypeFinalizedBuildResponse;
 
@@ -85,6 +70,14 @@ namespace AmphetamineSerializer
             {
                 Delegate = fin.Method.CreateDelegate(request.DelegateType)
             };
+        }
+
+        public IResponse RequestHandler(IRequest request)
+        {
+            if (request is DelegateBuildRequest)
+                return HandleDelegateRequest(request);
+            else
+                return HandleElementRequest(request);
         }
     }
 }

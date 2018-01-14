@@ -97,7 +97,7 @@ namespace AmphetamineSerializer.Common
         /// <summary>
         /// Chain-of-responsibility that manage building request.
         /// </summary>
-        public IChainManager Chain { get; set; }
+        public IChainElement Finder { get; set; }
 
         /// <summary>
         /// Indicate wether the builder is managing the life-cycle of the elements.

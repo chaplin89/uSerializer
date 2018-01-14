@@ -34,11 +34,8 @@ namespace AmphetamineSerializer
             else
                 ctx.G = ctx.Provider.AddMethod("Handle", ctx.InputParameters, typeof(void));
 
-            if (ctx.Chain == null)
-            {
-                var defaultFinder = DefaultHandlerFinder.WithDefaultBackends();
-                ctx.Chain = new ChainManager().SetNext(defaultFinder);
-            }
+            if (ctx.Finder == null)
+                ctx.Finder = DefaultHandlerFinder.WithDefaultBackends();
         }
         #endregion
 
@@ -177,7 +174,7 @@ namespace AmphetamineSerializer
             if (element == null)
                 throw new ArgumentNullException("element");
 
-            var response = ctx.Chain.Process(request);
+            var response = ctx.Finder.RequestHandler(request);
 
             if (response == null)
                 throw new InvalidOperationException("Unable to process the request.");
@@ -202,7 +199,7 @@ namespace AmphetamineSerializer
                 ctx.G.Call(typeFinalizedResponse.Method);
                 return;
             }
-            else 
+            else
             {
                 var typeNotFinalizedResponse = response as TypeNotFinalizedBuildResponse;
                 if (typeNotFinalizedResponse == null)

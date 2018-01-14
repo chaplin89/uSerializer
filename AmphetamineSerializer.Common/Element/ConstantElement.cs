@@ -95,6 +95,7 @@ namespace AmphetamineSerializer.Common.Element
 
             if (method == null)
                 throw new InvalidOperationException("Unrecognized type");
+
             method.Invoke(g, new object[] { Constant });
         }
     }

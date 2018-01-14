@@ -49,7 +49,6 @@
   <ItemGroup>
     <Compile Include="IBuilder.cs" />
     <Compile Include="IChainElement.cs" />
-    <Compile Include="IChainManager.cs" />
     <Compile Include="IElement.cs" />
     <Compile Include="IRequest.cs" />
     <Compile Include="IResponse.cs" />
