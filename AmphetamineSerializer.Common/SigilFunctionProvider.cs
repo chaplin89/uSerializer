@@ -134,20 +134,15 @@ namespace AmphetamineSerializer.Common
 
             if (methods.Count == 0)
             {
-                AlreadyBuildedMethods = new Dictionary<Type, IResponse>();
-
-                if (typeBuilder != null)
-                {
-                    Type currentType = typeBuilder.CreateType();
-                    Debug.Assert(assemblyBuilder != null);
+                AlreadyBuildedMethods.Clear();
+                Type currentType = typeBuilder.CreateType();
 #if !RUN_ONLY
-                    assemblyBuilder.Save(assemblyName.Name + ".dll");
+                assemblyBuilder.Save(assemblyName.Name + ".dll");
 #endif
-                    return new TypeFinalizedBuildResponse()
-                    {
-                        Method = currentType.GetMethod(created.Name, created.GetParameters().Select(x => x.ParameterType).ToArray())
-                    };
-                }
+                return new TypeFinalizedBuildResponse()
+                {
+                    Method = currentType.GetMethod(created.Name, created.GetParameters().Select(x => x.ParameterType).ToArray())
+                };
             }
             return response;
         }

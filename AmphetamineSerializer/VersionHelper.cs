@@ -20,7 +20,7 @@ namespace AmphetamineSerializer
         /// <returns></returns>
         static public IEnumerable<object> GetExplicitlyManagedVersions(Type rootType)
         {
-            var versionField = GetAllFields(null, rootType).First();
+            var versionField = GetSerializableMembers(null, rootType).First();
 
             if (versionField.LoadedType != typeof(int))
                 return GetNonNumericVersions(rootType);
@@ -35,7 +35,7 @@ namespace AmphetamineSerializer
         /// <returns></returns>
         private static IEnumerable<object> GetNonNumericVersions(Type rootType)
         {
-            return GetAllFields(null, rootType)
+            return GetSerializableMembers(null, rootType)
                 .Where(x=>x.Attribute.Version != null)
                 .Select(x=>x.Attribute.Version)
                 .Distinct();
@@ -98,7 +98,7 @@ namespace AmphetamineSerializer
         /// </summary>
         /// <param name="rootType"></param>
         /// <returns>All the fields contained in a type</returns>
-        static public IEnumerable<MemberElement> GetAllFields(IElement instance, Type rootType)
+        static public IEnumerable<MemberElement> GetSerializableMembers(IElement instance, Type rootType)
         {
             return GetFields(instance, rootType);
         }

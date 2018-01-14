@@ -54,14 +54,7 @@ namespace AmphetamineSerializer
             }
 
             var versions = VersionHelper.GetExplicitlyManagedVersions(normalizedType).ToArray();
-
-            if (versions.Length > 1)
-                ManageVersions(instance, versions, normalizedType);
-            else
-            {
-                BuildFromFields(VersionHelper.GetAllFields(instance, normalizedType));
-                ctx.G.Return();
-            }
+            ManageVersions(instance, versions, normalizedType);
 
             return ctx.Provider.GetMethod();
         }
@@ -100,8 +93,15 @@ namespace AmphetamineSerializer
         /// <param name="normalizedType"></param>
         private void ManageVersions(IElement instance, object[] versions, Type normalizedType)
         {
+            if (versions.Length <= 1)
+            {
+                BuildFromMembers(VersionHelper.GetSerializableMembers(instance, normalizedType));
+                ctx.G.Return();
+                return;
+            }
+
             Label[] labels = new Label[versions.Length];
-            var versionField = VersionHelper.GetAllFields(instance, normalizedType).First();
+            var versionField = VersionHelper.GetSerializableMembers(instance, normalizedType).First();
 
             if (versionField.Member.Name.ToUpperInvariant() != "version")
                 throw new InvalidOperationException("The version field should be the first.");
@@ -127,7 +127,7 @@ namespace AmphetamineSerializer
                     var fields = VersionHelper.GetVersionSnapshot(instance, normalizedType, versions[i])
                                               .Where(x => x.Member.Name.ToUpperInvariant() != "version");
                     ctx.G.MarkLabel(labels[i]);
-                    BuildFromFields(fields);
+                    BuildFromMembers(fields);
                     ctx.G.Return();
                 }
             }
@@ -219,7 +219,7 @@ namespace AmphetamineSerializer
         /// including array, primitive and non primitive types.
         /// </summary>
         /// <param name="fields">Fields to manage</param>
-        private void BuildFromFields(IEnumerable<IElement> fields)
+        private void BuildFromMembers(IEnumerable<IElement> fields)
         {
             if (ctx == null)
                 throw new InvalidOperationException("Context is null.");
