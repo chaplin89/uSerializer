@@ -173,6 +173,7 @@ namespace AmphetamineSerializer
             {
                 IBuilder instance = (IBuilder)Activator.CreateInstance(item, new object[] { newCtx });
                 response = instance.Make();
+
                 if (response != null)
                 {
                     Debugger.Log(0, "Info", $"Request {ctx.CurrentElement.ToString()} handled by {response.ProcessedBy}\n");
@@ -197,22 +198,31 @@ namespace AmphetamineSerializer
             if (response is TypeFinalizedBuildResponse)
             {
                 var typeFinalizedResponse = response as TypeFinalizedBuildResponse;
-                if (!typeFinalizedResponse.Method.IsStatic)
-                    throw new InvalidOperationException("Expected a static function but received a non-static one.");
 
-                ctx.G.Call(typeFinalizedResponse.Method);
+                if (!typeFinalizedResponse.Method.IsStatic)
+                {
+                    typeFinalizedResponse.Instance.Load(ctx.G, TypeOfContent.Value);
+                    ctx.G.CallVirtual(typeFinalizedResponse.Method);
+                }
+                else
+                {
+                    ctx.G.Call(typeFinalizedResponse.Method);
+                }
+
                 return;
             }
-            else
+            else if (response is TypeNotFinalizedBuildResponse)
             {
                 var typeNotFinalizedResponse = response as TypeNotFinalizedBuildResponse;
 
                 if (typeNotFinalizedResponse == null)
                     throw new InvalidOperationException("Can't forward parameters.");
-
+                
                 ctx.G.Call(typeNotFinalizedResponse.Emiter);
                 return;
             }
+
+            throw new InvalidOperationException("Response type not supported.");
         }
 
         /// <summary>
@@ -364,6 +374,16 @@ namespace AmphetamineSerializer
 
             if (loopContext.Size is LocalElement)
                 ctx.VariablePool.ReleaseVariable(loopContext.Size as LocalElement);
+        }
+
+        public override IResponse PreMake()
+        {
+            return null;
+        }
+
+        public override IResponse PostMake()
+        {
+            return null;
         }
         #endregion
     }

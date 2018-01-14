@@ -40,6 +40,10 @@ namespace AmphetamineSerializer.Common
             return method;
         }
 
+        public abstract IResponse PreMake();
+
+        public abstract IResponse PostMake();
+
         /// <summary>
         /// Build a function.
         /// </summary>

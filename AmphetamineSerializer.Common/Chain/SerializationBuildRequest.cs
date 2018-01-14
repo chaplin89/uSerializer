@@ -1,6 +1,7 @@
 ﻿using AmphetamineSerializer.Interfaces;
 using Sigil.NonGeneric;
 using System;
+using System.Collections.Generic;
 
 namespace AmphetamineSerializer.Common.Chain
 {
@@ -12,7 +13,7 @@ namespace AmphetamineSerializer.Common.Chain
         /// <summary>
         /// Additional context that will be passed to the builder.
         /// </summary>
-        public object AdditionalContext { get; set; }
+        public Dictionary<string, object> AdditionalContext { get; set; }
 
         /// <summary>
         /// If the request allow the process to modify the a context,
@@ -46,7 +47,7 @@ namespace AmphetamineSerializer.Common.Chain
         /// <summary>
         /// Additional context that will be passed to the builder.
         /// </summary>
-        public object AdditionalContext { get; set; }
+        public Dictionary<string, object> AdditionalContext { get; set; }
 
         /// <summary>
         /// Build a request based on a delegate type.

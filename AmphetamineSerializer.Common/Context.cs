@@ -23,7 +23,7 @@ namespace AmphetamineSerializer.Common
         /// <param name="provider"></param>
         /// <param name="g"></param>
         public Context(Type[] inputParameters,
-                              object additionalContext,
+                              Dictionary<string, object> additionalContext,
                               IElement element,
                               SigilFunctionProvider provider,
                               Emit g,
@@ -31,7 +31,7 @@ namespace AmphetamineSerializer.Common
         {
             LoopCtx = new Stack<LoopContext>();
             InputParameters = inputParameters;
-            AdditionalContext = additionalContext;
+            AdditionalContext = additionalContext ?? new Dictionary<string, object>();
             CurrentElement = element;
             Provider = provider;
             G = g;
@@ -70,7 +70,7 @@ namespace AmphetamineSerializer.Common
         /// your serialization logic starting from generic meta-information retrieved 
         /// from the header of a file (and not directly from an object graph).
         /// </remarks>
-        public object AdditionalContext { get; set; }
+        public Dictionary<string, object> AdditionalContext { get; }
 
         /// <summary>
         /// Provide an easy way to build a function from scratch.

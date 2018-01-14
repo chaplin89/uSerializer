@@ -67,25 +67,6 @@ namespace AmphetamineSerializer.Backends
             if (ctx.InputParameters.Length != 3)
                 return null;
             
-            // if (ctx.AdditionalContext == null)
-            // {
-            //     var defaultFinder = new DefaultHandlerFinder().Use<ByteCountBackend>();
-            //     var chain = new ChainManager().SetNext(defaultFinder);
-            // 
-            //     var oldChain = ctx.Chain;
-            //     ctx.Chain = chain;
-            // 
-            //     var request = new ElementBuildRequest()
-            //     {
-            //         Element = ctx.CurrentElement,
-            //         G = ctx.G,
-            //         InputTypes = ctx.InputParameters,
-            //         Provider = ctx.Provider
-            //     };
-            // 
-            //     var response = ctx.Chain.Process(request);
-            // }
-
             if (typeHandlerMap.ContainsKey(ctx.CurrentElement.LoadedType))
                 HandlePrimitive(ctx);
             else if (ctx.CurrentElement.LoadedType == typeof(string))
@@ -185,6 +166,34 @@ namespace AmphetamineSerializer.Backends
                 indexElement.Load(g, TypeOfContent.Value);
                 g.Call(typeHandlerMap[type].Item1);
             }), null);
+        }
+
+        public override IResponse PreMake()
+        {
+            // if (ctx.AdditionalContext == null)
+            // {
+            //     var defaultFinder = new DefaultHandlerFinder().Use<ByteCountBackend>();
+            //     var chain = new ChainManager().SetNext(defaultFinder);
+            // 
+            //     var oldChain = ctx.Chain;
+            //     ctx.Chain = chain;
+            // 
+            //     var request = new ElementBuildRequest()
+            //     {
+            //         Element = ctx.CurrentElement,
+            //         G = ctx.G,
+            //         InputTypes = ctx.InputParameters,
+            //         Provider = ctx.Provider
+            //     };
+            // 
+            //     var response = ctx.Chain.Process(request);
+            // }
+            return null;
+        }
+
+        public override IResponse PostMake()
+        {
+            return null;
         }
     }
 }

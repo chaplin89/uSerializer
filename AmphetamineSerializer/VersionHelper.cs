@@ -51,17 +51,17 @@ namespace AmphetamineSerializer
             int? maxExplicitlyManagedVersion = null;
             int? minExplicitlyManagedVersion = null;
 
-            var vBegin = GetFields(null, rootType)
+            var vBegin = GetMembers(null, rootType)
                             .Where(x => x.Attribute.VersionBegin != -1)
                             .Select(x => x.Attribute.VersionBegin)
                             .Distinct();
 
-            var vEnd = GetFields(null, rootType)
+            var vEnd = GetMembers(null, rootType)
                             .Where(x => x.Attribute.VersionEnd != -1)
                             .Select(x => x.Attribute.VersionEnd)
                             .Distinct();
             
-            var vSpecific = GetFields(null, rootType)
+            var vSpecific = GetMembers(null, rootType)
                             .Where(x => x.Attribute.Version != null)
                             .Select(x => (int)x.Attribute.Version)
                             .Distinct();
@@ -90,7 +90,7 @@ namespace AmphetamineSerializer
         /// <returns>All the fields that match the given version</returns>
         static public IEnumerable<MemberElement> GetVersionSnapshot(IElement instance, Type rootType, object version)
         {
-            return GetFields(instance, rootType, version);
+            return GetMembers(instance, rootType, version);
         }
         
         /// <summary>
@@ -100,7 +100,7 @@ namespace AmphetamineSerializer
         /// <returns>All the fields contained in a type</returns>
         static public IEnumerable<MemberElement> GetSerializableMembers(IElement instance, Type rootType)
         {
-            return GetFields(instance, rootType);
+            return GetMembers(instance, rootType);
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace AmphetamineSerializer
         /// </summary>
         /// <param name="rootType">Context</param>
         /// <param name="version">Version used to filter fields.</param>
-        static private IEnumerable<MemberElement> GetFields(IElement instance, Type rootType, object version = null)
+        static private IEnumerable<MemberElement> GetMembers(IElement instance, Type rootType, object version = null)
         {
             var attributes = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 

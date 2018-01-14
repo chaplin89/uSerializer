@@ -2,14 +2,15 @@
 using AmphetamineSerializer.Common.Chain;
 using AmphetamineSerializer.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace AmphetamineSerializer
 {
     /// <summary>
-    /// 
+    /// AmphetamineSerializer's default serializator.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="T">Type of the object to serialize/deserialize</typeparam>
     public class Serializator<T> : ISerializator<T>
     {
         protected delegate void SerializeStream(T obj, BinaryWriter stream);
@@ -17,15 +18,19 @@ namespace AmphetamineSerializer
         protected delegate void SerializeByteArray(T obj, byte[] array, ref int position);
         protected delegate void DeserializeByteArray(ref T obj, byte[] array, ref int position);
 
-        protected Lazy<DeserializeStream> DeserializeFromStream { get; set; }
-        protected Lazy<SerializeStream> SerializeFromStream { get; set; }
-        protected Lazy<DeserializeByteArray> DeserializeFromByteArray { get; set; }
-        protected Lazy<SerializeByteArray> SerializeFromByteArray { get; set; }
+        protected Lazy<DeserializeStream> DeserializeFromStream { get; }
+        protected Lazy<SerializeStream> SerializeFromStream { get; }
+        protected Lazy<DeserializeByteArray> DeserializeFromByteArray { get; }
+        protected Lazy<SerializeByteArray> SerializeFromByteArray { get; }
 
-        private object additionalContext;
+        private Dictionary<string, object> additionalContext;
         DefaultHandlerFinder finder = DefaultHandlerFinder.StreamTemplate();
 
-        public Serializator(object additionalContext = null)
+        /// <summary>
+        /// Build the serializator.
+        /// </summary>
+        /// <param name="additionalContext">Additional context that may serve to some backend.</param>
+        public Serializator(Dictionary<string, object> additionalContext= null)
         {
             this.additionalContext = additionalContext;
 

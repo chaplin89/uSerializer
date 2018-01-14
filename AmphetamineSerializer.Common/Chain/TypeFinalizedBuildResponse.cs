@@ -16,7 +16,7 @@ namespace AmphetamineSerializer.Common.Chain
         /// <summary>
         /// If the method is not static, this is the instance.
         /// </summary>
-        public object Instance { get; set; }
+        public IElement Instance { get; set; }
 
         /// <summary>
         /// Name of the module that processed the request.

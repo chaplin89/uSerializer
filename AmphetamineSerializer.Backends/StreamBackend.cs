@@ -146,5 +146,15 @@ namespace AmphetamineSerializer.Backends
                 ctx.G.CallVirtual(typeHandlerMap[ctx.CurrentElement.LoadedType]);
             }
         }
+
+        public override IResponse PreMake()
+        {
+            return null;
+        }
+
+        public override IResponse PostMake()
+        {
+            return null;
+        }
     }
 }
