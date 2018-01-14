@@ -1,20 +1,27 @@
 ﻿using Ploeh.AutoFixture;
+using System;
 using System.IO;
 
 namespace AmphetamineSerializer.PerformanceTests
 {
     abstract class PerformanceTestBase<T> : IPerformanceTest
     {
-        protected T graph;
+        private Fixture fixture;
 
         public PerformanceTestBase()
         {
-            Fixture fixture = new Fixture();
-            graph = fixture.Create<T>();
+            fixture = new Fixture();
         }
 
         public abstract string Description { get; }
 
-        public abstract double Do(Stream stream);
+        protected abstract double InternalDo(Stream stream, T graph);
+
+        public double Do(Stream stream)
+        {
+            var res = InternalDo(stream, fixture.Create<T>());
+            GC.Collect();
+            return res;
+        }
     }
 }

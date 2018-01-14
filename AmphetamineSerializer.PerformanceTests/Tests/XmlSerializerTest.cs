@@ -15,7 +15,7 @@ namespace AmphetamineSerializer.PerformanceTests
 
         public override string Description => "XmlSerializer";
 
-        public override double Do(Stream stream)
+        protected override double InternalDo(Stream stream, T graph)
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();

@@ -8,7 +8,7 @@ namespace AmphetamineSerializer.PerformanceTests
 {
     class Program
     {
-        const int totalIterations = 1000;
+        const int totalIterations = 100;
 
         static void Main(string[] args)
         {
@@ -16,11 +16,28 @@ namespace AmphetamineSerializer.PerformanceTests
             Console.WriteLine();
             
             var performanceTrivial = TestSerialization(TestContainer.FieldTrivial);
-            var performance1d = TestSerialization(TestContainer.Field1D);
-            var performanceJagged = TestSerialization(TestContainer.FieldJagged);
-            var performanceFull = TestSerialization(TestContainer.FieldFull);
+            var performance1d =      TestSerialization(TestContainer.Field1D);
+            var performanceJagged =  TestSerialization(TestContainer.FieldJagged);
+            var performanceFull =    TestSerialization(TestContainer.FieldFull);
+
+            Print(TestSerialization(TestContainer.FieldTrivial), "Trivial");
+            Print(TestSerialization(TestContainer.Field1D), "1D");
+            Print(TestSerialization(TestContainer.FieldJagged), "Jagged");
+            Print(TestSerialization(TestContainer.FieldFull), "Full");
 
             Console.ReadKey();
+        }
+
+        static void Print(Dictionary<string, double> result, string label)
+        {
+            Console.WriteLine($"Showing result for type {label}");
+            Console.WriteLine(new string('+', 10));
+
+            foreach (var item in result)
+                Console.WriteLine($"{item.Key}: {item.Value}");
+
+            Console.WriteLine(new string('+', 10));
+            Console.WriteLine();
         }
 
         static Dictionary<string, double> TestSerialization(IPerformanceTest[] tests)

@@ -15,7 +15,7 @@ namespace AmphetamineSerializer.PerformanceTests
 
         public override string Description => "Amphetamine";
 
-        public override double Do(Stream stream)
+        protected override double InternalDo(Stream stream, T graph)
         {
             writer = new BinaryWriter(stream);
 

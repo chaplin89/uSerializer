@@ -163,19 +163,20 @@ namespace AmphetamineSerializer
             if (element == null)
                 throw new ArgumentNullException("element");
 
-            var ctx = new Context(inputTypes, this.ctx.AdditionalContext, element, 
+            var newCtx = new Context(inputTypes, this.ctx.AdditionalContext, element,
                                   this.ctx.Provider, this.ctx.G, this.ctx.Backends);
 
             IResponse response = null;
 
             foreach (var item in ctx.Backends)
             {
-                IBuilder instance = (IBuilder)Activator.CreateInstance(item, new object[] { ctx });
+                IBuilder instance = (IBuilder)Activator.CreateInstance(item, new object[] { newCtx });
                 response = instance.Make();
-                if (response == null)
-                    continue;
-
-                Debugger.Log(0, "Info", $"Request {ctx.CurrentElement.ToString()} handled by {response.ProcessedBy}\n");
+                if (response != null)
+                {
+                    Debugger.Log(0, "Info", $"Request {ctx.CurrentElement.ToString()} handled by {response.ProcessedBy}\n");
+                    break;
+                }
             }
 
             if (response == null)

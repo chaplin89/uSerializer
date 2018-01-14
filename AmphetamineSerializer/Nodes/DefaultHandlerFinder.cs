@@ -4,6 +4,7 @@ using AmphetamineSerializer.Common.Chain;
 using AmphetamineSerializer.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace AmphetamineSerializer
@@ -66,7 +67,11 @@ namespace AmphetamineSerializer
 
         private Type[] GetMatchingBackends(Type[] inputTypes)
         {
-            return new Type[] { typeof(BinaryStreamBackend) };
+            if (inputTypes.Contains(typeof(BinaryReader)) || inputTypes.Contains(typeof(BinaryWriter)))
+                return new Type[] { typeof(BinaryStreamBackend), typeof(AssemblyBuilder) };
+            else if (inputTypes.Contains(typeof(byte[])))
+                return new Type[] { typeof(ByteCountBackend), typeof(ByteArrayBackend), typeof(AssemblyBuilder) };
+            else throw new InvalidOperationException();
         }
 
         public IResponse RequestHandler(IRequest request)
