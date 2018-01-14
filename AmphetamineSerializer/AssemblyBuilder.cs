@@ -134,6 +134,7 @@ namespace AmphetamineSerializer
             else if (versionField.LoadedType.IsAssignableFrom(typeof(IEquatable<>)))
             {
                 // TODO: Manage non numeric versions
+                throw new InvalidOperationException("Non-numeric versions not supported at the moment.");
             }
         }
 
@@ -218,13 +219,13 @@ namespace AmphetamineSerializer
         /// Recursively emit the instruction for deserialize everything,
         /// including array, primitive and non primitive types.
         /// </summary>
-        /// <param name="fields">Fields to manage</param>
-        private void BuildFromMembers(IEnumerable<IElement> fields)
+        /// <param name="members">Fields to manage</param>
+        private void BuildFromMembers(IEnumerable<IElement> members)
         {
             if (ctx == null)
                 throw new InvalidOperationException("Context is null.");
 
-            var linkedList = new Stack<IElement>(fields.Reverse());
+            var linkedList = new Stack<IElement>(members.Reverse());
 
             while (linkedList.Count > 0)
             {
@@ -238,7 +239,7 @@ namespace AmphetamineSerializer
                     {
                         if (ctx.CurrentElement.Attribute.SizeIndex > ctx.CurrentElement.Attribute.Index)
                             throw new InvalidOperationException("Size should come before the array.");
-                        sizeElement = fields.Where(_ => _.Attribute.Index == ctx.CurrentElement.Attribute.SizeIndex).Single();
+                        sizeElement = members.Where(_ => _.Attribute.Index == ctx.CurrentElement.Attribute.SizeIndex).Single();
                     }
 
                     var loopContext = GenerateLoopPreamble(sizeElement);
