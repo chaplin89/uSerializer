@@ -26,7 +26,8 @@ namespace AmphetamineSerializer.Common
                               object additionalContext,
                               IElement element,
                               SigilFunctionProvider provider,
-                              Emit g)
+                              Emit g,
+                              Type[] backends)
         {
             LoopCtx = new Stack<LoopContext>();
             InputParameters = inputParameters;
@@ -34,6 +35,7 @@ namespace AmphetamineSerializer.Common
             CurrentElement = element;
             Provider = provider;
             G = g;
+            Backends = backends;
         }
 
         /// <summary>
@@ -89,15 +91,15 @@ namespace AmphetamineSerializer.Common
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        public Type[] Backends { get; }
+
+        /// <summary>
         /// Types in input to the method that will be forwarded to the
         /// serialization handlers.
         /// </summary>
         public Type[] InputParameters { get; set; }
-
-        /// <summary>
-        /// Chain-of-responsibility that manage building request.
-        /// </summary>
-        public IChainManager Chain { get; set; }
 
         /// <summary>
         /// Indicate wether the builder is managing the life-cycle of the elements.

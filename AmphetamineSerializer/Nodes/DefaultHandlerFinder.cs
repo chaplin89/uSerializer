@@ -4,52 +4,16 @@ using AmphetamineSerializer.Common.Chain;
 using AmphetamineSerializer.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.IO;
 using System.Linq;
 
 namespace AmphetamineSerializer
 {
     public class DefaultHandlerFinder : IChainElement
     {
-        readonly Dictionary<Type, RequestHandler> managedRequests;
-
         List<Type> backends = new List<Type>();
 
-        public DefaultHandlerFinder()
-        {
-            managedRequests = new Dictionary<Type, RequestHandler>()
-            {
-                { typeof(ElementBuildRequest), HandleBuildRequest},
-                { typeof(DelegateBuildRequest), HandleDelegateRequest }
-            };
-        }
-
         public string Name { get { return "DefaultHandlerFinder"; } }
-
-        public Dictionary<Type, RequestHandler> ManagedRequestes { get { return managedRequests; } }
-
-        public IResponse HandleBuildRequest(IRequest genericRequest)
-        {
-            var request = genericRequest as ElementBuildRequest;
-
-            var ctx = new Context(request.InputTypes,
-                                         request.AdditionalContext,
-                                         request.Element,
-                                         request.Provider,
-                                         request.G);
-
-            foreach (var item in backends)
-            {
-                IBuilder instance = (IBuilder)Activator.CreateInstance(item, new object[] { ctx });
-                var response = instance.Make();
-                if (response == null)
-                    continue;
-
-                Debugger.Log(0, "Info", $"Request {ctx.CurrentElement.ToString()} handled by {response.ProcessedBy}");
-                return response;
-            }
-            return null;
-        }
 
         public DefaultHandlerFinder Use<T>()
             where T : BuilderBase
@@ -58,13 +22,10 @@ namespace AmphetamineSerializer
             return this;
         }
 
-        public static DefaultHandlerFinder WithDefaultBackends()
+        public static DefaultHandlerFinder StreamTemplate()
         {
             return new DefaultHandlerFinder()
-                        .Use<BinaryStreamBackend>()
-                        //.Use<ByteCountBackend>()
-                        // .Use<ByteArrayBackend>()
-                        .Use<AssemblyBuilder>();
+                        .Use<BinaryStreamBackend>();
         }
 
         private IResponse HandleDelegateRequest(IRequest genericRequest)
@@ -77,7 +38,7 @@ namespace AmphetamineSerializer
                 InputTypes = request.DelegateType.GetMethod("Invoke").GetParameters().Select(x => x.ParameterType).ToArray()
             };
 
-            var response = HandleBuildRequest(elementRequest) ;
+            var response = HandleElementRequest(elementRequest);
 
             var fin = response as TypeFinalizedBuildResponse;
 
@@ -85,6 +46,40 @@ namespace AmphetamineSerializer
             {
                 Delegate = fin.Method.CreateDelegate(request.DelegateType)
             };
+        }
+
+        private IResponse HandleElementRequest(IRequest genericRequest)
+        {
+            var request = genericRequest as ElementBuildRequest;
+            var backends = GetMatchingBackends(request.InputTypes);
+
+            var ctx = new Context(request.InputTypes,
+                                  request.AdditionalContext,
+                                  request.Element,
+                                  request.Provider,
+                                  request.G,
+                                  backends);
+
+            var instance = new AssemblyBuilder(ctx);
+            var response = instance.Make();
+            return response;
+        }
+
+        private Type[] GetMatchingBackends(Type[] inputTypes)
+        {
+            if (inputTypes.Contains(typeof(BinaryReader)) || inputTypes.Contains(typeof(BinaryWriter)))
+                return new Type[] { typeof(BinaryStreamBackend), typeof(AssemblyBuilder) };
+            else if (inputTypes.Contains(typeof(byte[])))
+                return new Type[] { typeof(ByteCountBackend), typeof(ByteArrayBackend), typeof(AssemblyBuilder) };
+            else throw new InvalidOperationException();
+        }
+
+        public IResponse RequestHandler(IRequest request)
+        {
+            if (request is DelegateBuildRequest)
+                return HandleDelegateRequest(request);
+            else
+                return HandleElementRequest(request);
         }
     }
 }

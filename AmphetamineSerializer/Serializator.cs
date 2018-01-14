@@ -23,8 +23,7 @@ namespace AmphetamineSerializer
         protected Lazy<SerializeByteArray> SerializeFromByteArray { get; set; }
 
         private object additionalContext;
-        IChainManager chain = new ChainManager()
-                                  .SetNext(DefaultHandlerFinder.WithDefaultBackends());
+        DefaultHandlerFinder finder = DefaultHandlerFinder.StreamTemplate();
 
         public Serializator(object additionalContext = null)
         {
@@ -66,7 +65,7 @@ namespace AmphetamineSerializer
                 DelegateType = typeof(D)
             };
 
-            var response = chain.Process(request) as DelegateBuildResponse;
+            var response = finder.RequestHandler(request) as DelegateBuildResponse;
             return (D)Convert.ChangeType(response.Delegate, typeof(D));
         }
 

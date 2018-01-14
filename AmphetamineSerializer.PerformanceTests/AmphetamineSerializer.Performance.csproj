@@ -54,8 +54,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Tests\AmphetamineTest.cs" />
+    <Compile Include="Tests\BinaryFormatterTest.cs" />
+    <Compile Include="Tests\DataContractTest.cs" />
+    <Compile Include="Tests\IPerformanceTest.cs" />
+    <Compile Include="Tests\PerformanceTestBase.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tests\TestContainer.cs" />
+    <Compile Include="Tests\XmlSerializerTest.cs" />
+    <Compile Include="Tests\ZeroFormatterTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
