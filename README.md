@@ -5,8 +5,6 @@
 It's a serializator that is made to ease the interoperation between managed and native code.
 It makes porting an existing C/C++ structure to managed code very easy. Most of the time, all you need to do is to copy the structure and decorate its fields.
 
-**Despite being reasonable well-tested, AS is still missing some core features (see [TODO](#todo-not-in-any-specific-order) section) and it's not ready for a production usage**
-
 ## Table of contents
   * [Features](#features)
   * [How to use](#how-to-use)
@@ -18,7 +16,7 @@ It makes porting an existing C/C++ structure to managed code very easy. Most of 
 
 ## Features
 * **Performance** Serialization and deserialization rely 100% on custom CIL code generated on-the-fly.
-* **Extensibility** The library comes with a series of "backends" and a builder, that put pieces togheter. Say you want to build an XML serializer, you can do that by implementing the appropriate backend.
+* **Extensibility** The library comes with a series of "backends" and a builder, that put pieces togheter. With the right backend, you can do pre-compile assembly to do almost all things you normally do by reflection. 
 * **Versioning** It allow support for serializing/deserializing different version of the same structure.
 
 ## How to use
@@ -92,6 +90,9 @@ There are plans to support the version field to be a generic complex object.
 ## Extension
 [WIP]
 ## TODO (not in any specific order)
+
+**Despite being reasonable well-tested, AS is still missing some core features and it's not ready for a production usage**
+
 - [X] ~~Remove obsolete code/improve readability~~
 - [X] ~~Test coverage of the versioning part~~
 - [X] ~~Provide a better abstraction for the IL generation part~~ (IElement seems a good abstraction)
@@ -111,6 +112,7 @@ There are plans to support the version field to be a generic complex object.
 - [ ] Provide a better support for plugin-like features
 - [ ] Support for null object
 - [ ] Support for struct
+- [ ] Endianness specification support
 - [ ] Feasibility study:
    - [ ] XML backend
    - [ ] JSON backend
@@ -119,7 +121,7 @@ There are plans to support the version field to be a generic complex object.
 
 Here follow the output of the benchmark inside AmphetamineSerializer that show how AmpethamineSerializer performance compare to the performance of other serializators.
 
-**Note 1**: Performance is not a top priority at this stage of development. Actually, most of the efforts are moving toward defining a semi-decent architecture with a reasonable level of maintainability (as far as writing IL code can be defined "maintainable") and developing unit-tests. Also, despite speed is an important aspect of every serializator, I believe the real value of AS rely in its flexibility. AS comes with an "AssemblyBuilder" that put pieces togheter, and a series of "Backends" that are in charge of emitting instructions.
+**Note 1**: Performance is not a top priority at this stage of development. Actually, most of the efforts are moving toward defining a semi-decent architecture with a reasonable level of maintainability (as far as writing IL code can be defined "maintainable") and developing unit-tests. Also, despite speed is an important aspect of every serializator, I believe the real value of AS rely in its flexibility.
 
 **Note 2**: It's simply impossible to provide a completely fair comparison. Of course, some of those serializator are binary, other are textual; some use bytearray, some don't. Nevertheless this can be an interesting starting point to see how AS compare to other serializators.
 
